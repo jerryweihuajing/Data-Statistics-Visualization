@@ -23,7 +23,6 @@ from matplotlib.font_manager import FontProperties
 import HeadColumns as HC
 import PathProcessing as PP
 
-
 #------------------------------------------------------------------------------
 """
 Make statistics from one excel
