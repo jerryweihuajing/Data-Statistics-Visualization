@@ -10,6 +10,7 @@ Created on Thu Oct 17 21:03:11 2019
 """
 
 import xlrd
+import xlwt
 
 import copy as cp
 import pandas as pd
@@ -34,7 +35,7 @@ Args:
     list_num_head_columns: list of num_head_rows (default: None)
     
 Returns:
-    new head columns list
+    None
 """
 def WorkbookStatistics(xls_path,num_head_rows,num_head_columns,list_num_head_columns=None):
     
@@ -51,7 +52,10 @@ def WorkbookStatistics(xls_path,num_head_rows,num_head_columns,list_num_head_col
     new_workbook=copy(workbook)
         
     #construct output folder path
-    tables_output_folder=xls_path.replace('.xls','').replace('input','output')+'\\'
+    tables_output_folder=xls_path.replace('.xls','').replace('input','output')+'\\统计\\'
+    
+    #generate output folder
+    PP.GenerateFolder(tables_output_folder)
     
     #save as
     new_workbook.save(tables_output_folder+'统计结果.xls')
@@ -76,12 +80,11 @@ def WorkbookStatistics(xls_path,num_head_rows,num_head_columns,list_num_head_col
         print('')
         
         #construct output folder path
-        figures_output_folder=xls_path.replace('.xls','').replace('input','output')+'\\Figures\\sheet '+this_sheet_name+'\\'
+        figures_output_folder=xls_path.replace('.xls','').replace('input','output')+'\\统计\\图\\表 '+this_sheet_name+'\\'
         
         #generate output folder
         PP.GenerateFolder(figures_output_folder)
-        PP.GenerateFolder(tables_output_folder)
-        
+
         #Data Frame object
         channel=pd.read_excel(xls_path,sheet_name=this_sheet_name)
         
@@ -327,6 +330,17 @@ def WorkbookStatistics(xls_path,num_head_rows,num_head_columns,list_num_head_col
         #blank row
         one_list=['']*(len(channel.iloc[:1].columns)+2)
         
+        #define the border style
+        borders = xlwt.Borders()
+        borders.left = 1
+        borders.right = 1
+        borders.top = 1
+        borders.bottom = 1
+        borders.bottom_colour=0x3A    
+         
+        style = xlwt.XFStyle()
+        style.borders = borders
+        
         #fill with blank lines
         for ii in range(num_info_rows):
             
@@ -343,13 +357,15 @@ def WorkbookStatistics(xls_path,num_head_rows,num_head_columns,list_num_head_col
                     
                     this_sheet.write(i+start_info_row,
                                      j+map_sheet_names_num_head_columns[this_sheet_name],
-                                     statistic.iloc[i,j])      
+                                     statistic.iloc[i,j],
+                                     style)      
                   
                 #transform int to float
                 except:
                     
                     this_sheet.write(i+start_info_row,
                                      j+map_sheet_names_num_head_columns[this_sheet_name],
-                                     float(statistic.iloc[i,j]))
+                                     float(statistic.iloc[i,j]),
+                                     style)
    
         new_workbook.save(tables_output_folder+'统计结果.xls')
