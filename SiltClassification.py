@@ -9,8 +9,6 @@ Created on Sat Oct 19 13:57:48 2019
 @title：Silt Classification
 """
 
-from __init__ import *
-
 import xlrd
 import xlwt
 
