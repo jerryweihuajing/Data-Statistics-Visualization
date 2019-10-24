@@ -23,6 +23,7 @@ from matplotlib.font_manager import FontProperties
 
 import HeadColumns as HC
 import PathProcessing as PP
+import GeotechnicalParameters as GP
 
 #------------------------------------------------------------------------------
 """
@@ -101,7 +102,7 @@ def WorkbookStatistics(xls_path,num_head_rows,num_head_columns,list_num_head_col
         '''complete info of statistics'''
             
         #item names of statistics
-        statistic_items=['平均值','标准差','最大值','最小值']
+        statistic_items=['数据量','最大值','最小值','平均值','标准差','变异系数','标准值']
         
         #new dataframe to store statistic data
         statistic=cp.deepcopy(channel.iloc[:len(statistic_items)])
@@ -134,6 +135,9 @@ def WorkbookStatistics(xls_path,num_head_rows,num_head_columns,list_num_head_col
                 statistic.iloc[1,k]=''
                 statistic.iloc[2,k]=''
                 statistic.iloc[3,k]=''
+                statistic.iloc[4,k]=''
+                statistic.iloc[5,k]=''
+                statistic.iloc[6,k]=''
                 
                 columns_to_delete.append(title)
                 
@@ -196,7 +200,10 @@ def WorkbookStatistics(xls_path,num_head_rows,num_head_columns,list_num_head_col
                 statistic.iloc[1,k]=''
                 statistic.iloc[2,k]=''
                 statistic.iloc[3,k]=''
-            
+                statistic.iloc[4,k]=''
+                statistic.iloc[5,k]=''
+                statistic.iloc[6,k]=''
+                
                 columns_void.append(title)
                 
                 continue
@@ -275,25 +282,35 @@ def WorkbookStatistics(xls_path,num_head_rows,num_head_columns,list_num_head_col
                 
                 this_label.set_fontname('Times New Roman')
                 
-            #average
-            data_average=np.mean(valid_data)
-            
-            #standard
-            data_standard=np.std(valid_data,ddof=1)
+            #amount
+            data_amount=len(valid_data)
             
             #maximum
             data_maximum=np.max(valid_data)
             
             #minimum
-            data_minimum=np.min(valid_data)
+            data_minimum=np.min(valid_data)  
             
-        #    print(data_average,data_standard,data_maximum,data_minimum)
+            #average
+            data_average=np.mean(valid_data)
+            
+            #standard deviation
+            data_standard_deviation=GP.StandardDeviation(valid_data)
+            
+            #variable coefficient
+            data_variable_coefficient=GP.VariableCoefficient(valid_data)
+            
+            #standard value
+            data_standard_value=GP.StandardValue(valid_data,'+')
             
             #give the value
-            statistic.iloc[0,k]=data_average
-            statistic.iloc[1,k]=data_standard
-            statistic.iloc[2,k]=data_maximum
-            statistic.iloc[3,k]=data_minimum
+            statistic.iloc[0,k]=data_amount
+            statistic.iloc[1,k]=data_maximum
+            statistic.iloc[2,k]=data_minimum
+            statistic.iloc[3,k]=data_average
+            statistic.iloc[4,k]=data_standard_deviation
+            statistic.iloc[5,k]=data_variable_coefficient
+            statistic.iloc[6,k]=data_standard_value
             
             #valid file name
             if '<' in title:

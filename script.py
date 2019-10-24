@@ -13,5 +13,5 @@ from __init__ import *
 
 xls_path='.\Data\\input\\土工试验54个.xls'
 
-#ES.WorkbookStatistics(xls_path,3,2,[2,2,1,2])    
+ES.WorkbookStatistics(xls_path,3,2,[2,2,1,2])    
 SC.WorkbookClassification(xls_path,3,2,[2,2,1,2])           
