@@ -213,7 +213,7 @@ def ClassificationStatistics(map_title_classification,figures_output_folder):
         
 #------------------------------------------------------------------------------
 """
-Make statistics from one excel
+Make statistics from all sheets in one excel
 
 Args:
     xls_path: path of excel to be processed
@@ -224,10 +224,10 @@ Args:
 Returns:
     None
 """
-def WorkbookClassification(xls_path,num_head_rows,num_head_columns,list_num_head_columns=None):
+def SheetsClassification(xls_path,num_head_rows,num_head_columns,list_num_head_columns=None):
     
     print('')
-    print('--Workbook Classification')
+    print('--Sheets Classification')
     
     plt.style.use('ggplot')
     
@@ -256,6 +256,8 @@ def WorkbookClassification(xls_path,num_head_rows,num_head_columns,list_num_head
         list_num_head_columns=[num_head_columns]*len(list_sheet_names)
         
     map_sheet_names_num_head_columns=dict(zip(list_sheet_names,list_num_head_columns))    
+    
+    title_list=['粉土密实度分类','粉土湿度分类','黏性土状态分类']
     
     #traverse all sheets
     for this_sheet_name in workbook.sheet_names():
@@ -321,8 +323,7 @@ def WorkbookClassification(xls_path,num_head_rows,num_head_columns,list_num_head
         
         #collect them into list
         classification_list=[classification_ω0,classification_e0,classification_IL]
-        title_list=['粉土密实度分类','粉土湿度分类','黏性土状态分类']
-  
+
         #plus columns
         num_columns_plus=map_sheet_names_num_head_columns[this_sheet_name]-num_head_columns
         
@@ -370,3 +371,122 @@ def WorkbookClassification(xls_path,num_head_rows,num_head_columns,list_num_head
         
         #statistics result figures of classification
         ClassificationStatistics(map_title_classification,figures_output_folder)
+         
+#------------------------------------------------------------------------------
+"""
+Make statistics from all sheets in one excel
+
+Args:
+    xls_path: path of excel to be processed
+    num_head_rows: top rows
+    num_head_columns: left columns
+    
+Returns:
+    None
+"""
+def WorkbookClassification(xls_path,num_head_rows,num_head_columns):
+    
+    print('')
+    print('--Workbook Classification')
+    
+    plt.style.use('ggplot')
+    
+    #open the excel sheet to be operated on
+    #formatting_info: keep the header format
+    workbook=xlrd.open_workbook(xls_path,formatting_info=True)
+    
+    #construct output folder path
+    tables_output_folder=xls_path.replace('.xls','').replace('input','output')+'\\分类\\'
+    
+    #construct output folder path
+    figures_output_folder=xls_path.replace('.xls','').replace('input','output')+'\\分类\\图\\总表\\'
+    
+    #generate output folder
+    PP.GenerateFolder(figures_output_folder)
+    PP.GenerateFolder(tables_output_folder)    
+
+    #construct map between sheet names and head rows
+    list_sheet_names=list(workbook.sheet_names())
+         
+    title_list=['粉土密实度分类','粉土湿度分类','黏性土状态分类']
+    
+    #total dictionanry
+    list_map=[]
+    
+    #traverse all sheets
+    for this_sheet_name in list_sheet_names:
+            
+        print('')
+        print('...')
+        print('......')
+        print('->sheet name:',this_sheet_name)
+        
+        #Data Frame object
+        channel=pd.read_excel(xls_path,sheet_name=this_sheet_name)
+        
+        final_head_columns,unit_list=HC.HeadColumnsGeneration(channel,num_head_rows)
+        
+        #all info of dataframe
+        value_matrix=channel.values
+        
+        for k in range(len(final_head_columns)):
+            
+            this_head=final_head_columns[k]
+            
+            #search for pore ratio
+            if 'e0' in this_head:
+                
+                list_e0=value_matrix[:,k]
+                head_e0=this_head
+                
+                print('-->head:'+head_e0)
+             
+            #search for moisture content
+            if 'ω0' in this_head:
+                
+                list_ω0=value_matrix[:,k]
+                head_ω0=this_head 
+                
+                print('-->head:'+head_ω0)
+                
+            #search for liquidity index
+            if 'IL' in this_head:
+                
+                list_IL=value_matrix[:,k]
+                head_IL=this_head
+                
+                print('-->head:'+head_IL)
+                
+        #list of classification result
+        classification_ω0=SiltMoistureClassification(list_ω0,num_head_rows)
+        classification_e0=SiltCompactnessClassification(list_e0,num_head_rows)
+        classification_IL=ClayeySiltStateClassification(list_IL,num_head_rows)
+        
+        #collect them into list
+        classification_list=[classification_ω0,classification_e0,classification_IL]
+
+        #construct a map between title and classification result
+        map_title_classification=dict(zip(title_list,classification_list))
+        
+        #collect this map
+        list_map.append(map_title_classification)
+    
+    '''re classification'''
+#    #total classification result map    
+#    total_map_title_classification={}
+#    
+#    #initiate
+#    for this_title in title_list:
+#        
+#        total_map_title_classification[this_title]=0
+#      
+#    #sum up
+#    for this_map in list_map:
+#        
+#        for this_key in list(this_map.keys()):
+#            
+#            total_map_title_classification[this_key]+=this_map[this_key]
+            
+#    #statistics result figures of classification
+#    ClassificationStatistics(total_map_title_classification,figures_output_folder)
+        
