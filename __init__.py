@@ -18,5 +18,6 @@ sys.path=list(set(sys.path))
 
 import HeadColumns as HC
 import PathProcessing as PP
+import BatchProcessing as BP
 import ExcelStatistics as ES
 import SiltClassification as SC

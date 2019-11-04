@@ -166,7 +166,7 @@ def SheetsStatistics(xls_path,num_head_rows,num_head_columns,list_num_head_colum
                 ax.yaxis.set_major_locator(MultipleLocator(int(np.ceil((max(str_frequency)-min(str_frequency))/n_step))))
                 
                 #set ticks
-                plt.tick_params(labelsize=60/len(str_group))
+                plt.tick_params(labelsize=12)
         
                 #y label fonts
                 for this_label in ax.get_yticklabels():
@@ -301,7 +301,7 @@ def SheetsStatistics(xls_path,num_head_rows,num_head_columns,list_num_head_colum
             data_variable_coefficient=GP.VariableCoefficient(valid_data)
             
             #standard value
-            data_standard_value=GP.StandardValue(valid_data,'+')
+            data_standard_value=GP.StandardValue(valid_data,'-')
             
             #give the value
             statistic.iloc[0,k]=data_amount
@@ -414,7 +414,7 @@ def WorkbookStatistics(xls_path,num_head_rows,num_head_columns):
     tables_output_folder=xls_path.replace('.xls','').replace('input','output')+'\\统计\\'
     
     #construct output folder path
-    figures_output_folder=xls_path.replace('.xls','').replace('input','output')+'\\统计\\图\\总表\\'
+    figures_output_folder=xls_path.replace('.xls','').replace('input','output')+'\\统计\\图\\总图\\'
         
     #generate output folder
     PP.GenerateFolder(tables_output_folder)
@@ -670,7 +670,7 @@ def WorkbookStatistics(xls_path,num_head_rows,num_head_columns):
         data_variable_coefficient=GP.VariableCoefficient(valid_data)
         
         #standard value
-        data_standard_value=GP.StandardValue(valid_data,'+')
+        data_standard_value=GP.StandardValue(valid_data)
         
         #give the value
         statistic[0][k]=str(round(data_amount,3))

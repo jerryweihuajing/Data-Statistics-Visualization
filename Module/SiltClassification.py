@@ -147,6 +147,29 @@ def ClayeySiltStateClassification(list_IL,num_head_rows=0):
 
 #------------------------------------------------------------------------------
 """
+Convert the list into a frequency distribution dictionary
+
+Args:
+    which_list: list to be processed 
+    
+Returns:
+    result dictionary
+"""  
+def List2FrequencyMap(which_list):
+    
+    keys=list(set(which_list))
+    
+    #frequency distribution map
+    map_frequency={}
+    
+    for this_key in keys:
+        
+        map_frequency[this_key]=which_list.conut(this_key)    
+    
+    return map_frequency
+ 
+#------------------------------------------------------------------------------
+"""
 Classification result statistics figure
 
 Args:
@@ -180,23 +203,23 @@ def ClassificationStatistics(map_title_classification,figures_output_folder):
         #frequency list
         str_frequency=list(map_str_frequency.values())
         
-        fig,ax=plt.subplots(figsize=(8,8))
+        fig,ax=plt.subplots(figsize=(12,8))
         
         #plot histogram
-        plt.bar(range(len(str_frequency)),str_frequency,tick_label=str_group)
+        plt.barh(range(len(str_frequency)),str_frequency,tick_label=str_group)
         
-        ax.yaxis.set_major_locator(MultipleLocator(int(np.ceil((max(str_frequency)-min(str_frequency))/20))))
+        ax.xaxis.set_major_locator(MultipleLocator(int(np.ceil((max(str_frequency)-min(str_frequency))/20))))
         
         #set ticks
-        plt.tick_params(labelsize=60/len(str_group))
+        plt.tick_params(labelsize=12)
         
         #y label fonts
-        for this_label in ax.get_yticklabels():
+        for this_label in ax.get_xticklabels():
             
             this_label.set_fontname('Times New Roman')
             
         #x label fonts
-        for this_label in ax.get_xticklabels():
+        for this_label in ax.get_yticklabels():
             
             this_label.set_fontname('SimHei')
             
@@ -206,7 +229,7 @@ def ClassificationStatistics(map_title_classification,figures_output_folder):
         plt.title(title+' 频数分布直方图\n样本总量:'+str(int(len(valid_str))),
                   FontProperties=title_font)
         
-        plt.xlabel(title,FontProperties=label_font)
+        plt.ylabel(title,FontProperties=label_font)
         
         plt.savefig(figures_output_folder+title+'.png')
         plt.close()
@@ -396,22 +419,18 @@ def WorkbookClassification(xls_path,num_head_rows,num_head_columns):
     workbook=xlrd.open_workbook(xls_path,formatting_info=True)
     
     #construct output folder path
-    tables_output_folder=xls_path.replace('.xls','').replace('input','output')+'\\分类\\'
-    
-    #construct output folder path
-    figures_output_folder=xls_path.replace('.xls','').replace('input','output')+'\\分类\\图\\总表\\'
+    figures_output_folder=xls_path.replace('.xls','').replace('input','output')+'\\分类\\图\\总图\\'
     
     #generate output folder
     PP.GenerateFolder(figures_output_folder)
-    PP.GenerateFolder(tables_output_folder)    
-
+  
     #construct map between sheet names and head rows
     list_sheet_names=list(workbook.sheet_names())
          
     title_list=['粉土密实度分类','粉土湿度分类','黏性土状态分类']
     
-    #total dictionanry
-    list_map=[]
+    #classification result list
+    classification_ω0,classification_e0,classification_IL=[],[],[]
     
     #traverse all sheets
     for this_sheet_name in list_sheet_names:
@@ -458,35 +477,15 @@ def WorkbookClassification(xls_path,num_head_rows,num_head_columns):
                 print('-->head:'+head_IL)
                 
         #list of classification result
-        classification_ω0=SiltMoistureClassification(list_ω0,num_head_rows)
-        classification_e0=SiltCompactnessClassification(list_e0,num_head_rows)
-        classification_IL=ClayeySiltStateClassification(list_IL,num_head_rows)
+        classification_ω0+=SiltMoistureClassification(list_ω0,num_head_rows)
+        classification_e0+=SiltCompactnessClassification(list_e0,num_head_rows)
+        classification_IL+=ClayeySiltStateClassification(list_IL,num_head_rows)
         
-        #collect them into list
-        classification_list=[classification_ω0,classification_e0,classification_IL]
+    #collect them into list
+    classification_list=[classification_ω0,classification_e0,classification_IL]
 
-        #construct a map between title and classification result
-        map_title_classification=dict(zip(title_list,classification_list))
-        
-        #collect this map
-        list_map.append(map_title_classification)
-    
-    '''re classification'''
-#    #total classification result map    
-#    total_map_title_classification={}
-#    
-#    #initiate
-#    for this_title in title_list:
-#        
-#        total_map_title_classification[this_title]=0
-#      
-#    #sum up
-#    for this_map in list_map:
-#        
-#        for this_key in list(this_map.keys()):
-#            
-#            total_map_title_classification[this_key]+=this_map[this_key]
-            
-#    #statistics result figures of classification
-#    ClassificationStatistics(total_map_title_classification,figures_output_folder)
-        
+    #construct a map between title and classification result
+    map_title_classification=dict(zip(title_list,classification_list))
+
+    #statistics result figures of classification
+    ClassificationStatistics(map_title_classification,figures_output_folder)

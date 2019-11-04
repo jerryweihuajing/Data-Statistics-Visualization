@@ -11,8 +11,11 @@ Created on Mon Sep 30 20:43:10 2019
 
 from __init__ import *
 
-xls_path='.\Data\\input\\土工试验54个.xls'
-
+#xls_path='.\Data\\input\\颗分3.xls'
+#
 #ES.WorkbookStatistics(xls_path,3,2)    
-SC.WorkbookClassification(xls_path,3,2)           
+#SC.WorkbookClassification(xls_path,3,2)           
 
+folder_path='.\Data\\input\\'
+
+BP.Go(folder_path,3,2)

@@ -79,13 +79,13 @@ Statistical correction factor calculation in Geotechnical Engineering
 
 Args:
     data: data array
-    mode: '+' or '-' which depends
+    mode: '+' or '-' which depends (default: -)
     r: correlation coefficient (default: 0)
     
 Returns:
     Statistical correction factor
 """
-def StatisticalCorrectionFactor(data,mode,r=0):
+def StatisticalCorrectionFactor(data,mode='-',r=0):
     
     n=len(data)
     
@@ -105,12 +105,12 @@ Standard value calculation in Geotechnical Engineering
 
 Args:
     data: data array
-    mode: '+' or '-' which depends
+    mode: '+' or '-' which depends (default: -)
     r: correlation coefficient (default: 0)
     
 Returns:
     Standard value
 """         
-def StandardValue(data,mode,r=0):
+def StandardValue(data,mode='-',r=0):
     
     return Average(data)*StatisticalCorrectionFactor(data,mode,r)
