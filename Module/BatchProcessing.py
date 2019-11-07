@@ -11,6 +11,7 @@ Created on Mon Nov  4 14:38:52 2019
 
 import os
 
+import DataFiltering as DF
 import ExcelStatistics as ES
 import SiltClassification as SC
 
@@ -33,5 +34,7 @@ def Go(folder_path,num_head_rows,num_head_columns):
         #create name of single path
         this_xls_path=folder_path+this_xls_name
       
+        DF.SheetsFiltering(this_xls_path,3)
         ES.WorkbookStatistics(this_xls_path,3,2)    
         SC.WorkbookClassification(this_xls_path,3,2)  
+        

@@ -21,6 +21,7 @@ from matplotlib.pyplot import MultipleLocator
 from matplotlib.font_manager import FontProperties
 
 import HeadColumns as HC
+import ListOperation as LO
 import PathProcessing as PP
 
 #------------------------------------------------------------------------------
@@ -448,14 +449,19 @@ def WorkbookClassification(xls_path,num_head_rows,num_head_columns):
         #all info of dataframe
         value_matrix=channel.values
         
+        #delete the repetition
+        index_valid=LO.ValidIndexList(value_matrix[num_head_rows:,1])
+        
+        print('-->Valid Samples:',len(index_valid))
+        
         for k in range(len(final_head_columns)):
             
             this_head=final_head_columns[k]
             
             #search for pore ratio
             if 'e0' in this_head:
-                
-                list_e0=value_matrix[:,k]
+     
+                list_e0=LO.CustomIndexList(list(value_matrix[:,k]),index_valid)
                 head_e0=this_head
                 
                 print('-->head:'+head_e0)
@@ -463,7 +469,7 @@ def WorkbookClassification(xls_path,num_head_rows,num_head_columns):
             #search for moisture content
             if 'ω0' in this_head:
                 
-                list_ω0=value_matrix[:,k]
+                list_ω0=LO.CustomIndexList(list(value_matrix[:,k]),index_valid)
                 head_ω0=this_head 
                 
                 print('-->head:'+head_ω0)
@@ -471,7 +477,7 @@ def WorkbookClassification(xls_path,num_head_rows,num_head_columns):
             #search for liquidity index
             if 'IL' in this_head:
                 
-                list_IL=value_matrix[:,k]
+                list_IL=LO.CustomIndexList(list(value_matrix[:,k]),index_valid)
                 head_IL=this_head
                 
                 print('-->head:'+head_IL)

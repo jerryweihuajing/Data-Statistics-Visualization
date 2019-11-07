@@ -22,6 +22,7 @@ from matplotlib.pyplot import MultipleLocator
 from matplotlib.font_manager import FontProperties
 
 import HeadColumns as HC
+import ListOperation as LO
 import PathProcessing as PP
 import GeotechnicalParameters as GP
 
@@ -112,7 +113,7 @@ def SheetsStatistics(xls_path,num_head_rows,num_head_columns,list_num_head_colum
         
         #no valid data
         columns_void=[]
-        
+            
         for k in range(num_head_columns,np.shape(value_matrix)[1]):
         
             #num of steps
@@ -386,7 +387,7 @@ def SheetsStatistics(xls_path,num_head_rows,num_head_columns,list_num_head_colum
                                      style)
    
         new_workbook.save(tables_output_folder+'统计结果.xls')
-             
+
 #------------------------------------------------------------------------------
 """
 Make statistics from one excel
@@ -462,6 +463,11 @@ def WorkbookStatistics(xls_path,num_head_rows,num_head_columns):
         
         #no valid data
         columns_void=[]
+
+        #delete the repetition
+        index_valid=LO.ValidIndexList(value_matrix[num_head_rows:,1])
+ 
+        print('-->Valid Samples:',len(index_valid))
         
         for k in range(num_head_columns,np.shape(value_matrix)[1]):
         
@@ -477,7 +483,8 @@ def WorkbookStatistics(xls_path,num_head_rows,num_head_columns):
             #title str
             title=final_head_columns[k]
             
-            list_data.append(data)
+            #valid data
+            list_data.append(LO.CustomIndexList(data,index_valid))
             list_title.append(title)
    
     #map between title and data
