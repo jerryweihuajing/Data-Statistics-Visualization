@@ -210,7 +210,7 @@ def ClassificationStatistics(map_title_classification,figures_output_folder):
         plt.barh(range(len(str_frequency)),str_frequency,tick_label=str_group)
         
         ax.xaxis.set_major_locator(MultipleLocator(int(np.ceil((max(str_frequency)-min(str_frequency))/20))))
-        
+    
         #set ticks
         plt.tick_params(labelsize=12)
         
@@ -458,10 +458,15 @@ def WorkbookClassification(xls_path,num_head_rows,num_head_columns):
             
             this_head=final_head_columns[k]
             
+            #search for type of silt
+            if '分类' in this_head:
+                
+                list_GB=LO.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
+                
             #search for pore ratio
             if 'e0' in this_head:
      
-                list_e0=LO.CustomIndexList(list(value_matrix[:,k]),index_valid)
+                list_e0=LO.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
                 head_e0=this_head
                 
                 print('-->head:'+head_e0)
@@ -469,7 +474,7 @@ def WorkbookClassification(xls_path,num_head_rows,num_head_columns):
             #search for moisture content
             if 'ω0' in this_head:
                 
-                list_ω0=LO.CustomIndexList(list(value_matrix[:,k]),index_valid)
+                list_ω0=LO.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
                 head_ω0=this_head 
                 
                 print('-->head:'+head_ω0)
@@ -477,15 +482,166 @@ def WorkbookClassification(xls_path,num_head_rows,num_head_columns):
             #search for liquidity index
             if 'IL' in this_head:
                 
-                list_IL=LO.CustomIndexList(list(value_matrix[:,k]),index_valid)
+                list_IL=LO.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
                 head_IL=this_head
                 
                 print('-->head:'+head_IL)
-                
+
+        #filter floury soil
+        index_floury_soil=LO.GBIndexFlourySoil(list_GB)
+        
+        ω0_valid=LO.CustomIndexList(list_ω0,index_floury_soil)
+        e0_valid=LO.CustomIndexList(list_e0,index_floury_soil)
+
+        #filter cohesive silt
+        index_cohesive_silt=LO.GBIndexCohesiveSilt(list_GB)
+        
+        IL_valid=LO.CustomIndexList(list_IL,index_cohesive_silt)
+     
         #list of classification result
-        classification_ω0+=SiltMoistureClassification(list_ω0,num_head_rows)
-        classification_e0+=SiltCompactnessClassification(list_e0,num_head_rows)
-        classification_IL+=ClayeySiltStateClassification(list_IL,num_head_rows)
+        #floury soil
+        classification_ω0+=SiltMoistureClassification(ω0_valid,num_head_rows)
+        classification_e0+=SiltCompactnessClassification(e0_valid,num_head_rows)
+        
+        #cohesive silt
+        classification_IL+=ClayeySiltStateClassification(IL_valid,num_head_rows)
+        
+    #collect them into list
+    classification_list=[classification_ω0,classification_e0,classification_IL]
+
+    #construct a map between title and classification result
+    map_title_classification=dict(zip(title_list,classification_list))
+
+    #statistics result figures of classification
+    ClassificationStatistics(map_title_classification,figures_output_folder)
+    
+#------------------------------------------------------------------------------
+"""
+Make statistics from all sheets in one excel
+
+Args:
+    list_xls_path: list path of excel to be processed
+    num_head_rows: top rows
+    num_head_columns: left columns
+    
+Returns:
+    None
+"""
+def MergedWorkbookClassification(list_xls_path,num_head_rows,num_head_columns):
+    
+    print('')
+    print('--Merged Workbook Classification')
+    
+    plt.style.use('ggplot')
+    
+    #construct output folder path
+    tables_output_folder=list_xls_path[0].split('input')[0]+'output\\颗分汇总\\分类\\'
+    
+    #construct output folder path
+    figures_output_folder=list_xls_path[0].split('input')[0]+'output\\颗分汇总\\分类\\图\\总图\\'
+        
+    #generate output folder
+    PP.GenerateFolder(tables_output_folder)
+    PP.GenerateFolder(figures_output_folder)
+    
+    #DF channels
+    total_channels=[]
+    
+    for this_xls_path in list_xls_path:
+        
+        #open the excel sheet to be operated on
+        #formatting_info: keep the header format
+        workbook=xlrd.open_workbook(this_xls_path,formatting_info=True)
+        
+        #construct map between sheet names and head rows
+        list_sheet_names=list(workbook.sheet_names())
+     
+        #traverse all sheets
+        for this_sheet_name in list_sheet_names:
+            
+            #Data Frame object
+            that_channel=pd.read_excel(this_xls_path,sheet_name=this_sheet_name)
+            
+            #collect it
+            total_channels.append(that_channel)
+     
+    title_list=['粉土密实度分类','粉土湿度分类','黏性土状态分类']
+    
+    #classification result list
+    classification_ω0,classification_e0,classification_IL=[],[],[]
+    
+    #traverse all sheets
+    for channel in total_channels:
+    
+        print('')
+        print('...')
+        print('......')
+        print('')
+
+        final_head_columns,unit_list=HC.HeadColumnsGeneration(channel,num_head_rows)
+        
+        #all info of dataframe
+        value_matrix=channel.values
+        
+        #delete the repetition
+        index_valid=LO.ListWithoutRepetition(value_matrix[num_head_rows:,1])
+        
+        print('-->Valid Samples:',len(index_valid))
+        
+        for k in range(len(final_head_columns)):
+            
+            this_head=final_head_columns[k]
+            
+            #search for type of silt
+            if '分类' in this_head:
+                
+                list_GB=LO.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
+                head_GB=this_head
+                
+                print('-->head:'+head_GB)
+                
+            #search for pore ratio
+            if 'e0' in this_head:
+     
+                list_e0=LO.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
+                head_e0=this_head
+                
+                print('-->head:'+head_e0)
+             
+            #search for moisture content
+            if 'ω0' in this_head:
+                
+                list_ω0=LO.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
+                head_ω0=this_head 
+                
+                print('-->head:'+head_ω0)
+                
+            #search for liquidity index
+            if 'IL' in this_head:
+                
+                list_IL=LO.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
+                head_IL=this_head
+                
+                print('-->head:'+head_IL)
+
+        #filter floury soil
+        index_floury_soil=LO.GBIndexFlourySoil(list_GB)
+        
+        ω0_valid=LO.CustomIndexList(list_ω0,index_floury_soil)
+        e0_valid=LO.CustomIndexList(list_e0,index_floury_soil)
+
+        #filter cohesive silt
+        index_cohesive_silt=LO.GBIndexCohesiveSilt(list_GB)
+        
+        IL_valid=LO.CustomIndexList(list_IL,index_cohesive_silt)
+     
+        #list of classification result
+        #floury soil
+        classification_ω0+=SiltMoistureClassification(ω0_valid,num_head_rows)
+        classification_e0+=SiltCompactnessClassification(e0_valid,num_head_rows)
+        
+        #cohesive silt
+        classification_IL+=ClayeySiltStateClassification(IL_valid,num_head_rows)
         
     #collect them into list
     classification_list=[classification_ω0,classification_e0,classification_IL]

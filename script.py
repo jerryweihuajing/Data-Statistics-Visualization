@@ -11,14 +11,24 @@ Created on Mon Sep 30 20:43:10 2019
 
 from __init__ import *
 
-xls_path='.\Data\\input\\土工试验54个.xls'
 
-DF.SheetsFiltering(xls_path,3)
-
-#ES.WorkbookStatistics(xls_path,3,2)    
-#SC.WorkbookClassification(xls_path,3,2)           
-
-#folder_path='.\Data\\input\\'
+##merge xls
+#list_merged_xls_name=['颗分.xls','颗分2.xls','颗分3.xls']
 #
-#BP.Go(folder_path,3,2)
+##construct list xls path
+#list_merged_xls_path=['.\Data\\input\\'+this_xls_name for this_xls_name in list_merged_xls_name]
+#
+#ES.MergedWorkbookStatistics(list_merged_xls_path,3,2)
+#SC.MergedWorkbookClassification(list_merged_xls_path,3,2)      
 
+#single
+list_single_xls_name=['地热6水文2.xls','土工试验54个.xls']
+
+#construct list xls path
+list_single_xls_path=['.\Data\\input\\'+this_xls_name for this_xls_name in list_single_xls_name]
+
+for this_single_xls_path in list_single_xls_path:
+
+#    ES.WorkbookStatistics(this_single_xls_path,3,2)    
+    SC.WorkbookClassification(this_single_xls_path,3,2) 
+    '''bug'''

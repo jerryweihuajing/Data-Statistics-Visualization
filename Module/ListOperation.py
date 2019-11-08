@@ -50,7 +50,6 @@ def ValidIndexList(which_list):
         
         this_index=which_list[ix]
         
-        
         if this_index in index_valid:
             
             repetition+=1
@@ -68,6 +67,41 @@ def ValidIndexList(which_list):
     
     return ix_valid
 
+#------------------------------------------------------------------------------   
+"""
+Delete only duplicates
+
+Args:
+    which_list: list to be processed
+
+Returns:
+    None
+"""          
+def ListWithoutRepetition(which_list):
+    
+    #result list
+    ix_valid=[]
+    
+    #their names
+    index_valid=[]
+        
+    #count invalid index
+    repetition=0
+    
+    for ix in range(len(which_list)):
+        
+        this_index=which_list[ix]
+        
+        if this_index in index_valid:
+            
+            repetition+=1
+            
+            continue
+                   
+        ix_valid.append(ix)
+        index_valid.append(this_index)
+    
+    return ix_valid
 #------------------------------------------------------------------------------   
 """
 Calculate the difference between A and B
@@ -90,3 +124,54 @@ def SetDiffernece(set_A,set_B):
             set_difference.append(item)
             
     return set_difference
+
+#------------------------------------------------------------------------------   
+"""
+Filter cohesive silt to index list
+
+Args:
+    which_list: GB list to be processed
+
+Returns:
+    None
+"""          
+def GBIndexCohesiveSilt(which_list):
+    
+    ix_valid=[]
+    
+    for ix in range(len(which_list)):
+        
+        if not isinstance(which_list[ix],str):
+            
+            continue
+        
+        if '黏土' in which_list[ix]:
+
+            ix_valid.append(ix)
+        
+    return ix_valid
+#------------------------------------------------------------------------------   
+"""
+Filter floury soil to index list
+
+Args:
+    which_list: GB list to be processed
+
+Returns:
+    None
+"""          
+def GBIndexFlourySoil(which_list):
+    
+    ix_valid=[]
+    
+    for ix in range(len(which_list)):
+
+        if not isinstance(which_list[ix],str):
+            
+            continue
+        
+        if '粉土' in which_list[ix]:
+
+            ix_valid.append(ix)
+        
+    return ix_valid
