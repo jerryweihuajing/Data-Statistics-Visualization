@@ -90,7 +90,6 @@ class grain:
         
         self.partition=DictKeyOfValue(map_partition_proportion,max(list(map_partition_proportion.values())))
 
-
 list_proportion=['','','','','',42,42,9.7,6.0]
 
 g=grain()

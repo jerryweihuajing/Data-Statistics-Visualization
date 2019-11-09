@@ -147,52 +147,7 @@ def SheetsStatistics(xls_path,num_head_rows,num_head_columns,list_num_head_colum
                 statistic.iloc[6,k]=''
                 
                 columns_to_delete.append(title)
-                
-                #expire nan
-                valid_str=[this_data for this_data in data if isinstance(this_data,str)]
-                
-                #group in x axis
-                str_group=list(set(valid_str))
-                
-                #list of str frequency
-                str_frequency=[0]*(len(str_group))
-                      
-                #construct a dictionary as vote machine
-                map_str_frequency=dict((this_valid_str,valid_str.count(this_valid_str)) for this_valid_str in valid_str)
-                
-        #        print(map_str_frequency)
-               
-                #frequency list
-                str_frequency=list(map_str_frequency.values())
-                
-                fig,ax=plt.subplots(figsize=(8,8))
-                
-                #plot histogram
-                plt.bar(range(len(str_frequency)),str_frequency,tick_label=str_group)
-                
-                ax.yaxis.set_major_locator(MultipleLocator(int(np.ceil((max(str_frequency)-min(str_frequency))/n_step))))
-                
-                #set ticks
-                plt.tick_params(labelsize=12)
         
-                #y label fonts
-                for this_label in ax.get_yticklabels():
-                    
-                    this_label.set_fontname('Times New Roman')
-                    
-                #x label fonts
-                for this_label in ax.get_xticklabels():
-                    
-                    this_label.set_fontname('SimHei')
-                    
-                plt.title(title+' 频数分布直方图\n样本总量:'+str(int(len(valid_str))),
-                          FontProperties=title_font)
-                
-                plt.xlabel(title+' '+unit,FontProperties=label_font)
-                
-                plt.savefig(figures_output_folder+title+'.png')
-                plt.close()
-                
                 continue
             
             #expire nan
@@ -225,12 +180,7 @@ def SheetsStatistics(xls_path,num_head_rows,num_head_columns,list_num_head_colum
             for this_tick in group:
                 
                 if 'e' in str(this_tick):
-                    
-        #            print(str(min(group)).split('e')[0])
-        #            print(str(max(group)).split('e')[0])
-        #            print(str(min(group)).split('e')[-1])
-        #            print(str(max(group)).split('e')[-1])
-        
+   
                     factor=str(min(group)).split('e')[-1]
         
                     scaled_flag=True
@@ -536,51 +486,7 @@ def WorkbookStatistics(xls_path,num_head_rows,num_head_columns):
         if '分类' in title or '备' in title or '注' in title:
     
             columns_to_delete.append(title)
-            
-            #expire nan
-            valid_str=[this_data for this_data in data if isinstance(this_data,str)]
-            
-            #group in x axis
-            str_group=list(set(valid_str))
-            
-            #list of str frequency
-            str_frequency=[0]*(len(str_group))
-                  
-            #construct a dictionary as vote machine
-            map_str_frequency=dict((this_valid_str,valid_str.count(this_valid_str)) for this_valid_str in valid_str)
-            
-    #        print(map_str_frequency)
-           
-            #frequency list
-            str_frequency=list(map_str_frequency.values())
-            
-            fig,ax=plt.subplots(figsize=(12,8))
-            
-            '''transform orientation'''
-            #plot histogram
-            plt.barh(range(len(str_frequency)),str_frequency,tick_label=str_group)
-            
-            ax.xaxis.set_major_locator(MultipleLocator(int(np.ceil((max(str_frequency)-min(str_frequency))/n_step))))
-            
-            #set ticks
-            plt.tick_params(labelsize=12)
-    
-            #y label fonts
-            for this_label in ax.get_xticklabels():
-                
-                this_label.set_fontname('Times New Roman')
-                
-            #x label fonts
-            for this_label in ax.get_yticklabels():
-                
-                this_label.set_fontname('SimHei')
-                
-            plt.title(title+' 频数分布直方图\n样本总量:'+str(int(len(valid_str))),
-                      FontProperties=title_font)
-            
-            plt.savefig(figures_output_folder+title+'.png')
-            plt.close()
-            
+          
             continue
         
         #expire nan
@@ -604,12 +510,7 @@ def WorkbookStatistics(xls_path,num_head_rows,num_head_columns):
         for this_tick in group:
             
             if 'e' in str(this_tick):
-                
-    #            print(str(min(group)).split('e')[0])
-    #            print(str(max(group)).split('e')[0])
-    #            print(str(min(group)).split('e')[-1])
-    #            print(str(max(group)).split('e')[-1])
-    
+
                 factor=str(min(group)).split('e')[-1]
     
                 scaled_flag=True
@@ -862,8 +763,8 @@ def MergedWorkbookStatistics(list_xls_path,num_head_rows,num_head_columns):
         #no valid data
         columns_void=[]
 
-        #delete the repetition and keep label R
-        index_valid=LO.ListWithoutRepetition(value_matrix[num_head_rows:,1])
+        #delete the repetition and remove label R
+        index_valid=LO.ValidIndexList(value_matrix[num_head_rows:,1])
         
         total_id+=(list(value_matrix[num_head_rows:,1]))
         
@@ -893,7 +794,7 @@ def MergedWorkbookStatistics(list_xls_path,num_head_rows,num_head_columns):
     print('......')
     print('Merged Workbook')
     print('-->Total Samples:',len(total_id))
-    print('-->Valid Samples:',len(LO.ListWithoutRepetition(total_id)))
+    print('-->Valid Samples:',len(LO.ValidIndexList(total_id)))
     print('')
     
     #map between title and data
@@ -925,51 +826,7 @@ def MergedWorkbookStatistics(list_xls_path,num_head_rows,num_head_columns):
         if '分类' in title or '备' in title or '注' in title:
     
             columns_to_delete.append(title)
-            
-            #expire nan
-            valid_str=[this_data for this_data in data if isinstance(this_data,str)]
-            
-            #group in x axis
-            str_group=list(set(valid_str))
-            
-            #list of str frequency
-            str_frequency=[0]*(len(str_group))
                   
-            #construct a dictionary as vote machine
-            map_str_frequency=dict((this_valid_str,valid_str.count(this_valid_str)) for this_valid_str in valid_str)
-            
-    #        print(map_str_frequency)
-           
-            #frequency list
-            str_frequency=list(map_str_frequency.values())
-            
-            fig,ax=plt.subplots(figsize=(12,8))
-            
-            '''transform orientation'''
-            #plot histogram
-            ax.barh(range(len(str_frequency)),str_frequency,tick_label=str_group)
-                     
-            ax.xaxis.set_major_locator(MultipleLocator(int(np.ceil((max(str_frequency)-min(str_frequency))/n_step))))
-            
-            #set ticks
-            plt.tick_params(labelsize=12)
-    
-            #y label fonts
-            for this_label in ax.get_xticklabels():
-                
-                this_label.set_fontname('Times New Roman')
-                
-            #x label fonts
-            for this_label in ax.get_yticklabels():
-                
-                this_label.set_fontname('SimHei')
-                
-            plt.title(title+' 频数分布直方图\n样本总量:'+str(int(len(valid_str))),
-                      FontProperties=title_font)
-            
-            plt.savefig(figures_output_folder+title+'.png')
-            plt.close()
-            
             continue
         
         #expire nan
@@ -993,12 +850,7 @@ def MergedWorkbookStatistics(list_xls_path,num_head_rows,num_head_columns):
         for this_tick in group:
             
             if 'e' in str(this_tick):
-                
-    #            print(str(min(group)).split('e')[0])
-    #            print(str(max(group)).split('e')[0])
-    #            print(str(min(group)).split('e')[-1])
-    #            print(str(max(group)).split('e')[-1])
-    
+
                 factor=str(min(group)).split('e')[-1]
     
                 scaled_flag=True

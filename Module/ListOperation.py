@@ -141,8 +141,8 @@ def GBIndexCohesiveSilt(which_list):
 
             ix_valid.append(ix)
         
-        
     return ix_valid
+
 #------------------------------------------------------------------------------   
 """
 Filter floury soil to index list

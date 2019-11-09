@@ -12,8 +12,9 @@ Created on Sat Oct 19 13:57:48 2019
 import xlrd
 import xlwt
 
-import pandas as pd
+import copy as cp
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 
 from xlutils.copy import copy
@@ -189,20 +190,17 @@ def ClassificationStatistics(map_title_classification,figures_output_folder):
         
         #expire nan
         valid_str=[this_data for this_data in data if isinstance(this_data,str) and this_data!='']
-        
-        #group in x axis
-        str_group=list(set(valid_str))
-        
-        #list of str frequency
-        str_frequency=[0]*(len(str_group))
-              
+                   
         #construct a dictionary as vote machine
         map_str_frequency=dict((this_valid_str,valid_str.count(this_valid_str)) for this_valid_str in valid_str)
-            
+        
         #frequency list
         str_frequency=list(map_str_frequency.values())
         
-        fig,ax=plt.subplots(figsize=(12,8))
+        #group in x axis
+        str_group=list(map_str_frequency.keys())
+        
+        fig,ax=plt.subplots(figsize=(16,8))
         
         #plot histogram
         plt.barh(range(len(str_frequency)),str_frequency,tick_label=str_group)
@@ -225,12 +223,9 @@ def ClassificationStatistics(map_title_classification,figures_output_folder):
             this_label.set_fontname('SimHei')
             
         title_font = FontProperties(fname=r"C:\Windows\Fonts\simhei.ttf", size=16)  
-        label_font = FontProperties(fname=r"C:\Windows\Fonts\simhei.ttf", size=13)  
         
         plt.title(title+' 频数分布直方图\n样本总量:'+str(int(len(valid_str))),
                   FontProperties=title_font)
-        
-        plt.ylabel(title,FontProperties=label_font)
         
         plt.savefig(figures_output_folder+title+'.png')
         plt.close()
@@ -281,7 +276,11 @@ def SheetsClassification(xls_path,num_head_rows,num_head_columns,list_num_head_c
         
     map_sheet_names_num_head_columns=dict(zip(list_sheet_names,list_num_head_columns))    
     
-    title_list=['粉土密实度分类','粉土湿度分类','黏性土状态分类']
+    title_list=['粉土密实度分类',\
+                '粉土湿度分类',\
+                '黏性土状态分类',\
+                '土的分类',\
+                '备注']
     
     #traverse all sheets
     for this_sheet_name in workbook.sheet_names():
@@ -309,6 +308,9 @@ def SheetsClassification(xls_path,num_head_rows,num_head_columns,list_num_head_c
         #all info of dataframe
         value_matrix=channel.values
         
+        #delete the repetition
+        index_valid=LO.ValidIndexList(value_matrix[num_head_rows:,1])
+        
         #index of line where info starts
         start_info_row=num_head_rows+1   
              
@@ -316,10 +318,26 @@ def SheetsClassification(xls_path,num_head_rows,num_head_columns,list_num_head_c
             
             this_head=final_head_columns[k]
             
+            #search for note and make statistics
+            if '备' in this_head or '注' in this_head:
+                
+                list_note=LO.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
+                head_note=this_head
+                
+                print('-->head:'+head_note)
+                
+            #search for type of silt
+            if '分类' in this_head:
+                
+                list_GB=LO.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
+                head_GB=this_head
+                
+                print('-->head:'+head_GB)
+                
             #search for pore ratio
             if 'e0' in this_head:
-                
-                list_e0=value_matrix[:,k]
+     
+                list_e0=LO.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
                 head_e0=this_head
                 
                 print('-->head:'+head_e0)
@@ -327,7 +345,7 @@ def SheetsClassification(xls_path,num_head_rows,num_head_columns,list_num_head_c
             #search for moisture content
             if 'ω0' in this_head:
                 
-                list_ω0=value_matrix[:,k]
+                list_ω0=LO.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
                 head_ω0=this_head 
                 
                 print('-->head:'+head_ω0)
@@ -335,7 +353,7 @@ def SheetsClassification(xls_path,num_head_rows,num_head_columns,list_num_head_c
             #search for liquidity index
             if 'IL' in this_head:
                 
-                list_IL=value_matrix[:,k]
+                list_IL=LO.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
                 head_IL=this_head
                 
                 print('-->head:'+head_IL)
@@ -344,10 +362,16 @@ def SheetsClassification(xls_path,num_head_rows,num_head_columns,list_num_head_c
         classification_ω0=SiltMoistureClassification(list_ω0,num_head_rows)
         classification_e0=SiltCompactnessClassification(list_e0,num_head_rows)
         classification_IL=ClayeySiltStateClassification(list_IL,num_head_rows)
+        classification_GB=cp.deepcopy(list_GB)
+        classification_note=cp.deepcopy(list_note)
         
         #collect them into list
-        classification_list=[classification_ω0,classification_e0,classification_IL]
-
+        classification_list=[classification_e0,\
+                             classification_ω0,\
+                             classification_IL,\
+                             classification_GB,\
+                             classification_note]
+        
         #plus columns
         num_columns_plus=map_sheet_names_num_head_columns[this_sheet_name]-num_head_columns
         
@@ -428,7 +452,18 @@ def WorkbookClassification(xls_path,num_head_rows,num_head_columns):
     #construct map between sheet names and head rows
     list_sheet_names=list(workbook.sheet_names())
          
-    title_list=['粉土密实度分类','粉土湿度分类','黏性土状态分类']
+    title_list=['粉土密实度分类',\
+                '粉土湿度分类',\
+                '黏性土状态分类',\
+                '土的分类',\
+                '备注']
+    
+    #classification result list
+    classification_ω0=[]
+    classification_e0=[]
+    classification_IL=[]
+    classification_GB=[]
+    classification_note=[]
     
     #classification result list
     classification_ω0,classification_e0,classification_IL=[],[],[]
@@ -458,10 +493,21 @@ def WorkbookClassification(xls_path,num_head_rows,num_head_columns):
             
             this_head=final_head_columns[k]
             
+            #search for note and make statistics
+            if '备' in this_head or '注' in this_head:
+                
+                list_note=LO.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
+                head_note=this_head
+                
+                print('-->head:'+head_note)
+                
             #search for type of silt
             if '分类' in this_head:
                 
                 list_GB=LO.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
+                head_GB=this_head
+                
+                print('-->head:'+head_GB)
                 
             #search for pore ratio
             if 'e0' in this_head:
@@ -506,9 +552,19 @@ def WorkbookClassification(xls_path,num_head_rows,num_head_columns):
         #cohesive silt
         classification_IL+=ClayeySiltStateClassification(IL_valid,num_head_rows)
         
+        #GB
+        classification_GB+=list_GB
+        
+        #note
+        classification_note+=list_note
+        
     #collect them into list
-    classification_list=[classification_e0,classification_ω0,classification_IL]
-
+    classification_list=[classification_e0,\
+                         classification_ω0,\
+                         classification_IL,\
+                         classification_GB,\
+                         classification_note]
+    
     #construct a map between title and classification result
     map_title_classification=dict(zip(title_list,classification_list))
 
@@ -565,10 +621,18 @@ def MergedWorkbookClassification(list_xls_path,num_head_rows,num_head_columns):
             #collect it
             total_channels.append(that_channel)
      
-    title_list=['粉土密实度分类','粉土湿度分类','黏性土状态分类']
+    title_list=['粉土密实度分类',\
+                '粉土湿度分类',\
+                '黏性土状态分类',\
+                '土的分类',\
+                '备注']
     
     #classification result list
-    classification_ω0,classification_e0,classification_IL=[],[],[]
+    classification_ω0=[]
+    classification_e0=[]
+    classification_IL=[]
+    classification_GB=[]
+    classification_note=[]
     
     #traverse all sheets
     for channel in total_channels:
@@ -592,6 +656,14 @@ def MergedWorkbookClassification(list_xls_path,num_head_rows,num_head_columns):
             
             this_head=final_head_columns[k]
             
+            #search for note and make statistics
+            if '备' in this_head or '注' in this_head:
+                
+                list_note=LO.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
+                head_note=this_head
+                
+                print('-->head:'+head_note)
+                
             #search for type of silt
             if '分类' in this_head:
                 
@@ -626,13 +698,13 @@ def MergedWorkbookClassification(list_xls_path,num_head_rows,num_head_columns):
 
         #filter floury soil
         index_floury_soil=LO.GBIndexFlourySoil(list_GB)
-        
+
         ω0_valid=LO.CustomIndexList(list_ω0,index_floury_soil)
         e0_valid=LO.CustomIndexList(list_e0,index_floury_soil)
 
         #filter cohesive silt
         index_cohesive_silt=LO.GBIndexCohesiveSilt(list_GB)
-        
+
         IL_valid=LO.CustomIndexList(list_IL,index_cohesive_silt)
      
         #list of classification result
@@ -643,8 +715,18 @@ def MergedWorkbookClassification(list_xls_path,num_head_rows,num_head_columns):
         #cohesive silt
         classification_IL+=ClayeySiltStateClassification(IL_valid,num_head_rows)
         
+        #GB
+        classification_GB+=list_GB
+        
+        #note
+        classification_note+=list_note
+        
     #collect them into list
-    classification_list=[classification_e0,classification_ω0,classification_IL]
+    classification_list=[classification_e0,\
+                         classification_ω0,\
+                         classification_IL,\
+                         classification_GB,\
+                         classification_note]
 
     #construct a map between title and classification result
     map_title_classification=dict(zip(title_list,classification_list))
