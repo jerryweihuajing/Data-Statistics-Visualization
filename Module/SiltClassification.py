@@ -276,10 +276,10 @@ def SheetsClassification(xls_path,num_head_rows,num_head_columns,list_num_head_c
         
     map_sheet_names_num_head_columns=dict(zip(list_sheet_names,list_num_head_columns))    
     
-    title_list=['粉土密实度分类',\
-                '粉土湿度分类',\
-                '黏性土状态分类',\
-                '土的分类',\
+    title_list=['粉土密实度分类',
+                '粉土湿度分类',
+                '黏性土状态分类',
+                '土的分类',
                 '备注']
     
     #traverse all sheets
@@ -366,10 +366,10 @@ def SheetsClassification(xls_path,num_head_rows,num_head_columns,list_num_head_c
         classification_note=cp.deepcopy(list_note)
         
         #collect them into list
-        classification_list=[classification_e0,\
-                             classification_ω0,\
-                             classification_IL,\
-                             classification_GB,\
+        classification_list=[classification_e0,
+                             classification_ω0,
+                             classification_IL,
+                             classification_GB,
                              classification_note]
         
         #plus columns
@@ -452,10 +452,10 @@ def WorkbookClassification(xls_path,num_head_rows,num_head_columns):
     #construct map between sheet names and head rows
     list_sheet_names=list(workbook.sheet_names())
          
-    title_list=['粉土密实度分类',\
-                '粉土湿度分类',\
-                '黏性土状态分类',\
-                '土的分类',\
+    title_list=['粉土密实度分类',
+                '粉土湿度分类',
+                '黏性土状态分类',
+                '土的分类',
                 '备注']
     
     #classification result list
@@ -559,10 +559,10 @@ def WorkbookClassification(xls_path,num_head_rows,num_head_columns):
         classification_note+=list_note
         
     #collect them into list
-    classification_list=[classification_e0,\
-                         classification_ω0,\
-                         classification_IL,\
-                         classification_GB,\
+    classification_list=[classification_e0,
+                         classification_ω0,
+                         classification_IL,
+                         classification_GB,
                          classification_note]
     
     #construct a map between title and classification result
@@ -621,10 +621,10 @@ def MergedWorkbookClassification(list_xls_path,num_head_rows,num_head_columns):
             #collect it
             total_channels.append(that_channel)
      
-    title_list=['粉土密实度分类',\
-                '粉土湿度分类',\
-                '黏性土状态分类',\
-                '土的分类',\
+    title_list=['粉土密实度分类',
+                '粉土湿度分类',
+                '黏性土状态分类',
+                '土的分类',
                 '备注']
     
     #classification result list
@@ -722,10 +722,10 @@ def MergedWorkbookClassification(list_xls_path,num_head_rows,num_head_columns):
         classification_note+=list_note
         
     #collect them into list
-    classification_list=[classification_e0,\
-                         classification_ω0,\
-                         classification_IL,\
-                         classification_GB,\
+    classification_list=[classification_e0,
+                         classification_ω0,
+                         classification_IL,
+                         classification_GB,
                          classification_note]
 
     #construct a map between title and classification result
