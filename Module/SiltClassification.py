@@ -181,7 +181,7 @@ Returns:
     None
 """  
 def ClassificationStatistics(map_title_classification,figures_output_folder):
-    
+
     for kk in range(len(map_title_classification)):
             
         data=list(map_title_classification.values())[kk]
@@ -198,9 +198,7 @@ def ClassificationStatistics(map_title_classification,figures_output_folder):
               
         #construct a dictionary as vote machine
         map_str_frequency=dict((this_valid_str,valid_str.count(this_valid_str)) for this_valid_str in valid_str)
-        
-    #        print(map_str_frequency)
-       
+            
         #frequency list
         str_frequency=list(map_str_frequency.values())
         
@@ -208,11 +206,13 @@ def ClassificationStatistics(map_title_classification,figures_output_folder):
         
         #plot histogram
         plt.barh(range(len(str_frequency)),str_frequency,tick_label=str_group)
-        
-        ax.xaxis.set_major_locator(MultipleLocator(int(np.ceil((max(str_frequency)-min(str_frequency))/20))))
+
+        if len(map_str_frequency)!=1:
+            
+            ax.xaxis.set_major_locator(MultipleLocator(int(np.ceil((max(str_frequency)-min(str_frequency))/20))))
     
         #set ticks
-        plt.tick_params(labelsize=12)
+        plt.tick_params(labelsize=15)
         
         #y label fonts
         for this_label in ax.get_xticklabels():
@@ -507,7 +507,7 @@ def WorkbookClassification(xls_path,num_head_rows,num_head_columns):
         classification_IL+=ClayeySiltStateClassification(IL_valid,num_head_rows)
         
     #collect them into list
-    classification_list=[classification_ω0,classification_e0,classification_IL]
+    classification_list=[classification_e0,classification_ω0,classification_IL]
 
     #construct a map between title and classification result
     map_title_classification=dict(zip(title_list,classification_list))
@@ -644,7 +644,7 @@ def MergedWorkbookClassification(list_xls_path,num_head_rows,num_head_columns):
         classification_IL+=ClayeySiltStateClassification(IL_valid,num_head_rows)
         
     #collect them into list
-    classification_list=[classification_ω0,classification_e0,classification_IL]
+    classification_list=[classification_e0,classification_ω0,classification_IL]
 
     #construct a map between title and classification result
     map_title_classification=dict(zip(title_list,classification_list))

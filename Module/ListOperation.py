@@ -102,28 +102,20 @@ def ListWithoutRepetition(which_list):
         index_valid.append(this_index)
     
     return ix_valid
+
 #------------------------------------------------------------------------------   
 """
-Calculate the difference between A and B
+Keep id with R
 
 Args:
-    set_A: list A
-    set_B: list B
+    which_list: list to be processed
 
 Returns:
-    difference list between A and B
-""" 
-def SetDiffernece(set_A,set_B):
-    
-    set_difference=[]
-    
-    for item in set_A:
-        
-        if item not in set_B:
-            
-            set_difference.append(item)
-            
-    return set_difference
+    None
+"""          
+def ListWithR(which_list):
+
+    return [ix for ix in range(len(which_list)) if 'R' in which_list[ix]]
 
 #------------------------------------------------------------------------------   
 """
@@ -148,6 +140,7 @@ def GBIndexCohesiveSilt(which_list):
         if '黏土' in which_list[ix]:
 
             ix_valid.append(ix)
+        
         
     return ix_valid
 #------------------------------------------------------------------------------   
@@ -175,3 +168,49 @@ def GBIndexFlourySoil(which_list):
             ix_valid.append(ix)
         
     return ix_valid
+
+#------------------------------------------------------------------------------   
+"""
+Calculate the difference between A and B
+
+Args:
+    set_A: list A
+    set_B: list B
+
+Returns:
+    difference list between A and B
+""" 
+def SetDiffernece(set_A,set_B):
+    
+    set_difference=[]
+    
+    for item in set_A:
+        
+        if item not in set_B:
+            
+            set_difference.append(item)
+            
+    return set_difference
+
+#------------------------------------------------------------------------------   
+"""
+Calculate the intersection between A and B
+
+Args:
+    set_A: list A
+    set_B: list B
+
+Returns:
+    intersection list between A and B
+""" 
+def SetIntersection(set_A,set_B):
+    
+    set_intersection=[]
+    
+    for item in set_A:
+        
+        if item in set_B:
+            
+            set_intersection.append(item)
+            
+    return set_intersection

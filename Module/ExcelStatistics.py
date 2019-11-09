@@ -114,13 +114,19 @@ def SheetsStatistics(xls_path,num_head_rows,num_head_columns,list_num_head_colum
         #no valid data
         columns_void=[]
             
+        #delete the repetition
+        index_valid=LO.ListWithoutRepetition(value_matrix[num_head_rows:,1])
+ 
+        print('-->Total Samples:',len(value_matrix[num_head_rows:,1]))
+        print('-->Valid Samples:',len(index_valid))
+        
         for k in range(num_head_columns,np.shape(value_matrix)[1]):
         
             #num of steps
             n_step=20
             
             #fetch the data
-            data=list(value_matrix[num_head_rows:,k])
+            data=LO.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
             
             #unit str
             unit=unit_list[k]
@@ -428,6 +434,9 @@ def WorkbookStatistics(xls_path,num_head_rows,num_head_columns):
     list_title=[]
     list_data=[]
     
+    #check if the repetition exists
+    total_id=[]
+        
     #traverse all sheets
     for this_sheet_name in list_sheet_names:
     
@@ -466,11 +475,14 @@ def WorkbookStatistics(xls_path,num_head_rows,num_head_columns):
 
         #delete the repetition
         index_valid=LO.ValidIndexList(value_matrix[num_head_rows:,1])
- 
+        
+        print('-->Total Samples:',len(value_matrix[num_head_rows:,1]))
         print('-->Valid Samples:',len(index_valid))
         
-        for k in range(num_head_columns,np.shape(value_matrix)[1]):
+        total_id+=(list(value_matrix[num_head_rows:,1]))
         
+        for k in range(num_head_columns,np.shape(value_matrix)[1]):
+            
             #num of steps
             n_step=20
             
@@ -486,7 +498,15 @@ def WorkbookStatistics(xls_path,num_head_rows,num_head_columns):
             #valid data
             list_data.append(LO.CustomIndexList(data,index_valid))
             list_title.append(title)
-   
+            
+    print('')
+    print('...')
+    print('......')
+    print('Workbook')
+    print('-->Total Samples:',len(total_id))
+    print('-->Valid Samples:',len(LO.ValidIndexList(total_id)))
+    print('')
+    
     #map between title and data
     map_title_data={}
     
@@ -810,6 +830,9 @@ def MergedWorkbookStatistics(list_xls_path,num_head_rows,num_head_columns):
     list_title=[]
     list_data=[]
     
+    #check if the repetition exists
+    total_id=[]
+    
     #traverse all sheets
     for channel in total_channels:
     
@@ -839,9 +862,12 @@ def MergedWorkbookStatistics(list_xls_path,num_head_rows,num_head_columns):
         #no valid data
         columns_void=[]
 
-        #delete the repetition
+        #delete the repetition and keep label R
         index_valid=LO.ListWithoutRepetition(value_matrix[num_head_rows:,1])
- 
+        
+        total_id+=(list(value_matrix[num_head_rows:,1]))
+        
+        print('-->Total Samples:',len(value_matrix[num_head_rows:,1]))
         print('-->Valid Samples:',len(index_valid))
         
         for k in range(num_head_columns,np.shape(value_matrix)[1]):
@@ -861,7 +887,15 @@ def MergedWorkbookStatistics(list_xls_path,num_head_rows,num_head_columns):
             #valid data
             list_data.append(LO.CustomIndexList(data,index_valid))
             list_title.append(title)
-   
+            
+    print('')
+    print('...')
+    print('......')
+    print('Merged Workbook')
+    print('-->Total Samples:',len(total_id))
+    print('-->Valid Samples:',len(LO.ListWithoutRepetition(total_id)))
+    print('')
+    
     #map between title and data
     map_title_data={}
     
