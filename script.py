@@ -11,7 +11,6 @@ Created on Mon Sep 30 20:43:10 2019
 
 from __init__ import *
 
-
 #merge xls
 list_merged_xls_name=['颗分.xls','颗分2.xls','颗分3.xls']
 

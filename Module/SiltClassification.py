@@ -24,6 +24,7 @@ from matplotlib.font_manager import FontProperties
 import HeadColumns as HC
 import ListOperation as LO
 import PathProcessing as PP
+import GrainPartition as GP
 
 #------------------------------------------------------------------------------
 """
@@ -45,6 +46,10 @@ def SiltCompactnessClassification(list_e0,num_head_rows=0):
         
         valid_data=float(this_data)
         
+        if np.isnan(valid_data):
+            
+            continue
+        
         if valid_data<0.75:
             
             classification_e0.append('密实')
@@ -59,7 +64,7 @@ def SiltCompactnessClassification(list_e0,num_head_rows=0):
             
         else:
             
-            classification_e0.append('')
+            classification_e0.append('其他')
             
     return classification_e0
 
@@ -83,6 +88,10 @@ def SiltMoistureClassification(list_ω0,num_head_rows=0):
         
         valid_data=float(this_data)
         
+        if np.isnan(valid_data):
+            
+            continue
+        
         if valid_data<20:
             
             classification_ω0.append('稍湿')
@@ -97,7 +106,7 @@ def SiltMoistureClassification(list_ω0,num_head_rows=0):
             
         else:
             
-            classification_ω0.append('')
+            classification_ω0.append('其他')
             
     return classification_ω0
 
@@ -121,6 +130,10 @@ def ClayeySiltStateClassification(list_IL,num_head_rows=0):
         
         valid_data=float(this_data)
         
+        if np.isnan(valid_data):
+            
+            continue
+        
         if valid_data<=0:
             
             classification_IL.append('坚硬')
@@ -143,7 +156,7 @@ def ClayeySiltStateClassification(list_IL,num_head_rows=0):
             
         else:
             
-            classification_IL.append('')
+            classification_IL.append('其他')
             
     return classification_IL
 
@@ -166,10 +179,72 @@ def List2FrequencyMap(which_list):
     
     for this_key in keys:
         
-        map_frequency[this_key]=which_list.conut(this_key)    
+        map_frequency[this_key]=which_list.count(this_key)    
     
     return map_frequency
- 
+    
+def TitleAndClassification2Table(map_title_classification,tables_output_folder):
+    
+    #delete blank list
+    title_list=list(map_title_classification.keys())
+    classification_list=list(map_title_classification.values())
+    
+    #frequency to save
+    list_frequency_map=[List2FrequencyMap(classification_list[ix]) for ix in range(len(title_list))]
+    
+    #construct new workbook   
+    new_workbook=xlwt.Workbook(encoding='utf-8') 
+    
+    #construct new sheet
+    new_sheet=new_workbook.add_sheet("总表")          
+          
+    #define the border style
+    borders = xlwt.Borders()
+    borders.left = 1
+    borders.right = 1
+    borders.top = 1
+    borders.bottom = 1
+    borders.bottom_colour=0x3A    
+     
+    style = xlwt.XFStyle()
+    style.borders = borders
+    
+    #instant row
+    row=0
+    
+    #title
+    for k in range(len(title_list)):
+        
+        new_sheet.write(row,0,title_list[k],style)
+        
+        row+=1
+        
+        new_sheet.write(row,0,'总量',style)
+        new_sheet.write(row,1,len(classification_list[k]),style)
+        
+        row+=1
+        
+    #        print(list_frequency_map[k])
+        
+        for kk in range(len(list_frequency_map[k])):
+            
+            if isinstance(list(list_frequency_map[k].keys())[kk],str):
+                
+                new_sheet.write(row,0,list(list_frequency_map[k].keys())[kk],style)
+                
+            else:
+                
+                new_sheet.write(row,0,'其他',style)
+                
+            new_sheet.write(row,1,list(list_frequency_map[k].values())[kk],style)
+            
+            row+=1
+            
+        row+=1
+            
+    new_workbook.save(tables_output_folder+'统计总表.xls')
+    
+
 #------------------------------------------------------------------------------
 """
 Classification result statistics figure
@@ -182,7 +257,9 @@ Returns:
     None
 """  
 def ClassificationStatistics(map_title_classification,figures_output_folder):
-
+    
+    plt.style.use('ggplot')
+    
     for kk in range(len(map_title_classification)):
             
         data=list(map_title_classification.values())[kk]
@@ -371,10 +448,15 @@ def SheetsClassification(xls_path,num_head_rows,num_head_columns,list_num_head_c
                              classification_IL,
                              classification_GB,
                              classification_note]
+        #frequency to save
+        list_frequency_map=[List2FrequencyMap(classification_list[ix]) for ix in range(len(title_list))]
         
-        #plus columns
-        num_columns_plus=map_sheet_names_num_head_columns[this_sheet_name]-num_head_columns
+        #construct new workbook   
+        new_workbook=xlwt.Workbook(encoding='utf-8') 
         
+        #construct new sheet
+        new_sheet=new_workbook.add_sheet("总表")          
+              
         #define the border style
         borders = xlwt.Borders()
         borders.left = 1
@@ -384,7 +466,45 @@ def SheetsClassification(xls_path,num_head_rows,num_head_columns,list_num_head_c
         borders.bottom_colour=0x3A    
          
         style = xlwt.XFStyle()
-        style.borders = borders 
+        style.borders = borders
+        
+        #instant row
+        row=0
+        
+        #title
+        for k in range(len(title_list)):
+            
+            new_sheet.write(row,0,title_list[k],style)
+            
+            row+=1
+            
+            new_sheet.write(row,0,'总量',style)
+            new_sheet.write(row,1,len(classification_list[k]),style)
+            
+            row+=1
+            
+#            print(list_frequency_map[k])
+            
+            for kk in range(len(list_frequency_map[k])):
+                
+                if isinstance(list(list_frequency_map[k].keys())[kk],str):
+                    
+                    new_sheet.write(row,0,list(list_frequency_map[k].keys())[kk],style)
+                    
+                else:
+                    
+                    new_sheet.write(row,0,'其他',style)
+                    
+                new_sheet.write(row,1,list(list_frequency_map[k].values())[kk],style)
+                
+                row+=1
+                
+            row+=1
+                
+        new_workbook.save(tables_output_folder+'统计总表.xls')
+    
+        #plus columns
+        num_columns_plus=map_sheet_names_num_head_columns[this_sheet_name]-num_head_columns
         
         #write table head
         for this_title in title_list:
@@ -414,12 +534,40 @@ def SheetsClassification(xls_path,num_head_rows,num_head_columns,list_num_head_c
         #save as
         new_workbook.save(tables_output_folder+'分类结果.xls')
         
+        #delete blank list
+        real_title_list=LO.CustomIndexList(title_list,LO.DeleteBlankList(classification_list))
+        real_classification_list=LO.CustomIndexList(classification_list,LO.DeleteBlankList(classification_list))
+        
+        #delete nan in classification list
+        new_classification_list=[]
+        
+        for this_classification in real_classification_list:
+            
+            new_classification=[]
+        
+            for item in this_classification:
+                
+                if not isinstance(item,str):
+                    
+                    if np.isnan(item):
+                        
+    #                    print('nan')
+                        
+                        continue
+                    
+                new_classification.append(item)
+                
+            new_classification_list.append(new_classification)
+            
         #construct a map between title and classification result
-        map_title_classification=dict(zip(title_list,classification_list))
+        map_title_classification=dict(zip(real_title_list,new_classification_list))
+        
+        #statistics result tables of classification
+        TitleAndClassification2Table(map_title_classification,tables_output_folder)
         
         #statistics result figures of classification
         ClassificationStatistics(map_title_classification,figures_output_folder)
-         
+       
 #------------------------------------------------------------------------------
 """
 Make statistics from all sheets in one excel
@@ -444,6 +592,7 @@ def WorkbookClassification(xls_path,num_head_rows,num_head_columns):
     workbook=xlrd.open_workbook(xls_path,formatting_info=True)
     
     #construct output folder path
+    tables_output_folder=xls_path.replace('.xls','').replace('input','output')+'\\分类\\'
     figures_output_folder=xls_path.replace('.xls','').replace('input','output')+'\\分类\\图\\总图\\'
     
     #generate output folder
@@ -564,10 +713,92 @@ def WorkbookClassification(xls_path,num_head_rows,num_head_columns):
                          classification_IL,
                          classification_GB,
                          classification_note]
+    #frequency to save
+    list_frequency_map=[List2FrequencyMap(classification_list[ix]) for ix in range(len(title_list))]
     
+    #construct new workbook   
+    new_workbook=xlwt.Workbook(encoding='utf-8') 
+    
+    #construct new sheet
+    new_sheet=new_workbook.add_sheet("总表")          
+          
+    #define the border style
+    borders = xlwt.Borders()
+    borders.left = 1
+    borders.right = 1
+    borders.top = 1
+    borders.bottom = 1
+    borders.bottom_colour=0x3A    
+     
+    style = xlwt.XFStyle()
+    style.borders = borders
+    
+    #instant row
+    row=0
+    
+    #title
+    for k in range(len(title_list)):
+        
+        new_sheet.write(row,0,title_list[k],style)
+        
+        row+=1
+        
+        new_sheet.write(row,0,'总量',style)
+        new_sheet.write(row,1,len(classification_list[k]),style)
+        
+        row+=1
+        
+#        print(list_frequency_map[k])
+        
+        for kk in range(len(list_frequency_map[k])):
+            
+            if isinstance(list(list_frequency_map[k].keys())[kk],str):
+                
+                new_sheet.write(row,0,list(list_frequency_map[k].keys())[kk],style)
+                
+            else:
+                
+                new_sheet.write(row,0,'其他',style)
+                
+            new_sheet.write(row,1,list(list_frequency_map[k].values())[kk],style)
+            
+            row+=1
+            
+        row+=1
+            
+    new_workbook.save(tables_output_folder+'统计总表.xls')
+    
+    #delete blank list
+    real_title_list=LO.CustomIndexList(title_list,LO.DeleteBlankList(classification_list))
+    real_classification_list=LO.CustomIndexList(classification_list,LO.DeleteBlankList(classification_list))
+    
+    #delete nan in classification list
+    new_classification_list=[]
+    
+    for this_classification in real_classification_list:
+        
+        new_classification=[]
+    
+        for item in this_classification:
+            
+            if not isinstance(item,str):
+                
+                if np.isnan(item):
+                    
+#                    print('nan')
+                    
+                    continue
+                
+            new_classification.append(item)
+            
+        new_classification_list.append(new_classification)
+        
     #construct a map between title and classification result
-    map_title_classification=dict(zip(title_list,classification_list))
-
+    map_title_classification=dict(zip(real_title_list,new_classification_list))
+    
+    #statistics result tables of classification
+    TitleAndClassification2Table(map_title_classification,tables_output_folder)
+    
     #statistics result figures of classification
     ClassificationStatistics(map_title_classification,figures_output_folder)
     
@@ -592,8 +823,6 @@ def MergedWorkbookClassification(list_xls_path,num_head_rows,num_head_columns):
     
     #construct output folder path
     tables_output_folder=list_xls_path[0].split('input')[0]+'output\\颗分汇总\\分类\\'
-    
-    #construct output folder path
     figures_output_folder=list_xls_path[0].split('input')[0]+'output\\颗分汇总\\分类\\图\\总图\\'
         
     #generate output folder
@@ -625,7 +854,11 @@ def MergedWorkbookClassification(list_xls_path,num_head_rows,num_head_columns):
                 '粉土湿度分类',
                 '黏性土状态分类',
                 '土的分类',
-                '备注']
+                '备注',
+                '砂类土分类（代号）',
+                '砾类土分类（代号）',
+                '砂类土分类（名称）',
+                '砾类土分类（名称）']
     
     #classification result list
     classification_ω0=[]
@@ -633,6 +866,10 @@ def MergedWorkbookClassification(list_xls_path,num_head_rows,num_head_columns):
     classification_IL=[]
     classification_GB=[]
     classification_note=[]
+    classification_S_type=[]
+    classification_G_type=[]
+    classification_S_code=[]
+    classification_G_code=[]
     
     #traverse all sheets
     for channel in total_channels:
@@ -648,7 +885,7 @@ def MergedWorkbookClassification(list_xls_path,num_head_rows,num_head_columns):
         value_matrix=channel.values
         
         #delete the repetition
-        index_valid=LO.ListWithoutRepetition(value_matrix[num_head_rows:,1])
+        index_valid=LO.ValidIndexList(value_matrix[num_head_rows:,1])
         
         print('-->Valid Samples:',len(index_valid))
         
@@ -695,7 +932,97 @@ def MergedWorkbookClassification(list_xls_path,num_head_rows,num_head_columns):
                 head_IL=this_head
                 
                 print('-->head:'+head_IL)
-
+        
+        #delete the repetition and remove label R
+        index_valid=LO.ListWithR(value_matrix[num_head_rows:,1])
+     
+        print('-->Total Samples:',len(value_matrix[num_head_rows:,1]))
+        print('-->Valid Samples:',len(index_valid))
+        
+        #partition index list
+        list_partition_index=[]
+        
+        for k in range(num_head_columns,np.shape(value_matrix)[1]):
+    
+            #title str
+            title=final_head_columns[k]
+            
+    #        print(k,title)
+        
+            if '颗' and '粒' and '分' and '析' in title:
+                
+                print('-->',title)
+                     
+                list_partition_index.append(k)
+            
+            if '不' and '均' and '匀' in title:
+                
+                print('-->',title)
+                
+                data_Cu=LO.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
+                
+            if '曲' and '率' in title:
+                
+                print('-->',title)
+                
+                data_Ce=LO.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
+                
+            if '分' and '类' in title:
+                
+                print('-->',title)
+                
+                data_GB=LO.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
+            
+    #    print(list_partition_index)
+        
+        #for partition
+        index_partition=LO.GBIndexPartition(data_GB)
+         
+        #matrix to contain grain partition proportion
+        data_partition=np.zeros((len(index_partition),len(list_partition_index)))
+        
+        column=0
+        
+        for this_index in list_partition_index:
+            
+            data_partition[:,column]=LO.CustomIndexList(list(value_matrix[num_head_rows:,this_index]),index_partition)
+        
+            column+=1
+        
+        #valid part
+        GB_partition=LO.CustomIndexList(data_GB,index_partition)
+        Cu_partition=LO.CustomIndexList(data_Cu,index_partition)
+        Ce_partition=LO.CustomIndexList(data_Ce,index_partition)
+        
+    #        len(index_valid)
+        
+        #classificaiotn result
+        S_classification_type=[]
+        G_classification_type=[]
+        S_classification_code=[]
+        G_classification_code=[]
+        
+        for kk in range(len(index_partition)):
+                  
+            #construct new object
+            this_grain=GP.grain()
+            
+            this_grain.silt_type=GB_partition[kk]
+            this_grain.InitMap(list(data_partition[kk,:]))   
+            
+            this_grain.Partition()
+            this_grain.Classification(Cu_partition[kk],Ce_partition[kk])
+            
+            if '砂' in this_grain.silt_type:
+                
+                S_classification_type.append(this_grain.classification_type)
+                S_classification_code.append(this_grain.classification_code)
+                
+            if '砾' in this_grain.silt_type:
+                
+                G_classification_type.append(this_grain.classification_type)
+                G_classification_code.append(this_grain.classification_code)
+            
         #filter floury soil
         index_floury_soil=LO.GBIndexFlourySoil(list_GB)
 
@@ -721,15 +1048,55 @@ def MergedWorkbookClassification(list_xls_path,num_head_rows,num_head_columns):
         #note
         classification_note+=list_note
         
+#        print(len(classification_GB),len(classification_note))
+        
+        #grain partition result
+        classification_S_type+=S_classification_type
+        classification_G_type+=G_classification_type
+        classification_S_code+=S_classification_code
+        classification_G_code+=G_classification_code
+        
     #collect them into list
     classification_list=[classification_e0,
                          classification_ω0,
                          classification_IL,
                          classification_GB,
-                         classification_note]
-
+                         classification_note,
+                         classification_S_type,
+                         classification_G_type,
+                         classification_S_code,
+                         classification_G_code]
+        
+    #delete blank list
+    real_title_list=LO.CustomIndexList(title_list,LO.DeleteBlankList(classification_list))
+    real_classification_list=LO.CustomIndexList(classification_list,LO.DeleteBlankList(classification_list))
+    
+    #delete nan in classification list
+    new_classification_list=[]
+    
+    for this_classification in real_classification_list:
+        
+        new_classification=[]
+    
+        for item in this_classification:
+            
+            if not isinstance(item,str):
+                
+                if np.isnan(item):
+                    
+#                    print('nan')
+                    
+                    continue
+                
+            new_classification.append(item)
+            
+        new_classification_list.append(new_classification)
+        
     #construct a map between title and classification result
-    map_title_classification=dict(zip(title_list,classification_list))
-
+    map_title_classification=dict(zip(real_title_list,new_classification_list))
+    
+    #statistics result tables of classification
+    TitleAndClassification2Table(map_title_classification,tables_output_folder)
+    
     #statistics result figures of classification
     ClassificationStatistics(map_title_classification,figures_output_folder)

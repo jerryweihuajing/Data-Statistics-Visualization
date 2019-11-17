@@ -171,6 +171,32 @@ def GBIndexFlourySoil(which_list):
 
 #------------------------------------------------------------------------------   
 """
+Filter for grain partition
+
+Args:
+    which_list: GB list to be processed
+
+Returns:
+    None
+"""          
+def GBIndexPartition(which_list):
+    
+    ix_valid=[]
+    
+    for ix in range(len(which_list)):
+
+        if not isinstance(which_list[ix],str):
+            
+            continue
+        
+        if '砂' or '砾' in which_list[ix]:
+            
+            ix_valid.append(ix)
+        
+    return ix_valid
+
+#------------------------------------------------------------------------------   
+"""
 Calculate the difference between A and B
 
 Args:
@@ -214,3 +240,17 @@ def SetIntersection(set_A,set_B):
             set_intersection.append(item)
             
     return set_intersection
+
+#------------------------------------------------------------------------------   
+"""
+Delete blank list in a list
+
+Args:
+    which_list: list consisting of list
+
+Returns:
+    intersection list between A and B
+"""  
+def DeleteBlankList(which_list):
+
+    return [which_list.index(item) for item in which_list if item!=[]]
