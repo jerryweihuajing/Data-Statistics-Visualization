@@ -37,11 +37,13 @@ Returns:
 """
 def StandardDeviation(data):
     
-    square_of_sum=Average(data)**2
-    
     n=len(data)
     
-    return np.sqrt(np.sum([item**2-square_of_sum/n for item in data])/(n-1))
+    A=np.sum([item**2 for item in data])
+    
+    B=np.sum(data)**2/n
+    
+    return np.sqrt((A-B)/(n-1))
 
 #------------------------------------------------------------------------------
 """

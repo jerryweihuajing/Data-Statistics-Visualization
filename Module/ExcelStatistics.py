@@ -129,8 +129,8 @@ def SheetsStatistics(xls_path,num_head_rows,num_head_columns,list_num_head_colum
             data=LO.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
             
             #unit str
-            unit=unit_list[k]
-            
+            unit='('+unit_list[k]+')'
+
             #title str
             title=final_head_columns[k]
             
@@ -153,7 +153,7 @@ def SheetsStatistics(xls_path,num_head_rows,num_head_columns,list_num_head_colum
             #expire nan
             valid_data=[float(this_data) for this_data in data if not np.isnan(float(this_data))]
             
-            print(k,title)
+            print(k,title,unit)
         
             if valid_data==[]:
                 
@@ -383,6 +383,7 @@ def WorkbookStatistics(xls_path,num_head_rows,num_head_columns):
     '''title and data throughout whole workbook'''
     list_title=[]
     list_data=[]
+    list_unit=[]
     
     #check if the repetition exists
     total_id=[]
@@ -448,6 +449,7 @@ def WorkbookStatistics(xls_path,num_head_rows,num_head_columns):
             #valid data
             list_data.append(LO.CustomIndexList(data,index_valid))
             list_title.append(title)
+            list_unit.append(unit)
             
     print('')
     print('...')
@@ -481,6 +483,7 @@ def WorkbookStatistics(xls_path,num_head_rows,num_head_columns):
         
         title=list(map_title_data.keys())[k]
         data=list(map_title_data.values())[k]
+        unit='('+list_unit[k]+')'
         
         #expire particular conditions
         if '分类' in title or '备' in title or '注' in title:
@@ -492,7 +495,7 @@ def WorkbookStatistics(xls_path,num_head_rows,num_head_columns):
         #expire nan
         valid_data=[float(this_data) for this_data in data if not np.isnan(float(this_data))]
         
-        print(k,title)
+        print(k,title,unit)
     
         if valid_data==[]:
             
@@ -730,6 +733,7 @@ def MergedWorkbookStatistics(list_xls_path,num_head_rows,num_head_columns):
     '''title and data throughout whole workbook'''
     list_title=[]
     list_data=[]
+    list_unit=[]
     
     #check if the repetition exists
     total_id=[]
@@ -788,6 +792,7 @@ def MergedWorkbookStatistics(list_xls_path,num_head_rows,num_head_columns):
             #valid data
             list_data.append(LO.CustomIndexList(data,index_valid))
             list_title.append(title)
+            list_unit.append(unit)
             
     print('')
     print('...')
@@ -821,6 +826,7 @@ def MergedWorkbookStatistics(list_xls_path,num_head_rows,num_head_columns):
         
         title=list(map_title_data.keys())[k]
         data=list(map_title_data.values())[k]
+        unit='('+list_unit[k]+')'
         
         #expire particular conditions
         if '分类' in title or '备' in title or '注' in title:
@@ -832,7 +838,7 @@ def MergedWorkbookStatistics(list_xls_path,num_head_rows,num_head_columns):
         #expire nan
         valid_data=[float(this_data) for this_data in data if not np.isnan(float(this_data))]
         
-        print(k,title)
+        print(k,title,unit)
     
         if valid_data==[]:
             
