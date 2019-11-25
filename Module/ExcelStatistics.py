@@ -643,7 +643,7 @@ def WorkbookStatistics(xls_path,num_head_rows,num_head_columns):
     
     #title
     new_sheet.write(0,0,'特征值',style)
-#    print(statistic)
+
     #header
     for kk in range(len(map_title_data)):
         
@@ -678,7 +678,6 @@ def WorkbookStatistics(xls_path,num_head_rows,num_head_columns):
                     new_sheet.write(j+plus,i+plus,float(statistic[j][i]),style)
        
     new_workbook.save(tables_output_folder+'统计总表.xls')
-
 
 #------------------------------------------------------------------------------
 """
