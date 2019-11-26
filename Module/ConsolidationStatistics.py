@@ -63,11 +63,15 @@ Calculate Pc external interface
 Args:
     P: pressure
     e: void ratio
-
+    hole_id: id of hole
+    show: whether to show
+    
 Returns:
     valid list
 """ 
-def CalculatePc(P,e):
+def CalculatePc(P,e,hole_id,show=False):
+    
+    fig,ax=plt.subplots(figsize=(10,6))
     
     #delete the first element
     valid_P=P[1:]
@@ -83,8 +87,48 @@ def CalculatePc(P,e):
         
         return None
     
-    return PC.CalculatePcAndCc(PC.PreProcess(valid_e,valid_logP))    
+    final_Pc=PC.CalculatePcAndCc(PC.PreProcess(valid_e,valid_logP,show=show),show=show)  
+    
+    #set ticks
+    plt.tick_params(labelsize=12)
+    labels = ax.get_xticklabels() + ax.get_yticklabels()
+    
+    #title font
+    annotation_font=FontProperties(fname=r"C:\Windows\Fonts\GILI____.ttf",size=16)
+    
+    #annotation font
+    title_font=FontProperties(fname="C:\Windows\Fonts\GIL_____.ttf",size=20)
+    
+    plt.title('ID:'+str(hole_id),FontProperties=title_font)  
+            
+    plt.xlabel('logP',FontProperties=annotation_font)
+    plt.ylabel('e',FontProperties=annotation_font)
+    
+    #label fonts
+    for this_label in labels:
+        
+        this_label.set_fontname('Times New Roman')
+        
+    #set locator
+    ax.yaxis.set_major_locator(MultipleLocator((max(valid_e)-min(valid_e))/10))
+    ax.yaxis.set_minor_locator(MultipleLocator((max(valid_e)-min(valid_e))/20))
+    ax.xaxis.set_major_locator(MultipleLocator((max(valid_logP)-min(valid_logP))/10))
+    ax.xaxis.set_minor_locator(MultipleLocator((max(valid_logP)-min(valid_logP))/20))
+    
+    #show the grid
+    plt.grid()
+    plt.show()
+    
+    return final_Pc
+ 
+P=[0,50,100,200,400,800,1200]
+e=[0.711,0.699,0.692,0.680,0.662,0.640,0.618]
 
+
+pc=CalculatePc(P,e,'GC001-1',show=True)
+
+
+'''
 print('')
 print('--Consolidation Statistics')
 
@@ -259,3 +303,4 @@ for this_label in labels:
     
 plt.savefig(figures_output_folder+'Pc.png')
 plt.close()
+'''

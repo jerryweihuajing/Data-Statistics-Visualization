@@ -20,6 +20,9 @@ Created on Wed Apr 24 22:13:09 2019
 import copy as cp
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
+
+from scipy.linalg import solve
 
 #------------------------------------------------------------------------------
 """
@@ -530,35 +533,48 @@ def CalculatePcAndCc(which_x_y,which_M=10,show=False):
     A=np.array([[1,-k_PQ],[1,-k_MN]])  
     B=np.array([pos_P[1]-k_PQ*pos_P[0],pos_M[1]-k_MN*pos_M[0]])
    
-    from scipy.linalg import solve
-    
     #Computing intersection
-    Pc=solve(A,B)[1]
-    Cc=k_MN
+    Pc=10**solve(A,B)[1]
+#    Cc=k_MN
+    
+    '''coordinate of point Q'''
+    pos_Q=[solve(A,B)[1],solve(A,B)[0]]
+    
+    '''len_PQ'''
+    len_PQ=Distance(pos_P,pos_Q)
+    
+    '''len_MN'''
+    len_MQ=Distance(pos_M,pos_Q)
     
 #    print('Cc=%.3f'%Cc)
 #    print('Pc=%.3f'%Pc)
     
+    #annotation font
+    annotation_font=fm.FontProperties(fname="C:\Windows\Fonts\GIL_____.ttf",size=16)
+    
     #show or not
     if show:
         
-        plt.annotate('Cc=%.3f'%Cc+'\n'+'Pc=%.3f'%Pc,
-                     xy=(solve(A,B)[1],solve(A,B)[0]),
-                     xytext=(0.9*solve(A,B)[1],0.9*solve(A,B)[0]),
-                     weight='bold',color='aqua',
+        plt.annotate('Pc=%dkPa'%int(Pc),
+                     xy=(pos_Q[0],pos_Q[1]),
+                     xytext=(0.95*pos_Q[0],0.95*pos_Q[1]),
+                     weight='bold',color='k',
                      arrowprops=dict(arrowstyle='-|>',
-                     connectionstyle='arc3',color='r'),\
-                     bbox=dict(boxstyle='round,pad=0.6', fc='yellow', ec='k',lw=1 ,alpha=0.4))
+                     connectionstyle='arc3',color='r'),
+                     bbox=dict(boxstyle='round,pad=0.6', fc='gray', ec='k',lw=1 ,alpha=0.4),
+                     fontproperties=annotation_font)
             
         '''point O error!'''
 #        plt.scatter(pos_O[0],pos_O[1],color='g')
 #        plt.scatter(pos_P[0],pos_P[1],color='r')
-        
+           
 #        LinePlot(pos_P,k_OP,0.2,'k','center') #OP        
-        LinePlot(pos_P,k_PS,0.5,'k','start') #PS
-        LinePlot(pos_P,k_PD,0.5,'k','start') #PD
-        LinePlot(pos_P,k_PQ,0.5,'r','start') #PQ
-        LinePlot(pos_M,k_MN,0.5,'b','end') #MN
+        LinePlot(pos_P,k_PS,len_PQ*1.5,'k','start') #PS
+        LinePlot(pos_P,k_PD,len_PQ*1.5,'k','start') #PD
+        LinePlot(pos_P,k_PQ,len_PQ*1.5,'r','start') #PQ
+        LinePlot(pos_M,k_MN,len_MQ*1.2,'b','end') #MN
         
-    return 10**Pc
+        plt.scatter(pos_Q[0],pos_Q[1],color='aqua')
+        
+    return Pc
      
