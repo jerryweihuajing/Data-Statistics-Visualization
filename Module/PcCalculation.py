@@ -563,7 +563,7 @@ def CalculatePcAndCc(which_x_y,which_M=10,show=False):
                      connectionstyle='arc3',color='r'),
                      bbox=dict(boxstyle='round,pad=0.6', fc='gray', ec='k',lw=1 ,alpha=0.4),
                      fontproperties=annotation_font)
-            
+                     
         '''point O error!'''
 #        plt.scatter(pos_O[0],pos_O[1],color='g')
 #        plt.scatter(pos_P[0],pos_P[1],color='r')

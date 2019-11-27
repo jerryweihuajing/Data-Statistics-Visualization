@@ -15,6 +15,7 @@ import pandas as pd
 import HeadColumns as HC
 import PcCalculation as PC
 import ListOperation as LO
+import PathProcessing as PP
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -64,15 +65,16 @@ Args:
     P: pressure
     e: void ratio
     hole_id: id of hole
+    start_depth: start depth of hole
+    end_depth: end depth of hole
+    output_folder: output folder of figures
     show: whether to show
     
 Returns:
     valid list
 """ 
-def CalculatePc(P,e,hole_id,show=False):
-    
-    fig,ax=plt.subplots(figsize=(10,6))
-    
+def CalculatePc(P,e,hole_id,start_depth,end_depth,output_folder,show=False):
+ 
     #delete the first element
     valid_P=P[1:]
     valid_e=e[1:]
@@ -86,6 +88,8 @@ def CalculatePc(P,e,hole_id,show=False):
     if PC.CalculatePcAndCc(PC.PreProcess(valid_e,valid_logP))>max(P):
         
         return None
+    
+    fig,ax=plt.subplots(figsize=(10,6))
     
     final_Pc=PC.CalculatePcAndCc(PC.PreProcess(valid_e,valid_logP,show=show),show=show)  
     
@@ -109,39 +113,65 @@ def CalculatePc(P,e,hole_id,show=False):
         
         this_label.set_fontname('Times New Roman')
         
+    #tick step
+    x_major_step=(max(valid_logP)-min(valid_logP))/10
+    x_minor_step=(max(valid_logP)-min(valid_logP))/20
+    y_major_step=(max(valid_e)-min(valid_e))/10
+    y_minor_step=(max(valid_e)-min(valid_e))/20
+    
     #set locator
-    ax.yaxis.set_major_locator(MultipleLocator((max(valid_e)-min(valid_e))/10))
-    ax.yaxis.set_minor_locator(MultipleLocator((max(valid_e)-min(valid_e))/20))
-    ax.xaxis.set_major_locator(MultipleLocator((max(valid_logP)-min(valid_logP))/10))
-    ax.xaxis.set_minor_locator(MultipleLocator((max(valid_logP)-min(valid_logP))/20))
+    ax.xaxis.set_major_locator(MultipleLocator(x_major_step))
+    ax.xaxis.set_minor_locator(MultipleLocator(x_minor_step))
+    ax.yaxis.set_major_locator(MultipleLocator(y_major_step))
+    ax.yaxis.set_minor_locator(MultipleLocator(y_minor_step))
+    
+    #add depth
+    plt.text(np.average(valid_logP),max(valid_e),
+             'Start Depth:'+str(start_depth)+'m End Depth:'+str(end_depth)+'m',
+             FontProperties=annotation_font)
     
     #show the grid
     plt.grid()
     plt.show()
     
+    #save the fig
+    plt.savefig(output_folder+str(hole_id)+'.png')   
+    plt.close()
+    
     return final_Pc
  
+path=r'C:\Users\whj\Desktop\fig\\'
+
 P=[0,50,100,200,400,800,1200]
 e=[0.711,0.699,0.692,0.680,0.662,0.640,0.618]
 
-
-pc=CalculatePc(P,e,'GC001-1',show=True)
-
+'''position of Pc annotation'''
+pc=CalculatePc(P,e,'GC001-1',1.2,3.4,path,show=True)
 
 '''
 print('')
 print('--Consolidation Statistics')
 
-plt.style.use('ggplot')
+#plt.style.use('ggplot')
 
+#construct output folder path
+figures_output_folder=xls_path.replace('.xls','').replace('input','output')+'\\统计\\图\\'
+
+#generate output folder
+PP.GenerateFolder(figures_output_folder+'Pc\\')
+    
 #open the excel sheet to be operated on
 #formatting_info: keep the header format
 workbook=xlrd.open_workbook(xls_path,formatting_info=True)
 
 #construct map between sheet names and head rows
 list_sheet_names=list(workbook.sheet_names())
- 
+
+#data throughout workbook 
 Pc_workbook=[]
+hole_id_worbook=[]
+start_depth_workbook=[]
+end_depth_workbook=[]
 
 #traverse all sheets
 for this_sheet_name in list_sheet_names:
@@ -161,7 +191,10 @@ for this_sheet_name in list_sheet_names:
     
     #all info of dataframe
     value_matrix=channel.values
-      
+    
+    #delete the repetition
+    index_valid=LO.ValidIndexList(value_matrix[num_head_rows:,1])  
+    
     #fetch the id of P and e
     index_e=[]
     index_e_high=[]
@@ -170,18 +203,23 @@ for this_sheet_name in list_sheet_names:
     P=[]
     P_high=[]
     
-    #delete the repetition
-    index_valid=LO.ValidIndexList(value_matrix[num_head_rows:,1])
-        
+    #hole id
+    list_hole_id=LO.CustomIndexList(list(value_matrix[num_head_rows:,1]),index_valid)
+    
+    #start depth
+    list_start_depth=LO.CustomIndexList(list(value_matrix[num_head_rows:,2]),index_valid)
+    
+    #end depth
+    list_end_depth=LO.CustomIndexList(list(value_matrix[num_head_rows:,3]),index_valid)
+
     for k in range(num_head_columns,np.shape(value_matrix)[1]):
         
         #title str
         title=final_head_columns[k] 
-        
+
         if '各级压力下的孔隙比' in title and '高压固结' not in title:
             
             print(k,title)
-#            print(title.strip().split(' ')[1])
             
             index_e.append(k)
             P.append(float(title.strip().split(' ')[1]))
@@ -189,7 +227,6 @@ for this_sheet_name in list_sheet_names:
         if '各级压力下的孔隙比' in title and '高压固结' in title:
             
             print(k,title)
-#            print(title.strip().split(' ')[1])
             
             index_e_high.append(k)
             P_high.append(float(title.strip().split(' ')[1]))
@@ -197,7 +234,7 @@ for this_sheet_name in list_sheet_names:
     #matrix to contain grain partition proportion
     data_e=np.zeros((len(index_valid),len(index_e)))
     data_e_high=np.zeros((len(index_valid),len(index_e_high)))
-        
+           
     column=0
         
     for this_index in index_e:
@@ -224,8 +261,18 @@ for this_sheet_name in list_sheet_names:
         this_e=LO.CustomIndexList(list(data_e[i]),expire_nan_index_list)
         this_P=LO.CustomIndexList(P,expire_nan_index_list)
 
-        Pc_normal.append(CalculatePc(this_P,this_e))
+        this_hole_id=list_hole_id[i]
+        this_start_depth=list_start_depth[i]
+        this_end_depth=list_end_depth[i]
         
+        Pc_normal.append(CalculatePc(this_P,
+                                     this_e,
+                                     this_hole_id,
+                                     this_start_depth,
+                                     this_end_depth,
+                                     figures_output_folder+'Pc\\',
+                                     show=True))
+    
     Pc_high_pressure=[]
     
     #high pressure
@@ -236,7 +283,17 @@ for this_sheet_name in list_sheet_names:
         this_e=LO.CustomIndexList(list(data_e_high[i]),expire_nan_index_list)
         this_P=LO.CustomIndexList(P_high,expire_nan_index_list)
         
-        Pc_high_pressure.append(CalculatePc(this_P,this_e))
+        this_hole_id=list_hole_id[i]
+        this_start_depth=list_start_depth[i]
+        this_end_depth=list_end_depth[i]
+        
+        Pc_high_pressure.append(CalculatePc(this_P,
+                                            this_e,
+                                            this_hole_id,
+                                            this_start_depth,
+                                            this_end_depth,
+                                            figures_output_folder+'Pc\\',
+                                            show=True))
         
     Pc_sheet=[]
     
@@ -272,9 +329,6 @@ plt.title('Pc频数分布直方图\n样本总量:'+str(int(len(Pc_workbook))),
           FontProperties=title_font)  
 
 plt.xlabel('Pc(kPa)',FontProperties=label_font)
-
-#construct output folder path
-figures_output_folder=xls_path.replace('.xls','').replace('input','output')+'\\统计\\图\\'
     
 #list of frequency
 frequency=[0]*(len(group)-1)
