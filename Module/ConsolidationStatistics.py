@@ -22,41 +22,7 @@ import matplotlib.pyplot as plt
 
 from matplotlib.pyplot import MultipleLocator
 from matplotlib.font_manager import FontProperties
-
-#------------------------------------------------------------------------------        
-"""
-Delete nan in a list and return a index list
-
-Args:
-    which_array: array to be processed
-
-Returns:
-    valid list
-""" 
-def ExpireNanIndexList(which_array):
-    
-    valid_index=[]
-    
-    #List form
-    which_list=list(which_array)
-    
-    this_index=0
-    
-    for item in which_list:
         
-        if not np.isnan(item):
-            
-            valid_index.append(this_index)
-            
-        this_index+=1
-        
-    return valid_index
-            
-    
-xls_path=r'C:\魏华敬\GitHub\DataStatistics\Data\input\土工试验54个.xls'
-
-num_head_rows,num_head_columns=3,2
-
 #------------------------------------------------------------------------------        
 """
 Calculate Pc external interface
@@ -85,13 +51,13 @@ def CalculatePc(P,e,hole_id,start_depth,end_depth,output_folder,show=False):
     
     valid_logP=[np.log10(item) for item in valid_P]
     
-    if PC.CalculatePcAndCc(PC.PreProcess(valid_e,valid_logP))>max(P):
+    if PC.CalculatePcAndCc(valid_logP,valid_e)>max(P):
         
         return None
     
     fig,ax=plt.subplots(figsize=(10,6))
     
-    final_Pc=PC.CalculatePcAndCc(PC.PreProcess(valid_e,valid_logP,show=show),show=show)  
+    final_Pc=PC.CalculatePcAndCc(valid_logP,valid_e,show=show)  
     
     #set ticks
     plt.tick_params(labelsize=12)
@@ -105,7 +71,7 @@ def CalculatePc(P,e,hole_id,start_depth,end_depth,output_folder,show=False):
     
     plt.title('ID:'+str(hole_id),FontProperties=title_font)  
             
-    plt.xlabel('logP',FontProperties=annotation_font)
+    plt.xlabel('lgP',FontProperties=annotation_font)
     plt.ylabel('e',FontProperties=annotation_font)
     
     #label fonts
@@ -134,227 +100,284 @@ def CalculatePc(P,e,hole_id,start_depth,end_depth,output_folder,show=False):
     plt.grid()
     plt.show()
     
-    #save the fig
+    if final_Pc<100:
+        
+        output_folder+='0-100\\'
+    
+    elif final_Pc<200:
+        
+        output_folder+='100-200\\'
+    
+    elif final_Pc<400:
+        
+        output_folder+='200-400\\'
+        
+    elif final_Pc<800:
+        
+        output_folder+='400-800\\'
+        
+    elif final_Pc<1600:
+        
+        output_folder+='800-1600\\'
+        
+    else:
+        
+        output_folder+='1600-3200\\'
+        
+    #save the fig    
     plt.savefig(output_folder+str(hole_id)+'.png')   
     plt.close()
     
     return final_Pc
  
-path=r'C:\Users\whj\Desktop\fig\\'
+#------------------------------------------------------------------------------
+"""
+Make consolidation calculation from one excel
 
-P=[0,50,100,200,400,800,1200]
-e=[0.711,0.699,0.692,0.680,0.662,0.640,0.618]
+Args:
+    xls_path: path of excel to be processed
+    num_head_rows: top rows
+    num_head_columns: left columns
 
-'''position of Pc annotation'''
-pc=CalculatePc(P,e,'GC001-1',1.2,3.4,path,show=True)
-
-'''
-print('')
-print('--Consolidation Statistics')
-
-#plt.style.use('ggplot')
-
-#construct output folder path
-figures_output_folder=xls_path.replace('.xls','').replace('input','output')+'\\统计\\图\\'
-
-#generate output folder
-PP.GenerateFolder(figures_output_folder+'Pc\\')
+Returns:
+    None
+"""
+def WorkbookCondolidation(xls_path,num_head_rows,num_head_columns):
     
-#open the excel sheet to be operated on
-#formatting_info: keep the header format
-workbook=xlrd.open_workbook(xls_path,formatting_info=True)
-
-#construct map between sheet names and head rows
-list_sheet_names=list(workbook.sheet_names())
-
-#data throughout workbook 
-Pc_workbook=[]
-hole_id_worbook=[]
-start_depth_workbook=[]
-end_depth_workbook=[]
-
-#traverse all sheets
-for this_sheet_name in list_sheet_names:
-
     print('')
-    print('...')
-    print('......')
-    print('->sheet name:',this_sheet_name)
-    print('')
+    print('--Consolidation Calculation')
     
-    #Data Frame object
-    channel=pd.read_excel(xls_path,sheet_name=this_sheet_name)
+    #plt.style.use('ggplot')
     
-    final_head_columns,unit_list=HC.HeadColumnsGeneration(channel,num_head_rows)
+    #construct output folder path
+    figures_output_folder=xls_path.replace('.xls','').replace('input','output')+'\\'
     
-    #print(final_head_columns)
+    #generate output folder
+    PP.GenerateFolder(figures_output_folder+'Pc\\正常\\')    
+    PP.GenerateFolder(figures_output_folder+'Pc\\高压\\')  
     
-    #all info of dataframe
-    value_matrix=channel.values
+    list_threshold=['0-100','100-200','200-400','400-800','800-1600','1600-3200']
     
-    #delete the repetition
-    index_valid=LO.ValidIndexList(value_matrix[num_head_rows:,1])  
+    for this_folder in [figures_output_folder+'Pc\\正常\\',figures_output_folder+'Pc\\高压\\']:
+        
+        for this_threshold in list_threshold:
+            
+            PP.GenerateFolder(this_folder+this_threshold+'\\')
     
-    #fetch the id of P and e
-    index_e=[]
-    index_e_high=[]
+    #open the excel sheet to be operated on
+    #formatting_info: keep the header format
+    workbook=xlrd.open_workbook(xls_path,formatting_info=True)
     
-    #pressure
-    P=[]
-    P_high=[]
+    #construct map between sheet names and head rows
+    list_sheet_names=list(workbook.sheet_names())
     
-    #hole id
-    list_hole_id=LO.CustomIndexList(list(value_matrix[num_head_rows:,1]),index_valid)
+    #data throughout workbook 
+    Pc_normal_workbook=[]
+    Pc_high_pressure_workbook=[]
     
-    #start depth
-    list_start_depth=LO.CustomIndexList(list(value_matrix[num_head_rows:,2]),index_valid)
+    #traverse all sheets
+    for this_sheet_name in list_sheet_names:
     
-    #end depth
-    list_end_depth=LO.CustomIndexList(list(value_matrix[num_head_rows:,3]),index_valid)
+        print('')
+        print('...')
+        print('......')
+        print('->sheet name:',this_sheet_name)
+        print('')
+        
+        #Data Frame object
+        channel=pd.read_excel(xls_path,sheet_name=this_sheet_name)
+        
+        final_head_columns,unit_list=HC.HeadColumnsGeneration(channel,num_head_rows)
+        
+        #print(final_head_columns)
+        
+        #all info of dataframe
+        value_matrix=channel.values
+        
+        #delete the repetition
+        index_valid=LO.ValidIndexList(value_matrix[num_head_rows:,1])  
+        
+        #fetch the id of P and e
+        index_e=[]
+        index_e_high=[]
+        
+        #pressure
+        P=[]
+        P_high=[]
+        
+        #hole id
+        list_hole_id=LO.CustomIndexList(list(value_matrix[num_head_rows:,1]),index_valid)
+        
+        #start depth
+        list_start_depth=LO.CustomIndexList(list(value_matrix[num_head_rows:,2]),index_valid)
+        
+        #end depth
+        list_end_depth=LO.CustomIndexList(list(value_matrix[num_head_rows:,3]),index_valid)
+    
+        for k in range(num_head_columns,np.shape(value_matrix)[1]):
+            
+            #title str
+            title=final_head_columns[k] 
+    
+            if '各级压力下的孔隙比' in title and '高压固结' not in title:
+                
+                print(k,title)
+                
+                index_e.append(k)
+                P.append(float(title.strip().split(' ')[1]))
+                
+            if '各级压力下的孔隙比' in title and '高压固结' in title:
+                
+                print(k,title)
+                
+                index_e_high.append(k)
+                P_high.append(float(title.strip().split(' ')[1]))
+                
+        #matrix to contain grain partition proportion
+        data_e=np.zeros((len(index_valid),len(index_e)))
+        data_e_high=np.zeros((len(index_valid),len(index_e_high)))
+               
+        column=0
+            
+        for this_index in index_e:
+            
+            data_e[:,column]=LO.CustomIndexList(list(value_matrix[num_head_rows:,this_index]),index_valid)
+        
+            column+=1
+       
+        column=0
+        
+        for this_index in index_e_high:
+            
+            data_e_high[:,column]=LO.CustomIndexList(list(value_matrix[num_head_rows:,this_index]),index_valid)
+        
+            column+=1
+            
+        Pc_normal=[]
+        
+        #normal
+        for i in range(np.shape(data_e)[0]):
+            
+            expire_nan_index_list=LO.ExpireNanIndexList(data_e[i])
+        
+            this_e=LO.CustomIndexList(list(data_e[i]),expire_nan_index_list)
+            this_P=LO.CustomIndexList(P,expire_nan_index_list)
+    
+            this_hole_id=list_hole_id[i]
+            this_start_depth=list_start_depth[i]
+            this_end_depth=list_end_depth[i]
+            
+            Pc_normal.append(CalculatePc(this_P,
+                                         this_e,
+                                         this_hole_id,
+                                         this_start_depth,
+                                         this_end_depth,
+                                         figures_output_folder+'Pc\\正常\\',
+                                         show=True))
+        
+        Pc_high_pressure=[]
+        
+        #high pressure
+        for i in range(np.shape(data_e_high)[0]):
+            
+            expire_nan_index_list=LO.ExpireNanIndexList(data_e_high[i])
+        
+            this_e=LO.CustomIndexList(list(data_e_high[i]),expire_nan_index_list)
+            this_P=LO.CustomIndexList(P_high,expire_nan_index_list)
+            
+            this_hole_id=list_hole_id[i]
+            this_start_depth=list_start_depth[i]
+            this_end_depth=list_end_depth[i]
+            
+            Pc_high_pressure.append(CalculatePc(this_P,
+                                                this_e,
+                                                this_hole_id,
+                                                this_start_depth,
+                                                this_end_depth,
+                                                figures_output_folder+'Pc\\高压\\',
+                                                show=True))
+            
+        Pc_normal_sheet=[]
+        Pc_high_pressure_sheet=[]
+        
+        for j in range(len(index_valid)):
+            
+    #        print(Pc_normal[j],Pc_high_pressure[j])
+            
+            if Pc_normal[j] is None and Pc_high_pressure[j] is None:
+                
+                continue
+            
+            if Pc_normal[j] is not None:
+                
+                 Pc_normal_sheet.append(Pc_normal[j])
+                
+            if Pc_high_pressure[j] is not None:
+                
+                Pc_high_pressure_sheet.append(Pc_high_pressure[j])
+         
+        Pc_normal_workbook+=Pc_normal_sheet
+        Pc_high_pressure_workbook+=Pc_high_pressure_sheet
+            
+    fig,ax=plt.subplots(figsize=(8,8))
+    
+    #for iteration
+    list_Pc_worbook=[Pc_normal_workbook,Pc_high_pressure_workbook]
+    list_title=['','高压固结']
+    list_folder_name=['正常\\','高压\\']
+    
+    for k in range(len(list_title)):
+        
+        #Pc, list title, folder name
+        Pc_workbook=list_Pc_worbook[k]
+        Pc_title=list_title[k]
+        Pc_folder_name=list_folder_name[k]
+        
+        group=np.linspace(min(Pc_workbook),max(Pc_workbook),20)
+        
+        title_font = FontProperties(fname=r"C:\Windows\Fonts\simhei.ttf", size=16)  
+        label_font = FontProperties(fname=r"C:\Windows\Fonts\simhei.ttf", size=13) 
+                
+        #plot histogram
+        plt.hist(Pc_workbook, group, histtype='bar', rwidth=0.95)
+         
+        plt.title(Pc_title+'Pc频数分布直方图\n样本总量:'+str(int(len(Pc_workbook))),
+                  FontProperties=title_font)  
+        
+        plt.xlabel('Pc(kPa)',FontProperties=label_font)
+            
+        #list of frequency
+        frequency=[0]*(len(group)-1)
+        
+        #mannual histogram
+        for this_valid_data in Pc_workbook:
+        
+            for g in range(len(group)-1):
+                
+                if group[g]<=this_valid_data<=group[g+1]:
+                    
+                    frequency[g]+=1
+                    
+                    break
+         
+        ax.yaxis.set_major_locator(MultipleLocator(int(np.ceil((max(frequency)-min(frequency))/20))))
+        
+        #set ticks
+        plt.tick_params(labelsize=15)
+        labels = ax.get_xticklabels() + ax.get_yticklabels()
+        
+        #label fonts
+        for this_label in labels:
+            
+            this_label.set_fontname('Times New Roman')
+            
+        plt.savefig(figures_output_folder+'Pc\\'+Pc_folder_name+'Pc值分布.png')
+        plt.close()
 
-    for k in range(num_head_columns,np.shape(value_matrix)[1]):
-        
-        #title str
-        title=final_head_columns[k] 
-
-        if '各级压力下的孔隙比' in title and '高压固结' not in title:
-            
-            print(k,title)
-            
-            index_e.append(k)
-            P.append(float(title.strip().split(' ')[1]))
-            
-        if '各级压力下的孔隙比' in title and '高压固结' in title:
-            
-            print(k,title)
-            
-            index_e_high.append(k)
-            P_high.append(float(title.strip().split(' ')[1]))
-            
-    #matrix to contain grain partition proportion
-    data_e=np.zeros((len(index_valid),len(index_e)))
-    data_e_high=np.zeros((len(index_valid),len(index_e_high)))
-           
-    column=0
-        
-    for this_index in index_e:
-        
-        data_e[:,column]=LO.CustomIndexList(list(value_matrix[num_head_rows:,this_index]),index_valid)
-    
-        column+=1
-   
-    column=0
-    
-    for this_index in index_e_high:
-        
-        data_e_high[:,column]=LO.CustomIndexList(list(value_matrix[num_head_rows:,this_index]),index_valid)
-    
-        column+=1
-        
-    Pc_normal=[]
-    
-    #normal
-    for i in range(np.shape(data_e)[0]):
-        
-        expire_nan_index_list=ExpireNanIndexList(data_e[i])
-    
-        this_e=LO.CustomIndexList(list(data_e[i]),expire_nan_index_list)
-        this_P=LO.CustomIndexList(P,expire_nan_index_list)
-
-        this_hole_id=list_hole_id[i]
-        this_start_depth=list_start_depth[i]
-        this_end_depth=list_end_depth[i]
-        
-        Pc_normal.append(CalculatePc(this_P,
-                                     this_e,
-                                     this_hole_id,
-                                     this_start_depth,
-                                     this_end_depth,
-                                     figures_output_folder+'Pc\\',
-                                     show=True))
-    
-    Pc_high_pressure=[]
-    
-    #high pressure
-    for i in range(np.shape(data_e_high)[0]):
-        
-        expire_nan_index_list=ExpireNanIndexList(data_e_high[i])
-    
-        this_e=LO.CustomIndexList(list(data_e_high[i]),expire_nan_index_list)
-        this_P=LO.CustomIndexList(P_high,expire_nan_index_list)
-        
-        this_hole_id=list_hole_id[i]
-        this_start_depth=list_start_depth[i]
-        this_end_depth=list_end_depth[i]
-        
-        Pc_high_pressure.append(CalculatePc(this_P,
-                                            this_e,
-                                            this_hole_id,
-                                            this_start_depth,
-                                            this_end_depth,
-                                            figures_output_folder+'Pc\\',
-                                            show=True))
-        
-    Pc_sheet=[]
-    
-    for j in range(len(index_valid)):
-        
-#        print(Pc_normal[j],Pc_high_pressure[j])
-        
-        if Pc_normal[j] is None and Pc_high_pressure[j] is None:
-            
-            continue
-        
-        if Pc_normal[j] is None:
-            
-            Pc_sheet.append(Pc_high_pressure[j])
-            
-        if Pc_high_pressure[j] is None:
-            
-            Pc_sheet.append(Pc_normal[j])
-     
-    Pc_workbook+=Pc_sheet
-        
-fig,ax=plt.subplots(figsize=(8,8))
-
-group=np.linspace(min(Pc_workbook),max(Pc_workbook),20)
-
-title_font = FontProperties(fname=r"C:\Windows\Fonts\simhei.ttf", size=16)  
-label_font = FontProperties(fname=r"C:\Windows\Fonts\simhei.ttf", size=13) 
-        
-#plot histogram
-plt.hist(Pc_workbook, group, histtype='bar', rwidth=0.95)
- 
-plt.title('Pc频数分布直方图\n样本总量:'+str(int(len(Pc_workbook))),
-          FontProperties=title_font)  
-
-plt.xlabel('Pc(kPa)',FontProperties=label_font)
-    
-#list of frequency
-frequency=[0]*(len(group)-1)
-
-#mannual histogram
-for this_valid_data in Pc_workbook:
-
-    for g in range(len(group)-1):
-        
-        if group[g]<=this_valid_data<=group[g+1]:
-            
-            frequency[g]+=1
-            
-            break
- 
-ax.yaxis.set_major_locator(MultipleLocator(int(np.ceil((max(frequency)-min(frequency))/20))))
-
-#set ticks
-plt.tick_params(labelsize=15)
-labels = ax.get_xticklabels() + ax.get_yticklabels()
-
-#label fonts
-for this_label in labels:
-    
-    this_label.set_fontname('Times New Roman')
-    
-plt.savefig(figures_output_folder+'Pc.png')
-plt.close()
-'''
+#path=r'C:\Users\whj\Desktop\fig\\'
+#
+#P=[0,50,100,200,400,800,1200]
+#e=[0.711,0.699,0.692,0.680,0.662,0.640,0.618]
+#
+#'''position of Pc annotation'''
+#pc=CalculatePc(P,e,'GC001-1',1.2,3.4,path,show=True)

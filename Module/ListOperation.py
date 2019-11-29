@@ -9,6 +9,8 @@ Created on Thu Nov  7 20:20:50 2019
 @title：List Operation
 """
 
+import numpy as np
+
 #------------------------------------------------------------------------------        
 """
 Gets the new list based on the index list  
@@ -254,3 +256,32 @@ Returns:
 def DeleteBlankList(which_list):
 
     return [which_list.index(item) for item in which_list if item!=[]]
+
+#------------------------------------------------------------------------------        
+"""
+Delete nan in a list and return a index list
+
+Args:
+    which_array: array to be processed
+
+Returns:
+    valid list
+""" 
+def ExpireNanIndexList(which_array):
+    
+    valid_index=[]
+    
+    #List form
+    which_list=list(which_array)
+    
+    this_index=0
+    
+    for item in which_list:
+        
+        if not np.isnan(item):
+            
+            valid_index.append(this_index)
+            
+        this_index+=1
+        
+    return valid_index

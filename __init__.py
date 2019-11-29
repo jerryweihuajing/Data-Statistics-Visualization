@@ -24,3 +24,4 @@ import GrainPartition as GP
 import BatchProcessing as BP
 import ExcelStatistics as ES
 import SiltClassification as SC
+import ConsolidationStatistics as CS

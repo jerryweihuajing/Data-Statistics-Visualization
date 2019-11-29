@@ -21,4 +21,8 @@ list_merged_xls_path=['.\Data\\input\\'+this_xls_name for this_xls_name in list_
 #SC.MergedWorkbookClassification(list_merged_xls_path,3,2)      
 
 #batch processing
-BP.Go('.\Data\\input\\',3,2)
+#BP.Go('.\Data\\input\\',3,2)
+
+xls_path=r'C:\魏华敬\GitHub\DataStatistics\Data\input\土工试验54个.xls'
+
+CS.WorkbookCondolidation(xls_path,3,2)

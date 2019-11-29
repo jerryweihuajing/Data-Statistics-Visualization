@@ -140,6 +140,32 @@ def Distance(pos_A,pos_B):
 
 #------------------------------------------------------------------------------
 """
+Interpolation Lagrange
+
+Args:
+    X: X array
+    Y: Y array
+    n_step: amount of step
+    show: (bool) whether to show
+    
+Returns:
+    Lagrange Interpolation value x y list
+"""
+def LargrangeInterpolation(X,Y,n_step=100,show=False):
+    
+    x_y_sample=[[X[k],Y[k]] for k in range(len(X))]
+    
+    new_x=np.linspace(min(X),max(X),n_step)
+    new_y=np.array([LargrangeValue(x_y_sample,this_x) for this_x in new_x])
+    
+    if show:
+        
+        plt.plot(new_x,new_y,'c')
+        
+    return [[new_x[k],new_y[k]] for k in range(n_step)]
+
+#------------------------------------------------------------------------------
+"""
 Data preprocessing
 
 Args:
@@ -149,7 +175,7 @@ Args:
 Returns:
     Lagrange Interpolation value
 """
-def PreProcess(which_e,which_P,show=False):
+def PreProcess(which_P,which_e,show=False):
     
     #plt.figure()
     #plt.plot(which_P,which_e)
@@ -198,6 +224,46 @@ def PreProcess(which_e,which_P,show=False):
     #plt.plot([0,1,2],[1,2,1],'r')
 
     return new_x_y
+
+#------------------------------------------------------------------------------
+"""
+Quadratic fitting
+
+Args:
+    X: X array
+    Y: Y array
+    n_step: amount of step
+    show: (bool) whether to show
+    
+Returns:
+    Parabola Fitting value
+"""
+def ParabolaFitting(X,Y,n_step=100,show=False):
+    
+#    print(X,Y)
+    
+    X.reverse()
+    Y.reverse()
+    
+    params= np.polyfit(X,Y,2)
+    
+    x=np.linspace(min(X),max(X),n_step)
+    
+    y=np.polyval(params,x)
+    
+    new_x=list(x)
+    new_y=list(y)
+    
+#    print(new_x,new_y)
+    
+#    new_x.reverse()
+#    new_y.reverse()
+    
+    if show:
+                
+        plt.plot(new_x,new_y,'c')
+
+    return [[new_x[k],new_y[k]] for k in range(len(new_x))] 
 
 #------------------------------------------------------------------------------
 """
@@ -432,73 +498,84 @@ Args:
 Returns:
     None
 """
-def MinCurvateRadius(which_x_y,which_M=10):
+def MinCurvateRadius(which_x_y):
    
     #Calculate the radius of curvature
-    base=0
+#    base=0
     
     #A list of radius of curvature
     curvate_radius=[]
     
     #Base overlay flag
-    base_plus=True
+#    base_plus=True
     
-    for k in range(len(which_x_y)-2):
-        
-        if base_plus:
-            
-            base+=1
+    for k in range(int(len(which_x_y)/6),len(which_x_y)-3):
         
         #The radius of curvature of this iteration
         that_R=Curvature(which_x_y[k:k+3])[0]
         
-    #    print(that_R)
+        curvate_radius.append(that_R)
         
-        if that_R>which_M:
+#        if base_plus:
+#            
+#            base+=1
+#        
+#    #    print(that_R)
+#        
+#        if that_R>which_M:
+#            
+#            #The point of the minimum radius of curvature
+#            curvate_radius.append(that_R)
+#            
+#            #Close the superposition
+#            base_plus=False
             
-            #The point of the minimum radius of curvature
-            curvate_radius.append(that_R)
-            
-            #Close the superposition
-            base_plus=False
-            
-    if curvate_radius==[]:
-        
-        return which_M
-    
+#    if curvate_radius==[]:
+#        
+#        return base_plus
+#    
     #Minimum radius of curvature
     R_min=min(curvate_radius)
-   
-    #Index of the minimum radius of curvature point
-    R_min_index=curvate_radius.index(R_min)+base  
+#   
+#    #Index of the minimum radius of curvature point
+#    R_min_index=curvate_radius.index(R_min)+base  
     
-    return R_min_index
+    return curvate_radius.index(R_min)
 
 #------------------------------------------------------------------------------
 """
 Calculate the final result
 
 Args:
-    which_x_y: input data
-    which_M: (defualt: 10)
+    x: x input data
+    y: y input data
     show: whether to plot the figure
     
 Returns:
     None
 """
-def CalculatePcAndCc(which_x_y,which_M=10,show=False):
+def CalculatePcAndCc(x,y,show=False):
+    
+    #combine x y
+    which_x_y=[[x[k],y[k]] for k in range(len(x))]
+    
+    #result of interpolation
+    new_x_y=LargrangeInterpolation(x,y)
+    
+    new_x=[this_x_y[0] for this_x_y in new_x_y]
+    new_y=[this_x_y[1] for this_x_y in new_x_y]
     
     #Index of the minimum radius of curvature point
-    R_min_index=MinCurvateRadius(which_x_y,which_M)
+    R_min_index=MinCurvateRadius(new_x_y)
     
     #Get the maximum curvature point (minimum radius of curvature)
-    pos_P=which_x_y[R_min_index]   
+    pos_P=new_x_y[R_min_index]   
     
     #plt.figure()
     #plt.plot(curvate_radius)
     
     #The slope of the tangent line at that point
-    pos_O=Curvature(which_x_y[R_min_index:R_min_index+3])[1]
+    pos_O=Curvature(new_x_y[R_min_index:R_min_index+3])[1]
     
     #k_PD=-1/k_OP
     k_OP=(pos_P-pos_O)[1]/(pos_P-pos_O)[0]
@@ -512,11 +589,11 @@ def CalculatePcAndCc(which_x_y,which_M=10,show=False):
     
     #The slope of Angle bisector PQ
     k_PQ=-np.tan(alpha/2)
-    
+     
     #Equation of line of Angle bisector PQ: y-y_p =k_PQ*(x-x_p)
     #The linear equation of # data sample terminal MN is: y-y_m =k_MN*(x-x_m)
-    pos_M=np.array(which_x_y[-2])
-    pos_N=np.array(which_x_y[-1])
+    pos_M=np.array([new_x[-2],new_y[-2]])
+    pos_N=np.array([new_x[-1],new_y[-1]])
     
     #The slope of MN
     k_MN=(pos_M-pos_N)[1]/(pos_M-pos_N)[0]
@@ -544,20 +621,50 @@ def CalculatePcAndCc(which_x_y,which_M=10,show=False):
     len_PQ=Distance(pos_P,pos_Q)
     
     '''len_MN'''
-    len_MQ=Distance(pos_M,pos_Q)
+    len_NQ=Distance(pos_N,pos_Q)
     
 #    print('Cc=%.3f'%Cc)
 #    print('Pc=%.3f'%Pc)
     
     #annotation font
     annotation_font=fm.FontProperties(fname="C:\Windows\Fonts\GIL_____.ttf",size=16)
+     
+    #sample data
+    sammple_font=fm.FontProperties(fname="C:\Windows\Fonts\GIL_____.ttf",size=9)
+    
+    #step stands for grid length
+    x_step=(max(x)-min(x))/10
+    y_step=(max(y)-min(y))/10
     
     #show or not
     if show:
         
+        #plot interpolation result
+        plt.plot(new_x,new_y,'c')
+        
+        #plot sample data
+        for kk in range(len(which_x_y)):
+            
+             plt.scatter(x[kk],y[kk],color='k')
+             
+             plt.annotate('(%.3f,%.3f)'%(x[kk],y[kk]),
+                         xy=(x[kk],y[kk]),
+                         xytext=(x[kk]-0.5*x_step,y[kk]-0.5*y_step),
+                         color='k',
+                         fontproperties=sammple_font)
+                     
+        #dicide text position
+        if pos_Q[0]>np.mean(new_x):
+            
+            pos_text=(pos_Q[0]-2*x_step,pos_Q[1]+4*y_step)
+            
+        else:
+            
+            pos_text=(pos_Q[0]-2*x_step,pos_Q[1]-4*y_step)
+        
         plt.annotate('Pc=%dkPa'%int(Pc),
                      xy=(pos_Q[0],pos_Q[1]),
-                     xytext=(0.95*pos_Q[0],0.95*pos_Q[1]),
+                     xytext=pos_text,
                      weight='bold',color='k',
                      arrowprops=dict(arrowstyle='-|>',
                      connectionstyle='arc3',color='r'),
@@ -572,7 +679,7 @@ def CalculatePcAndCc(which_x_y,which_M=10,show=False):
         LinePlot(pos_P,k_PS,len_PQ*1.5,'k','start') #PS
         LinePlot(pos_P,k_PD,len_PQ*1.5,'k','start') #PD
         LinePlot(pos_P,k_PQ,len_PQ*1.5,'r','start') #PQ
-        LinePlot(pos_M,k_MN,len_MQ*1.2,'b','end') #MN
+        LinePlot(pos_N,k_MN,len_NQ*1.2,'b','end') #MN
         
         plt.scatter(pos_Q[0],pos_Q[1],color='aqua')
         
