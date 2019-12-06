@@ -166,6 +166,55 @@ def LargrangeInterpolation(X,Y,n_step=100,show=False):
 
 #------------------------------------------------------------------------------
 """
+Interpolation former being curvate and latter being linear
+
+Args:
+    X: X array
+    Y: Y array
+    n_step: amount of step
+    show: (bool) whether to show
+    
+Returns:
+    Lagrange Interpolation value x y list
+"""
+def CurvateAndLinearInterpolation(X,Y,n_step=100,show=False):
+    
+    x_y_sample=[[X[k],Y[k]] for k in range(len(X))]
+    
+    total_x=np.linspace(min(X),max(X),n_step)
+    total_y=np.array([LargrangeValue(x_y_sample,this_x) for this_x in total_x])
+    
+    #former part
+    former_x=np.linspace(min(X),np.log10(800),n_step)
+    former_y=np.array([LargrangeValue(x_y_sample,this_x) for this_x in former_x])
+    
+    if max(X)-np.log10(800)<=0.01:
+        
+        return [[former_x[k],former_y[k]] for k in range(len(former_x))]
+    
+    #latter part
+    X_for_linear=[total_x[k] for k in range(len(total_x)) if total_x[k]>=np.log10(800)]
+    Y_for_linear=[total_y[k] for k in range(len(total_x)) if total_x[k]>=np.log10(800)]
+    
+#    print(X_for_linear,Y_for_linear)
+    
+    params= np.polyfit(X_for_linear,Y_for_linear,1)
+    
+    latter_x=np.linspace(np.log10(800),max(X),n_step)
+    latter_y=np.polyval(params,latter_x)
+    
+    #combine them
+    new_x=list(former_x)+list(latter_x)
+    new_y=list(former_y)+list(latter_y)
+
+    if show:
+        
+        plt.plot(new_x,new_y,'c')
+        
+    return [[new_x[k],new_y[k]] for k in range(len(new_x))]
+
+#------------------------------------------------------------------------------
+"""
 Data preprocessing
 
 Args:
@@ -379,7 +428,7 @@ def Curvature(which_3_points,show=False):
         LinePlot(pos_D,k_OD,distance_D+1,'k','end') #OD        
         LinePlot(pos_E,k_OE,distance_E+1,'k','end') #OE
         
-    if np.round(distance_D)==np.round(distance_E):
+    if np.round(distance_D)-np.round(distance_E)<0.1:
 
         return Distance(pos_O,pos_D),pos_O
     
@@ -499,7 +548,7 @@ Returns:
     None
 """
 def MinCurvateRadius(which_x_y):
-   
+
     #Calculate the radius of curvature
 #    base=0
     
@@ -511,10 +560,20 @@ def MinCurvateRadius(which_x_y):
     
     for k in range(int(len(which_x_y)/6),len(which_x_y)-3):
         
-        #The radius of curvature of this iteration
-        that_R=Curvature(which_x_y[k:k+3])[0]
+#        print(which_x_y[k1:k+3])
         
-        curvate_radius.append(that_R)
+        if which_x_y[k][0]>=np.log10(800):
+            
+            continue
+        
+        #The radius of curvature of this iteration
+        that_R=Curvature(which_x_y[k:k+3])
+        
+        if that_R is None:
+            
+            continue
+        
+        curvate_radius.append(that_R[0])
         
 #        if base_plus:
 #            
@@ -542,6 +601,35 @@ def MinCurvateRadius(which_x_y):
     
     return curvate_radius.index(R_min)
 
+def DataVisualisation(which_x_y):
+    
+    X=[item[0] for item in which_x_y]
+    Y=[item[1] for item in which_x_y]
+    
+    if max(X)-np.log10(800)<=0.01:
+        
+        return X,Y
+    
+    former_x=[X[k] for k in range(len(X)) if X[k]<=np.log10(800)]
+    former_y=[Y[k] for k in range(len(X)) if X[k]<=np.log10(800)]
+    
+    #latter part
+    X_for_linear=[X[k] for k in range(len(X)) if X[k]>=np.log10(800)]
+    Y_for_linear=[Y[k] for k in range(len(X)) if X[k]>=np.log10(800)]
+    
+#    print(X_for_linear,Y_for_linear)
+    
+    params= np.polyfit(X_for_linear,Y_for_linear,1)
+    
+    latter_x=np.linspace(np.log10(800),max(X),20)
+    latter_y=np.polyval(params,latter_x)
+    
+    #combine them
+    new_x=list(former_x)+list(latter_x)
+    new_y=list(former_y)+list(latter_y)
+
+    return new_x,new_y
+
 #------------------------------------------------------------------------------
 """
 Calculate the final result
@@ -568,6 +656,8 @@ def CalculatePcAndCc(x,y,show=False):
     #Index of the minimum radius of curvature point
     R_min_index=MinCurvateRadius(new_x_y)
     
+#    print(R_min_index)
+    
     #Get the maximum curvature point (minimum radius of curvature)
     pos_P=new_x_y[R_min_index]   
     
@@ -576,6 +666,8 @@ def CalculatePcAndCc(x,y,show=False):
     
     #The slope of the tangent line at that point
     pos_O=Curvature(new_x_y[R_min_index:R_min_index+3])[1]
+    
+#    print(pos_O)
     
     #k_PD=-1/k_OP
     k_OP=(pos_P-pos_O)[1]/(pos_P-pos_O)[0]
@@ -592,8 +684,33 @@ def CalculatePcAndCc(x,y,show=False):
      
     #Equation of line of Angle bisector PQ: y-y_p =k_PQ*(x-x_p)
     #The linear equation of # data sample terminal MN is: y-y_m =k_MN*(x-x_m)
-    pos_M=np.array([new_x[-2],new_y[-2]])
-    pos_N=np.array([new_x[-1],new_y[-1]])
+#    pos_M=np.array([new_x[-6],new_y[-6]])
+#    pos_N=np.array([new_x[-1],new_y[-1]])
+#    
+#    if pos_M[0]==pos_N[0] and pos_M[1]==pos_N[1]:
+#        
+#        print('equal')
+#        
+#        pos_M=np.array([x[-2],y[-2]])
+#        pos_N=np.array([x[-1],y[-1]])
+          
+    for index_800 in range(len(x)):
+
+        if abs(x[index_800]-np.log10(800))<=0.01:
+            
+            pos_M=np.array([x[index_800],y[index_800]])
+            
+            break
+        
+#    print(index_800,len(x))
+    
+    if index_800==len(x)-1:
+        
+        pos_M=np.array([x[-2],y[-2]])
+        
+    pos_N=np.array([x[-1],y[-1]])
+
+#    print(pos_M,pos_N)
     
     #The slope of MN
     k_MN=(pos_M-pos_N)[1]/(pos_M-pos_N)[0]
@@ -609,7 +726,9 @@ def CalculatePcAndCc(x,y,show=False):
     #Solve a binary first order equation
     A=np.array([[1,-k_PQ],[1,-k_MN]])  
     B=np.array([pos_P[1]-k_PQ*pos_P[0],pos_M[1]-k_MN*pos_M[0]])
-   
+    
+#    print(A,B)
+    
     #Computing intersection
     Pc=10**solve(A,B)[1]
 #    Cc=k_MN
@@ -639,8 +758,11 @@ def CalculatePcAndCc(x,y,show=False):
     #show or not
     if show:
         
+        x_visual=DataVisualisation(which_x_y)[0]
+        y_visual=DataVisualisation(which_x_y)[1]
+        
         #plot interpolation result
-        plt.plot(new_x,new_y,'c')
+        plt.plot(x_visual,y_visual,'c')
         
         #plot sample data
         for kk in range(len(which_x_y)):
@@ -654,14 +776,8 @@ def CalculatePcAndCc(x,y,show=False):
                          fontproperties=sammple_font)
                      
         #dicide text position
-        if pos_Q[0]>np.mean(new_x):
+        pos_text=(pos_Q[0]-2*x_step,pos_Q[1]-3*y_step)
             
-            pos_text=(pos_Q[0]-2*x_step,pos_Q[1]+4*y_step)
-            
-        else:
-            
-            pos_text=(pos_Q[0]-2*x_step,pos_Q[1]-4*y_step)
-        
         plt.annotate('Pc=%dkPa'%int(Pc),
                      xy=(pos_Q[0],pos_Q[1]),
                      xytext=pos_text,

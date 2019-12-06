@@ -55,7 +55,7 @@ def CalculatePc(P,e,hole_id,start_depth,end_depth,output_folder,show=False):
         
         return None
     
-    fig,ax=plt.subplots(figsize=(10,6))
+    fig,ax=plt.subplots(figsize=(8,8))
     
     final_Pc=PC.CalculatePcAndCc(valid_logP,valid_e,show=show)  
     
