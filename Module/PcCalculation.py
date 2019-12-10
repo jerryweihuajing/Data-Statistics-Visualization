@@ -151,7 +151,7 @@ Args:
 Returns:
     Lagrange Interpolation value x y list
 """
-def LargrangeInterpolation(X,Y,n_step=100,show=False):
+def LargrangeInterpolation(X,Y,n_step=15,show=False):
     
     x_y_sample=[[X[k],Y[k]] for k in range(len(X))]
     
@@ -694,20 +694,21 @@ def CalculatePcAndCc(x,y,show=False):
 #        pos_M=np.array([x[-2],y[-2]])
 #        pos_N=np.array([x[-1],y[-1]])
           
-    for index_800 in range(len(x)):
-
-        if abs(x[index_800]-np.log10(800))<=0.01:
-            
-            pos_M=np.array([x[index_800],y[index_800]])
-            
-            break
+#    for index_800 in range(len(x)):
+#
+#        if abs(x[index_800]-np.log10(800))<=0.01:
+#            
+#            pos_M=np.array([x[index_800],y[index_800]])
+#            
+#            break
+#        
+##    print(index_800,len(x))
+#    
+#    if index_800==len(x)-1:
+#        
+#        pos_M=np.array([x[-2],y[-2]])
         
-#    print(index_800,len(x))
-    
-    if index_800==len(x)-1:
-        
-        pos_M=np.array([x[-2],y[-2]])
-        
+    pos_M=np.array([x[-2],y[-2]])
     pos_N=np.array([x[-1],y[-1]])
 
 #    print(pos_M,pos_N)
@@ -715,6 +716,17 @@ def CalculatePcAndCc(x,y,show=False):
     #The slope of MN
     k_MN=(pos_M-pos_N)[1]/(pos_M-pos_N)[0]
     
+    #minimum of inclination above the curve
+    k_list=[]
+    
+    for this_index in range(len(new_x)-2):
+        
+        this_start=np.array([new_x[this_index]],new_y[this_index])
+        
+        k_list.append((this_start-pos_N)[1]/(this_start-pos_N)[0])
+        
+    k_MN=min(k_list)   
+        
     #标准化：
     #y-k_PQ*x+(k_PQ*x_P-y_P)
     #y-k_MN*x+(k_OM*x_D-y_N)

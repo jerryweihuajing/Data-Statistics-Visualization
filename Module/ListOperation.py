@@ -51,7 +51,7 @@ def ValidIndexList(which_list):
     for ix in range(len(which_list)):
         
         this_index=which_list[ix]
-        
+
         if this_index in index_valid:
             
             repetition+=1

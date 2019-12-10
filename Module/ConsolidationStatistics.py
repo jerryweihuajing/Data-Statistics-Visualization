@@ -221,6 +221,8 @@ def WorkbookCondolidation(xls_path,num_head_rows,num_head_columns):
     
             if '各级压力下的孔隙比' in title and '高压固结' not in title:
                 
+                continue
+            
                 print(k,title)
                 
                 index_e.append(k)
@@ -332,6 +334,10 @@ def WorkbookCondolidation(xls_path,num_head_rows,num_head_columns):
         Pc_workbook=list_Pc_worbook[k]
         Pc_title=list_title[k]
         Pc_folder_name=list_folder_name[k]
+        
+        if Pc_title=='':
+            
+            continue
         
         group=np.linspace(min(Pc_workbook),max(Pc_workbook),20)
         
