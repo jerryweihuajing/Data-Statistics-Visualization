@@ -151,7 +151,7 @@ Args:
 Returns:
     Lagrange Interpolation value x y list
 """
-def LargrangeInterpolation(X,Y,n_step=15,show=False):
+def LargrangeInterpolation(X,Y,n_step=1000,show=False):
     
     x_y_sample=[[X[k],Y[k]] for k in range(len(X))]
     
@@ -424,7 +424,8 @@ def Curvature(which_3_points,show=False):
         plt.scatter(pos_E[0],pos_E[1],color='y') #E
         
         LinePlot(pos_D,k_AB,1,'k','center') #AB
-        LinePlot(pos_E,k_BC,1,'k','center') #BC        
+        LinePlot(pos_E,k_BC,1,'k','center') #BC   
+        
         LinePlot(pos_D,k_OD,distance_D+1,'k','end') #OD        
         LinePlot(pos_E,k_OE,distance_E+1,'k','end') #OE
         
@@ -550,7 +551,8 @@ Returns:
 def MinCurvateRadius(which_x_y):
 
     #Calculate the radius of curvature
-#    base=0
+    base=int(len(which_x_y)/3)
+    threshold=int(3*len(which_x_y)/4)
     
     #A list of radius of curvature
     curvate_radius=[]
@@ -558,14 +560,10 @@ def MinCurvateRadius(which_x_y):
     #Base overlay flag
 #    base_plus=True
     
-    for k in range(int(len(which_x_y)/6),len(which_x_y)-3):
+    for k in range(base,threshold):
         
 #        print(which_x_y[k1:k+3])
-        
-        if which_x_y[k][0]>=np.log10(800):
-            
-            continue
-        
+           
         #The radius of curvature of this iteration
         that_R=Curvature(which_x_y[k:k+3])
         
@@ -599,7 +597,7 @@ def MinCurvateRadius(which_x_y):
 #    #Index of the minimum radius of curvature point
 #    R_min_index=curvate_radius.index(R_min)+base  
     
-    return curvate_radius.index(R_min)
+    return curvate_radius.index(R_min)+base
 
 def DataVisualisation(which_x_y):
     
@@ -671,7 +669,7 @@ def CalculatePcAndCc(x,y,show=False):
     
     #k_PD=-1/k_OP
     k_OP=(pos_P-pos_O)[1]/(pos_P-pos_O)[0]
-    k_PD=-1/k_OP
+    k_PD=-1.2/k_OP
      
     #horizontal line
     k_PS=0
@@ -708,25 +706,36 @@ def CalculatePcAndCc(x,y,show=False):
 #        
 #        pos_M=np.array([x[-2],y[-2]])
         
-    pos_M=np.array([x[-2],y[-2]])
-    pos_N=np.array([x[-1],y[-1]])
-
-#    print(pos_M,pos_N)
+#    pos_M=np.array([x[-2],y[-2]])
+#    pos_N=np.array([x[-1],y[-1]])
+#
+##    print(pos_M,pos_N)
+#    
+#    #The slope of MN
+#    k_MN=(pos_M-pos_N)[1]/(pos_M-pos_N)[0]
     
-    #The slope of MN
-    k_MN=(pos_M-pos_N)[1]/(pos_M-pos_N)[0]
+    pos_N=np.array([new_x[-1],new_y[-1]])
     
     #minimum of inclination above the curve
     k_list=[]
     
-    for this_index in range(len(new_x)-2):
+    for this_index in range(len(x)-1):
         
-        this_start=np.array([new_x[this_index]],new_y[this_index])
+        this_start=np.array([x[this_index],y[this_index]])
+        
+#        print(this_start,pos_N)
         
         k_list.append((this_start-pos_N)[1]/(this_start-pos_N)[0])
-        
-    k_MN=min(k_list)   
-        
+
+    pos_M=np.array([x[k_list.index(min(k_list))],
+                    y[k_list.index(min(k_list))]])
+            
+#    print(k_list.index(min(k_list)))
+#    print(k_list)
+    
+    #The slope of MN
+    k_MN=(pos_M-pos_N)[1]/(pos_M-pos_N)[0]
+    
     #标准化：
     #y-k_PQ*x+(k_PQ*x_P-y_P)
     #y-k_MN*x+(k_OM*x_D-y_N)
@@ -770,18 +779,20 @@ def CalculatePcAndCc(x,y,show=False):
     #show or not
     if show:
         
-        x_visual=DataVisualisation(which_x_y)[0]
-        y_visual=DataVisualisation(which_x_y)[1]
+#        x_visual=DataVisualisation(which_x_y)[0]
+#        y_visual=DataVisualisation(which_x_y)[1]
+#        
+#        #plot interpolation result
+#        plt.plot(x_visual,y_visual,'c')
         
-        #plot interpolation result
-        plt.plot(x_visual,y_visual,'c')
+        plt.plot(new_x,new_y,'c')
         
         #plot sample data
         for kk in range(len(which_x_y)):
             
              plt.scatter(x[kk],y[kk],color='k')
              
-             plt.annotate('(%.3f,%.3f)'%(x[kk],y[kk]),
+             plt.annotate('(%d,%.3f)'%(np.round(10**x[kk]),y[kk]),
                          xy=(x[kk],y[kk]),
                          xytext=(x[kk]-0.5*x_step,y[kk]-0.5*y_step),
                          color='k',
