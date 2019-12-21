@@ -669,7 +669,7 @@ def CalculatePcAndCc(x,y,show=False):
     
     #k_PD=-1/k_OP
     k_OP=(pos_P-pos_O)[1]/(pos_P-pos_O)[0]
-    k_PD=-1.2/k_OP
+    k_PD=-1/k_OP
      
     #horizontal line
     k_PS=0
