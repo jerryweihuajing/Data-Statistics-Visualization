@@ -379,7 +379,7 @@ def WorkbookCondolidation(xls_path,num_head_rows,num_head_columns):
             
         plt.savefig(figures_output_folder+'Pc\\'+Pc_folder_name+'Pc值分布.png')
         plt.close()
-
+    
 #path=r'C:\Users\whj\Desktop\fig\\'
 #
 #P=[0,50,100,200,400,800,1200]

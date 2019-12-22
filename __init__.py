@@ -13,7 +13,7 @@ import sys,os
     
 sys.path.append(os.getcwd())
 sys.path.append(os.getcwd()+'\\Module')
-#sys.path.append(os.getcwd()+'\\Object')
+sys.path.append(os.getcwd()+'\\Object')
 sys.path=list(set(sys.path))
 
 import HeadColumns as HC
@@ -24,4 +24,5 @@ import GrainPartition as GP
 import BatchProcessing as BP
 import ExcelStatistics as ES
 import SiltClassification as SC
+import ResilianceStatistics as RS
 import ConsolidationStatistics as CS
