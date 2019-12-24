@@ -85,7 +85,7 @@ def WorkbookResiliance(xls_path,num_head_rows,num_head_columns):
         channel=pd.read_excel(xls_path,sheet_name=this_sheet_name)
 
         final_head_columns,unit_list=HC.HeadColumnsGeneration(channel,num_head_rows)
-        print(final_head_columns)
+
         #print(final_head_columns)
         
         #all info of dataframe
