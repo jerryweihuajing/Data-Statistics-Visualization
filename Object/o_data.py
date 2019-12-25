@@ -26,6 +26,8 @@ class data:
                  hole_id=None,
                  start_depth=None,
                  end_depth=None,
+                 e0=None,
+                 alpha=None,
                  P_pressure=None,
                  e_pressure=None,
                  P_resiliance=None,
@@ -33,9 +35,11 @@ class data:
                  P_recompress=None,
                  e_recompress=None):
         
-        hole_id=hole_id
+        self.hole_id=hole_id
         start_depth=start_depth
         end_depth=end_depth
+        e0=e0
+        alpha=alpha
         P_pressure=P_pressure
         e_pressure=e_pressure
         P_resiliance=P_resiliance

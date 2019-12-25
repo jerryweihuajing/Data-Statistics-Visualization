@@ -85,7 +85,7 @@ def WorkbookResiliance(xls_path,num_head_rows,num_head_columns):
         channel=pd.read_excel(xls_path,sheet_name=this_sheet_name)
 
         final_head_columns,unit_list=HC.HeadColumnsGeneration(channel,num_head_rows)
-
+        
         #print(final_head_columns)
         
         #all info of dataframe
@@ -103,21 +103,24 @@ def WorkbookResiliance(xls_path,num_head_rows,num_head_columns):
         P_pressure=[]
         P_resiliance=[]
         P_recompress=[]
-        
-        #hole id
-        list_hole_id=LO.CustomIndexList(list(value_matrix[num_head_rows:,1]),index_valid)
-        
-        #start depth
-        list_start_depth=LO.CustomIndexList(list(value_matrix[num_head_rows:,2]),index_valid)
-        
-        #end depth
-        list_end_depth=LO.CustomIndexList(list(value_matrix[num_head_rows:,3]),index_valid)
     
         for k in range(num_head_columns,np.shape(value_matrix)[1]):
             
             #title str
             title=final_head_columns[k] 
                
+            if '孔隙比' in title:
+                
+                print(k,title)
+                
+                index_e0=k
+                
+            if '压缩指数' in title:
+                
+                print(k,title)
+                
+                index_alpha=k
+                
             if '一定压力固结沉降量' in title:
                 
                 print(k,title)
@@ -143,7 +146,22 @@ def WorkbookResiliance(xls_path,num_head_rows,num_head_columns):
                 
                 index_e_recompress.append(k)
                 P_recompress.append(float(title.strip().split(' ')[1]))
-
+            
+        #hole id
+        list_hole_id=LO.CustomIndexList(list(value_matrix[num_head_rows:,1]),index_valid)
+        
+        #start depth
+        list_start_depth=LO.CustomIndexList(list(value_matrix[num_head_rows:,2]),index_valid)
+        
+        #end depth
+        list_end_depth=LO.CustomIndexList(list(value_matrix[num_head_rows:,3]),index_valid)
+        
+        #pore aperture
+        list_e0=LO.CustomIndexList(list(value_matrix[num_head_rows:,index_e0]),index_valid)
+        
+        #compression index
+        list_alpha=LO.CustomIndexList(list(value_matrix[num_head_rows:,index_alpha]),index_valid)
+        
         list_index=[index_e_pressure,index_e_resiliance,index_e_recompress]
         list_data=[]
         
@@ -185,7 +203,6 @@ def WorkbookResiliance(xls_path,num_head_rows,num_head_columns):
             
             that_data.Canvas(figures_output_folder+'Pc\\回弹\\')
             
-        
 #        #high pressure
 #        for i in range(np.shape(index_valid)[0]):
 #            
