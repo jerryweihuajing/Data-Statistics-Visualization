@@ -50,6 +50,7 @@ def CalculatePc(P,e,hole_id,start_depth,end_depth,output_folder,show=False):
         return None
     
     valid_logP=[np.log10(item) for item in valid_P]
+#    valid_logP=[np.log2(item) for item in valid_P]
     
     if PC.CalculatePcAndCc(valid_logP,valid_e)>max(P):
         
@@ -298,7 +299,7 @@ def WorkbookCondolidation(xls_path,num_head_rows,num_head_columns):
                                                 this_end_depth,
                                                 figures_output_folder+'Pc\\高压\\',
                                                 show=True))
-            
+#        print(Pc_high_pressure)
         Pc_normal_sheet=[]
         Pc_high_pressure_sheet=[]
         

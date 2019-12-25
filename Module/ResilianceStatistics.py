@@ -68,7 +68,7 @@ def WorkbookResiliance(xls_path,num_head_rows,num_head_columns):
     list_sheet_names=list(workbook.sheet_names())
     
     #data throughout workbook 
-    Pc_pressure_workbook=[]
+    Pc_compress_workbook=[]
     Pc_resiliance_workbook=[]
     Pc_recompress_workbook=[]
     
@@ -86,23 +86,23 @@ def WorkbookResiliance(xls_path,num_head_rows,num_head_columns):
 
         final_head_columns,unit_list=HC.HeadColumnsGeneration(channel,num_head_rows)
         
-        #print(final_head_columns)
+#        print(final_head_columns)
         
         #all info of dataframe
         value_matrix=channel.values
         
         #delete the repetition
         index_valid=LO.ValidIndexList(value_matrix[num_head_rows:,1])  
-        
+
         #fetch the id of P and e
-        index_e_pressure=[]
-        index_e_resiliance=[]
-        index_e_recompress=[]
+        index_settlement_compression=[]
+        index_settlement_resiliance=[]
+        index_settlement_recompression=[]
         
         #pressure
-        P_pressure=[]
-        P_resiliance=[]
-        P_recompress=[]
+        pressure_compression=[]
+        pressure_resiliance=[]
+        pressure_recompression=[]
     
         for k in range(num_head_columns,np.shape(value_matrix)[1]):
             
@@ -113,28 +113,34 @@ def WorkbookResiliance(xls_path,num_head_rows,num_head_columns):
                 
                 print(k,title)
                 
-                index_e0=k
+                index_porosity_original=k
                 
             if '压缩指数' in title:
                 
                 print(k,title)
                 
-                index_alpha=k
+                index_coefficient_compression=k
+                
+            if '回弹指数' in title:
+                
+                print(k,title)
+                
+                index_coefficient_resiliance=k
                 
             if '一定压力固结沉降量' in title:
                 
                 print(k,title)
                 
-                index_e_pressure.append(k)
+                index_settlement_compression.append(k)
 
-                P_pressure.append(float(title.strip().split(' ')[1].replace('kPa','')))
+                pressure_compression.append(float(title.strip().split(' ')[1].replace('kPa','')))
                 
             if '回弹固结沉降量' in title:
                 
                 print(k,title)
                 
-                index_e_resiliance.append(k)
-                P_resiliance.append(float(title.strip().split(' ')[1]))
+                index_settlement_resiliance.append(k)
+                pressure_resiliance.append(float(title.strip().split(' ')[1]))
                 
             if '再压缩固结沉降量' in title:
                 
@@ -144,8 +150,8 @@ def WorkbookResiliance(xls_path,num_head_rows,num_head_columns):
                 
                 print(k,title)
                 
-                index_e_recompress.append(k)
-                P_recompress.append(float(title.strip().split(' ')[1]))
+                index_settlement_recompression.append(k)
+                pressure_recompression.append(float(title.strip().split(' ')[1]))
             
         #hole id
         list_hole_id=LO.CustomIndexList(list(value_matrix[num_head_rows:,1]),index_valid)
@@ -157,12 +163,18 @@ def WorkbookResiliance(xls_path,num_head_rows,num_head_columns):
         list_end_depth=LO.CustomIndexList(list(value_matrix[num_head_rows:,3]),index_valid)
         
         #pore aperture
-        list_e0=LO.CustomIndexList(list(value_matrix[num_head_rows:,index_e0]),index_valid)
+        list_porosity_original=LO.CustomIndexList(list(value_matrix[num_head_rows:,index_porosity_original]),index_valid)
         
-        #compression index
-        list_alpha=LO.CustomIndexList(list(value_matrix[num_head_rows:,index_alpha]),index_valid)
+        #compression coefficient
+        list_coefficient_compression=LO.CustomIndexList(list(value_matrix[num_head_rows:,index_coefficient_compression]),index_valid)
         
-        list_index=[index_e_pressure,index_e_resiliance,index_e_recompress]
+        #resiliance coefficient
+        list_coefficient_resiliance=LO.CustomIndexList(list(value_matrix[num_head_rows:,index_coefficient_resiliance]),index_valid)
+        
+        list_index=[index_settlement_compression,
+                    index_settlement_resiliance,
+                    index_settlement_recompression]
+        
         list_data=[]
         
         for this_index_list in list_index:
@@ -180,12 +192,10 @@ def WorkbookResiliance(xls_path,num_head_rows,num_head_columns):
                 
             list_data.append(this_data)
         
-        data_e_pressure,data_e_resiliance,data_e_recompress=list_data
+        data_settlement_compression,\
+        data_settlement_resiliance,\
+        data_settlement_recompression=list_data
         
-#        print(P_pressure,data_e_pressure)
-#        print(P_resiliance,data_e_resiliance)
-#        print(P_recompress,data_e_recompress)
-
         #construct data object
         for i in range(len(index_valid)):
             
@@ -194,14 +204,49 @@ def WorkbookResiliance(xls_path,num_head_rows,num_head_columns):
             that_data.hole_id=list_hole_id[i]
             that_data.end_depth=list_end_depth[i]
             that_data.start_depth=list_start_depth[i]
-            that_data.P_pressure=P_pressure
-            that_data.e_pressure=data_e_pressure[i]
-            that_data.P_resiliance=P_resiliance
-            that_data.e_resiliance=data_e_resiliance[i]
-            that_data.P_recompress=P_recompress
-            that_data.e_recompress=data_e_recompress[i]
+            that_data.porosity_original=list_porosity_original[i]
+            that_data.coefficient_compression=list_coefficient_compression[i]
+            that_data.coefficient_resiliance=list_coefficient_resiliance[i]
             
-            that_data.Canvas(figures_output_folder+'Pc\\回弹\\')
+            that_data.pressure_compression=pressure_compression
+            that_data.pressure_resiliance=pressure_resiliance
+            that_data.pressure_recompression=pressure_recompression
+            
+            that_data.settlement_compression=data_settlement_compression[i]
+            that_data.settlement_resiliance=data_settlement_resiliance[i]
+            that_data.settlement_recompression=data_settlement_recompression[i]
+            
+#            print(that_data.settlement_pressure)
+#            print(that_data.settlement_resiliance)
+#            print(that_data.settlement_recompress)
+            
+            print(that_data.porosity_original)
+#            print(that_data.coefficient_compression)
+#            print(that_data.coefficient_resiliance)
+            
+            print(that_data.pressure_compression)
+#            print(that_data.pressure_resiliance)
+#            print(that_data.pressure_recompression)
+            
+            '''unit of coeffient is 1/MPa'''
+            #define the porosity:alpha=de/dp
+            that_data.porosity_compression=that_data.porosity_original\
+                                          -0.001*that_data.coefficient_compression\
+                                          *np.array(that_data.pressure_compression)
+                                            
+            that_data.porosity_resiliance=that_data.porosity_original\
+                                         -0.001*that_data.coefficient_resiliance\
+                                         *np.array(that_data.pressure_resiliance)
+                                            
+            that_data.porosity_recompression=that_data.porosity_original\
+                                            -0.001*that_data.coefficient_compression\
+                                            *np.array(that_data.pressure_recompression)
+            
+            print(that_data.porosity_compression)
+#            print(that_data.porosity_resiliance)
+#            print(that_data.porosity_recompression)
+                                            
+#            that_data.Canvas(figures_output_folder+'Pc\\回弹\\')
             
 #        #high pressure
 #        for i in range(np.shape(index_valid)[0]):
