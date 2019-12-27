@@ -26,24 +26,29 @@ class data:
                  start_depth=None,
                  end_depth=None,
                  porosity_original=None,
-                 coefficient_compression=None,
-                 coefficient_resiliance=None,
-                 pressure_compression=None,
-                 pressure_resiliance=None,
-                 pressure_recompression=None,
                  porosity_compression=None,
                  porosity_resiliance=None,
                  porosity_recompression=None,
+                 coefficient_compression=None,
+                 coefficient_resiliance=None,
+                 coefficient_recompression=None,
+                 pressure_compression=None,
+                 pressure_resiliance=None,
+                 pressure_recompression=None,
                  settlement_compression=None,
                  settlement_resiliance=None,
                  settlement_recompression=None):
         
+        #basic information
         self.hole_id=hole_id
         self.start_depth=start_depth
         self.end_depth=end_depth
         self.porosity_original=porosity_original
+        
+        #coefficient
         self.coefficient_compression=coefficient_compression
         self.coefficient_resiliance=coefficient_resiliance
+        self.coefficient_recompression=coefficient_recompression
         
         #pressure
         self.pressure_compression=pressure_compression

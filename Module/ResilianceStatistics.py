@@ -66,12 +66,7 @@ def WorkbookResiliance(xls_path,num_head_rows,num_head_columns):
     
     #construct map between sheet names and head rows
     list_sheet_names=list(workbook.sheet_names())
-    
-    #data throughout workbook 
-    Pc_compress_workbook=[]
-    Pc_resiliance_workbook=[]
-    Pc_recompress_workbook=[]
-    
+
     #traverse all sheets
     for this_sheet_name in list_sheet_names:
     
@@ -83,13 +78,18 @@ def WorkbookResiliance(xls_path,num_head_rows,num_head_columns):
         
         #Data Frame object
         channel=pd.read_excel(xls_path,sheet_name=this_sheet_name)
-
+        
+        
+#        print(channel)
         final_head_columns,unit_list=HC.HeadColumnsGeneration(channel,num_head_rows)
         
 #        print(final_head_columns)
         
         #all info of dataframe
         value_matrix=channel.values
+        
+        '''special condition'''
+        num_head_rows-=1
         
         #delete the repetition
         index_valid=LO.ValidIndexList(value_matrix[num_head_rows:,1])  
@@ -114,18 +114,6 @@ def WorkbookResiliance(xls_path,num_head_rows,num_head_columns):
                 print(k,title)
                 
                 index_porosity_original=k
-                
-            if '压缩指数' in title:
-                
-                print(k,title)
-                
-                index_coefficient_compression=k
-                
-            if '回弹指数' in title:
-                
-                print(k,title)
-                
-                index_coefficient_resiliance=k
                 
             if '一定压力固结沉降量' in title:
                 
@@ -165,12 +153,6 @@ def WorkbookResiliance(xls_path,num_head_rows,num_head_columns):
         #pore aperture
         list_porosity_original=LO.CustomIndexList(list(value_matrix[num_head_rows:,index_porosity_original]),index_valid)
         
-#        #compression coefficient
-#        list_coefficient_compression=LO.CustomIndexList(list(value_matrix[num_head_rows:,index_coefficient_compression]),index_valid)
-#        
-#        #resiliance coefficient
-#        list_coefficient_resiliance=LO.CustomIndexList(list(value_matrix[num_head_rows:,index_coefficient_resiliance]),index_valid)
-        
         list_index=[index_settlement_compression,
                     index_settlement_resiliance,
                     index_settlement_recompression]
@@ -205,16 +187,14 @@ def WorkbookResiliance(xls_path,num_head_rows,num_head_columns):
             that_data.end_depth=list_end_depth[i]
             that_data.start_depth=list_start_depth[i]
             that_data.porosity_original=list_porosity_original[i]
-#            that_data.coefficient_compression=list_coefficient_compression[i]
-#            that_data.coefficient_resiliance=list_coefficient_resiliance[i]
             
             that_data.pressure_compression=pressure_compression
-            that_data.pressure_resiliance=pressure_resiliance
-            that_data.pressure_recompression=pressure_recompression
-            
             that_data.settlement_compression=data_settlement_compression[i]
-            that_data.settlement_resiliance=data_settlement_resiliance[i]
-            that_data.settlement_recompression=data_settlement_recompression[i]
+                  
+            print('')
+            print('...')
+            print('......')
+            print('Hole ID:',that_data.hole_id)
             
 #            print(that_data.settlement_compression)
 #            print(that_data.settlement_resiliance)
@@ -228,18 +208,47 @@ def WorkbookResiliance(xls_path,num_head_rows,num_head_columns):
 #            print(that_data.pressure_resiliance)
 #            print(that_data.pressure_recompression)
             
-            p=np.array(that_data.pressure_compression[:-1])\
-                -np.array(that_data.pressure_compression[1:])
+            '''calculate a and e of compression'''
+            #difference of s and p
+            diff_p=np.array(that_data.pressure_compression[1:])\
+                  -np.array(that_data.pressure_compression[:-1])
+
+            diff_s=np.array(that_data.settlement_compression[1:])\
+                  -np.array(that_data.settlement_compression[:-1])
             
-            s=[]
-                        
-            for k in range(len(that_data.settlement_compression)):
+            #first value
+            s_0=that_data.settlement_compression[0]
+            p_0=that_data.pressure_compression[0]
+            a_0=(s_0/p_0)*1000/20*(1+that_data.porosity_original)
+
+            list_a=[a_0]+list((diff_s/diff_p)*1000/20*(1+that_data.porosity_original))
+            list_diff_p=[p_0]+list(diff_p.ravel())
+
+            #porosity list
+            list_e=[that_data.porosity_original]
+            
+            for j in range(len(list_a)):
                 
-                s.append(np.sum(np.array(that_data.settlement_compression[:k+1])))
-                         
-            s=np.array(s[:-1])-np.array(s[1:])
+                e_next=list_e[j]-list_a[j]*list_diff_p[j]/1000
+                
+#                print('...')
+#                print('last e:',list_e[j])
+#                print('a:',list_a[j])
+#                print('diff p:',list_diff_p[j])
+#                print('next e:',e_next)
+                
+                list_e.append(e_next)
+
+            that_data.coefficient_compression=list_a
+            that_data.porosity_compression=list_e
             
-            print((s/p)*1000*(1+that_data.porosity_original))
+#            print(that_data.coefficient_compression)
+#            print(that_data.porosity_compression)
+            
+            that_data.pressure_resiliance=pressure_resiliance
+            that_data.pressure_recompression=pressure_recompression
+            that_data.settlement_resiliance=data_settlement_resiliance[i]
+            that_data.settlement_recompression=data_settlement_recompression[i]
             
             '''unit of coeffient is 1/MPa'''
             #define the porosity:alpha=de/dp
