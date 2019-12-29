@@ -28,21 +28,21 @@ class data:
                  end_depth=None,
                  pressure_consolidation=None,
                  index_compression=None,
-                 index_resiliance=None,
+                 index_resilience=None,
                  modulus_compression=None,
-                 modulus_resiliance=None,
+                 modulus_resilience=None,
                  porosity_original=None,
                  porosity_compression=None,
-                 porosity_resiliance=None,
+                 porosity_resilience=None,
                  porosity_recompression=None,
                  coefficient_compression=None,
-                 coefficient_resiliance=None,
+                 coefficient_resilience=None,
                  coefficient_recompression=None,
                  pressure_compression=None,
-                 pressure_resiliance=None,
+                 pressure_resilience=None,
                  pressure_recompression=None,
                  settlement_compression=None,
-                 settlement_resiliance=None,
+                 settlement_resilience=None,
                  settlement_recompression=None):
         
         #basic information
@@ -55,30 +55,30 @@ class data:
         
         #index 
         self.index_compression=index_compression
-        self.index_resiliance=index_resiliance
+        self.index_resilience=index_resilience
         
         #modulus
         self.modulus_compression=modulus_compression
-        self.modulus_resiliance=modulus_resiliance
+        self.modulus_resiliance=modulus_resilience
                  
         #coefficient
         self.coefficient_compression=coefficient_compression
-        self.coefficient_resiliance=coefficient_resiliance
+        self.coefficient_resilience=coefficient_resilience
         self.coefficient_recompression=coefficient_recompression
         
         #pressure
         self.pressure_compression=pressure_compression
-        self.pressure_resiliance=pressure_resiliance
+        self.pressure_resilience=pressure_resilience
         self.pressure_recompression=pressure_recompression
         
         #porosity
         self.porosity_compression=porosity_compression
-        self.porosity_resiliance=porosity_resiliance
+        self.porosity_resilience=porosity_resilience
         self.porosity_recompression=porosity_recompression
         
         #settlement volume
         self.settlement_compression=settlement_compression
-        self.settlement_resiliance=settlement_resiliance
+        self.settlement_resilience=settlement_resilience
         self.settlement_recompression=settlement_recompression
         
     def Canvas(self,output_folder):

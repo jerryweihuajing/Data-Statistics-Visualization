@@ -24,10 +24,10 @@ import matplotlib.pyplot as plt
 from matplotlib.pyplot import MultipleLocator
 from matplotlib.font_manager import FontProperties
 
-def ResilianceVisualization(valid_logP_resiliance,valid_e_resiliance):
+def ResilienceVisualization(valid_logP_resilience,valid_e_resilience):
     
     #combine x y
-    which_x_y=[[valid_logP_resiliance[k],valid_e_resiliance[k]] for k in range(len(x))]
+    which_x_y=[[valid_logP_resilience[k],valid_e_resilience[k]] for k in range(len(x))]
     
     #result of interpolation
     new_x_y=LargrangeInterpolation(x,y)
@@ -37,7 +37,7 @@ def ResilianceVisualization(valid_logP_resiliance,valid_e_resiliance):
     
 #------------------------------------------------------------------------------
 """
-Make resiliance calculation from one excel
+Make resilience calculation from one excel
 
 Args:
     xls_path: path of excel to be processed
@@ -47,10 +47,10 @@ Args:
 Returns:
     None
 """
-def WorkbookResiliance(xls_path,num_head_rows,num_head_columns):
+def WorkbookResilience(xls_path,num_head_rows,num_head_columns):
     
     print('')
-    print('--Resiliance Calculation')
+    print('--Resilience Calculation')
     
     #plt.style.use('ggplot')
     
@@ -111,12 +111,12 @@ def WorkbookResiliance(xls_path,num_head_rows,num_head_columns):
 
         #fetch the id of P and e
         index_settlement_compression=[]
-        index_settlement_resiliance=[]
+        index_settlement_resilience=[]
         index_settlement_recompression=[]
         
         #pressure
         pressure_compression=[]
-        pressure_resiliance=[]
+        pressure_resilience=[]
         pressure_recompression=[]
     
         for k in range(num_head_columns,np.shape(value_matrix)[1]):
@@ -140,7 +140,7 @@ def WorkbookResiliance(xls_path,num_head_rows,num_head_columns):
                 
                 print(k,title)
                 
-                index_index_resiliance=k    
+                index_index_resilience=k    
                 
             if '孔隙比' in title:
                 
@@ -160,8 +160,8 @@ def WorkbookResiliance(xls_path,num_head_rows,num_head_columns):
                 
                 print(k,title)
                 
-                index_settlement_resiliance.append(k)
-                pressure_resiliance.append(float(title.strip().split(' ')[1]))
+                index_settlement_resilience.append(k)
+                pressure_resilience.append(float(title.strip().split(' ')[1]))
                 
             if '再压缩固结沉降量' in title:
                 
@@ -196,11 +196,11 @@ def WorkbookResiliance(xls_path,num_head_rows,num_head_columns):
         list_index_compression=LO.CustomIndexList(list(value_matrix[num_head_rows:,index_index_compression]),index_valid)
         
         #compression index
-        list_index_resiliance=LO.CustomIndexList(list(value_matrix[num_head_rows:,index_index_resiliance]),index_valid)
+        list_index_resilience=LO.CustomIndexList(list(value_matrix[num_head_rows:,index_index_resilience]),index_valid)
         
         #settlement volume
         list_index=[index_settlement_compression,
-                    index_settlement_resiliance,
+                    index_settlement_resilience,
                     index_settlement_recompression]
         
         list_data=[]
@@ -221,7 +221,7 @@ def WorkbookResiliance(xls_path,num_head_rows,num_head_columns):
             list_data.append(this_data)
         
         data_settlement_compression,\
-        data_settlement_resiliance,\
+        data_settlement_resilience,\
         data_settlement_recompression=list_data
         
         #construct data object
@@ -236,7 +236,7 @@ def WorkbookResiliance(xls_path,num_head_rows,num_head_columns):
             that_data.porosity_original=list_porosity_original[i]
             that_data.pressure_consolidation=list_pressure_consolidation[i]
             that_data.index_compression=list_index_compression[i]
-            that_data.index_resiliance=list_index_resiliance[i]
+            that_data.index_resilience=list_index_resilience[i]
             
             that_data.pressure_compression=pressure_compression
             that_data.settlement_compression=data_settlement_compression[i]
@@ -245,18 +245,6 @@ def WorkbookResiliance(xls_path,num_head_rows,num_head_columns):
             print('...')
             print('......')
             print('Hole ID:',that_data.hole_id)
-            
-#            print(that_data.settlement_compression)
-#            print(that_data.settlement_resiliance)
-#            print(that_data.settlement_recompression)
-            
-#            print(that_data.porosity_original)
-#            print(that_data.coefficient_compression)
-#            print(that_data.coefficient_resiliance)
-            
-#            print(that_data.pressure_compression)
-#            print(that_data.pressure_resiliance)
-#            print(that_data.pressure_recompression)
             
             '''calculate a and e of compression'''
             #difference of s and p
@@ -300,7 +288,7 @@ def WorkbookResiliance(xls_path,num_head_rows,num_head_columns):
         
             print('Pc: %dkPa'%(that_data.pressure_consolidation))
             print('Cc: %.3f'%(that_data.index_compression))
-            print('Cs: %.3f'%(that_data.index_resiliance))
+            print('Cs: %.3f'%(that_data.index_resilience))
             print('Es1-2: %.2fMpa'%(that_data.modulus_compression))
 #            print(that_data.coefficient_compression)
 #            print(that_data.porosity_compression)
@@ -320,7 +308,7 @@ def WorkbookResiliance(xls_path,num_head_rows,num_head_columns):
             new_sheet.write(i*7+2,2,'压缩指数',style)
             new_sheet.write(i*7+2,3,'Cc=%.3f'%(that_data.index_compression),style)
             new_sheet.write(i*7+2,4,'回弹指数',style)
-            new_sheet.write(i*7+2,5,'Cs=%.3f'%(that_data.index_resiliance),style)
+            new_sheet.write(i*7+2,5,'Cs=%.3f'%(that_data.index_resilience),style)
             new_sheet.write(i*7+2,6,'压缩模量',style)
             new_sheet.write(i*7+2,7,'Es1-2=%.2fMpa'%(that_data.modulus_compression),style)
             new_sheet.write(i*7+2,8,'回弹模量',style)
@@ -353,30 +341,12 @@ def WorkbookResiliance(xls_path,num_head_rows,num_head_columns):
                 
                 new_sheet.write(i*7+6,j+2,'%.3f'%(that_data.coefficient_compression[j]),style)
                 
-            that_data.pressure_resiliance=pressure_resiliance
+            that_data.pressure_resilience=pressure_resilience
             that_data.pressure_recompression=pressure_recompression
-            that_data.settlement_resiliance=data_settlement_resiliance[i]
+            that_data.settlement_resilience=data_settlement_resilience[i]
             that_data.settlement_recompression=data_settlement_recompression[i]
             
             '''unit of coeffient is 1/MPa'''
-            #define the porosity:alpha=de/dp
-#            that_data.porosity_compression=that_data.porosity_original\
-#                                          -0.001*that_data.coefficient_compression\
-#                                          *np.array(that_data.pressure_compression)
-#                                            
-#            that_data.porosity_resiliance=that_data.porosity_original\
-#                                         -0.001*that_data.coefficient_resiliance\
-#                                         *np.array(that_data.pressure_resiliance)
-#                                            
-#            that_data.porosity_recompression=that_data.porosity_original\
-#                                            -0.001*that_data.coefficient_compression\
-#                                            *np.array(that_data.pressure_recompression)
-            
-#            print(that_data.porosity_compression)
-#            print(that_data.porosity_resiliance)
-#            print(that_data.porosity_recompression)
-                                            
-#            that_data.Canvas(figures_output_folder+'Pc\\回弹\\')
             
 #        #high pressure
 #        for i in range(np.shape(index_valid)[0]):

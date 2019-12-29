@@ -32,4 +32,4 @@ xls_path=os.getcwd()+'\\Data\input\土工试验54个.xls'
 '''resiliance: a new func'''
 xls_path=os.getcwd()+'\\Data\input\城市地质调查高压数据.xls'
 
-RS.WorkbookResiliance(xls_path,2,2)
+RS.WorkbookResilience(xls_path,2,2)
