@@ -22,9 +22,15 @@ import PcCalculation as PC
 #==============================================================================    
 class data:
     def __init__(self,
+                 indoor_id=None,
                  hole_id=None,
                  start_depth=None,
                  end_depth=None,
+                 pressure_consolidation=None,
+                 index_compression=None,
+                 index_resiliance=None,
+                 modulus_compression=None,
+                 modulus_resiliance=None,
                  porosity_original=None,
                  porosity_compression=None,
                  porosity_resiliance=None,
@@ -40,11 +46,21 @@ class data:
                  settlement_recompression=None):
         
         #basic information
+        self.indoor_id=indoor_id
         self.hole_id=hole_id
         self.start_depth=start_depth
         self.end_depth=end_depth
         self.porosity_original=porosity_original
+        self.pressure_consolidation=pressure_consolidation
         
+        #index 
+        self.index_compression=index_compression
+        self.index_resiliance=index_resiliance
+        
+        #modulus
+        self.modulus_compression=modulus_compression
+        self.modulus_resiliance=modulus_resiliance
+                 
         #coefficient
         self.coefficient_compression=coefficient_compression
         self.coefficient_resiliance=coefficient_resiliance

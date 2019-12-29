@@ -154,12 +154,10 @@ def WorkbookCondolidation(xls_path,num_head_rows,num_head_columns):
     figures_output_folder=xls_path.replace('.xls','').replace('input','output')+'\\'
     
     #generate output folder
-    PP.GenerateFolder(figures_output_folder+'Pc\\正常\\')    
-    PP.GenerateFolder(figures_output_folder+'Pc\\高压\\')  
-    
     list_threshold=['0-100','100-200','200-400','400-800','800-1600','1600-3200']
     
-    for this_folder in [figures_output_folder+'Pc\\正常\\',figures_output_folder+'Pc\\高压\\']:
+    for this_folder in [figures_output_folder+'先期固结压力\\正常\\',
+                        figures_output_folder+'先期固结压力\\高压\\']:
         
         for this_threshold in list_threshold:
             
@@ -275,7 +273,7 @@ def WorkbookCondolidation(xls_path,num_head_rows,num_head_columns):
                                          this_hole_id,
                                          this_start_depth,
                                          this_end_depth,
-                                         figures_output_folder+'Pc\\正常\\',
+                                         figures_output_folder+'先期固结压力\\正常\\',
                                          show=True))
         
         Pc_high_pressure=[]
@@ -297,7 +295,7 @@ def WorkbookCondolidation(xls_path,num_head_rows,num_head_columns):
                                                 this_hole_id,
                                                 this_start_depth,
                                                 this_end_depth,
-                                                figures_output_folder+'Pc\\高压\\',
+                                                figures_output_folder+'先期固结压力\\高压\\',
                                                 show=True))
 #        print(Pc_high_pressure)
         Pc_normal_sheet=[]
@@ -348,10 +346,10 @@ def WorkbookCondolidation(xls_path,num_head_rows,num_head_columns):
         #plot histogram
         plt.hist(Pc_workbook, group, histtype='bar', rwidth=0.95)
          
-        plt.title(Pc_title+'Pc频数分布直方图\n样本总量:'+str(int(len(Pc_workbook))),
+        plt.title(Pc_title+'先期固结压力频数分布直方图\n样本总量:'+str(int(len(Pc_workbook))),
                   FontProperties=title_font)  
         
-        plt.xlabel('Pc(kPa)',FontProperties=label_font)
+        plt.xlabel('先期固结压力(kPa)',FontProperties=label_font)
             
         #list of frequency
         frequency=[0]*(len(group)-1)
@@ -378,7 +376,7 @@ def WorkbookCondolidation(xls_path,num_head_rows,num_head_columns):
             
             this_label.set_fontname('Times New Roman')
             
-        plt.savefig(figures_output_folder+'Pc\\'+Pc_folder_name+'Pc值分布.png')
+        plt.savefig(figures_output_folder+'先期固结压力\\'+Pc_folder_name+'先期固结压力值分布.png')
         plt.close()
     
 #path=r'C:\Users\whj\Desktop\fig\\'

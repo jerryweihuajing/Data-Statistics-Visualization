@@ -14,7 +14,7 @@ from __init__ import *
 import os
 
 #merge xls
-list_merged_xls_name=['颗分.xls','颗分2.xls','颗分3.xls','地质调查HAB-1.xls']
+list_merged_xls_name=['颗分1.xls','颗分2.xls','颗分3.xls','地质调查HAB-1.xls']
 
 #construct list xls path
 list_merged_xls_path=['.\Data\\input\\'+this_xls_name for this_xls_name in list_merged_xls_name]

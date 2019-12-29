@@ -9,7 +9,7 @@ Created on Sun Dec 22 20:47:26 2019
 @title：Consolidation Calculation
 """
 
-import xlrd
+import xlrd,xlwt
 import pandas as pd
 
 import HeadColumns as HC
@@ -55,18 +55,35 @@ def WorkbookResiliance(xls_path,num_head_rows,num_head_columns):
     #plt.style.use('ggplot')
     
     #construct output folder path
-    figures_output_folder=xls_path.replace('.xls','').replace('input','output')+'\\'
+    output_folder=xls_path.replace('.xls','').replace('input','output')+'\\先期固结压力\\回弹\\'
     
-    #generate output folder   
-    PP.GenerateFolder(figures_output_folder+'Pc\\回弹\\')  
-
+    #generate output folder
+    PP.GenerateFolder(output_folder)
+    
     #open the excel sheet to be operated on
     #formatting_info: keep the header format
     workbook=xlrd.open_workbook(xls_path,formatting_info=True)
     
     #construct map between sheet names and head rows
     list_sheet_names=list(workbook.sheet_names())
-
+    
+    #construct new workbook   
+    new_workbook=xlwt.Workbook(encoding='utf-8')  
+    
+    #construct new sheet
+    new_sheet=new_workbook.add_sheet("总表")          
+          
+    #define the border style
+    borders = xlwt.Borders()
+    borders.left = 1
+    borders.right = 1
+    borders.top = 1
+    borders.bottom = 1
+    borders.bottom_colour=0x3A    
+     
+    style = xlwt.XFStyle()
+    style.borders = borders
+    
     #traverse all sheets
     for this_sheet_name in list_sheet_names:
     
@@ -79,8 +96,6 @@ def WorkbookResiliance(xls_path,num_head_rows,num_head_columns):
         #Data Frame object
         channel=pd.read_excel(xls_path,sheet_name=this_sheet_name)
         
-        
-#        print(channel)
         final_head_columns,unit_list=HC.HeadColumnsGeneration(channel,num_head_rows)
         
 #        print(final_head_columns)
@@ -109,6 +124,24 @@ def WorkbookResiliance(xls_path,num_head_rows,num_head_columns):
             #title str
             title=final_head_columns[k] 
                
+            if 'PC' in title:
+                
+                print(k,title)
+                
+                index_pressure_consolidation=k
+                
+            if '压缩指数' in title:
+                
+                print(k,title)
+                
+                index_index_compression=k
+                
+            if '回弹指数' in title:
+                
+                print(k,title)
+                
+                index_index_resiliance=k    
+                
             if '孔隙比' in title:
                 
                 print(k,title)
@@ -141,6 +174,9 @@ def WorkbookResiliance(xls_path,num_head_rows,num_head_columns):
                 index_settlement_recompression.append(k)
                 pressure_recompression.append(float(title.strip().split(' ')[1]))
             
+        #indoor id
+        list_indoor_id=LO.CustomIndexList(list(value_matrix[num_head_rows:,0]),index_valid)
+        
         #hole id
         list_hole_id=LO.CustomIndexList(list(value_matrix[num_head_rows:,1]),index_valid)
         
@@ -153,6 +189,16 @@ def WorkbookResiliance(xls_path,num_head_rows,num_head_columns):
         #pore aperture
         list_porosity_original=LO.CustomIndexList(list(value_matrix[num_head_rows:,index_porosity_original]),index_valid)
         
+        #consolidation pressure
+        list_pressure_consolidation=LO.CustomIndexList(list(value_matrix[num_head_rows:,index_pressure_consolidation]),index_valid)
+        
+        #compression index
+        list_index_compression=LO.CustomIndexList(list(value_matrix[num_head_rows:,index_index_compression]),index_valid)
+        
+        #compression index
+        list_index_resiliance=LO.CustomIndexList(list(value_matrix[num_head_rows:,index_index_resiliance]),index_valid)
+        
+        #settlement volume
         list_index=[index_settlement_compression,
                     index_settlement_resiliance,
                     index_settlement_recompression]
@@ -184,9 +230,13 @@ def WorkbookResiliance(xls_path,num_head_rows,num_head_columns):
             that_data=data()
             
             that_data.hole_id=list_hole_id[i]
+            that_data.indoor_id=list_indoor_id[i]
             that_data.end_depth=list_end_depth[i]
             that_data.start_depth=list_start_depth[i]
             that_data.porosity_original=list_porosity_original[i]
+            that_data.pressure_consolidation=list_pressure_consolidation[i]
+            that_data.index_compression=list_index_compression[i]
+            that_data.index_resiliance=list_index_resiliance[i]
             
             that_data.pressure_compression=pressure_compression
             that_data.settlement_compression=data_settlement_compression[i]
@@ -242,9 +292,67 @@ def WorkbookResiliance(xls_path,num_head_rows,num_head_columns):
             that_data.coefficient_compression=list_a
             that_data.porosity_compression=list_e
             
+            #compression modulus calculation
+            e=that_data.porosity_original
+            a=that_data.coefficient_compression[that_data.pressure_compression.index(200)]
+            
+            that_data.modulus_compression=(1+e)/a
+        
+            print('Pc: %dkPa'%(that_data.pressure_consolidation))
+            print('Cc: %.3f'%(that_data.index_compression))
+            print('Cs: %.3f'%(that_data.index_resiliance))
+            print('Es1-2: %.2fMpa'%(that_data.modulus_compression))
 #            print(that_data.coefficient_compression)
 #            print(that_data.porosity_compression)
             
+            '''print all data in sample paper'''
+            new_sheet.write(i*7+1,0,'室内编号',style)
+            new_sheet.write(i*7+1,1,that_data.indoor_id,style)
+            new_sheet.write(i*7+1,2,'野外编号',style)
+            new_sheet.write(i*7+1,3,that_data.hole_id,style)
+            new_sheet.write(i*7+1,4,'起始深度',style)
+            new_sheet.write(i*7+1,5,str(that_data.start_depth)+'m',style)
+            new_sheet.write(i*7+1,6,'终止深度',style)
+            new_sheet.write(i*7+1,7,str(that_data.end_depth)+'m',style)
+            
+            new_sheet.write(i*7+2,0,'先期固结压力',style)
+            new_sheet.write(i*7+2,1,'Pc=%dkPa'%(that_data.pressure_consolidation),style)
+            new_sheet.write(i*7+2,2,'压缩指数',style)
+            new_sheet.write(i*7+2,3,'Cc=%.3f'%(that_data.index_compression),style)
+            new_sheet.write(i*7+2,4,'回弹指数',style)
+            new_sheet.write(i*7+2,5,'Cs=%.3f'%(that_data.index_resiliance),style)
+            new_sheet.write(i*7+2,6,'压缩模量',style)
+            new_sheet.write(i*7+2,7,'Es1-2=%.2fMpa'%(that_data.modulus_compression),style)
+            new_sheet.write(i*7+2,8,'回弹模量',style)
+            new_sheet.write(i*7+2,9,'Eo2-1=',style)
+            
+            new_sheet.write(i*7+3,0,'P (kPa)',style)
+            new_sheet.write(i*7+3,1,'0',style)
+            
+            for j in range(len(that_data.pressure_compression)):
+                
+                new_sheet.write(i*7+3,j+2,'%d'%(that_data.pressure_compression[j]),style)
+               
+            new_sheet.write(i*7+4,0,'ΔH (mm)',style)
+            new_sheet.write(i*7+4,1,'',style)
+            
+            for j in range(len(that_data.settlement_compression)):
+                
+                new_sheet.write(i*7+4,j+2,'%.3f'%(that_data.settlement_compression[j]),style)
+               
+            new_sheet.write(i*7+5,0,'e',style)
+            
+            for j in range(len(that_data.porosity_compression)):
+                
+                new_sheet.write(i*7+5,j+1,'%.3f'%(that_data.porosity_compression[j]),style)
+                
+            new_sheet.write(i*7+6,0,'a (1/MPa)',style)
+            new_sheet.write(i*7+6,1,'',style)
+            
+            for j in range(len(that_data.coefficient_compression)):
+                
+                new_sheet.write(i*7+6,j+2,'%.3f'%(that_data.coefficient_compression[j]),style)
+                
             that_data.pressure_resiliance=pressure_resiliance
             that_data.pressure_recompression=pressure_recompression
             that_data.settlement_resiliance=data_settlement_resiliance[i]
@@ -370,4 +478,6 @@ def WorkbookResiliance(xls_path,num_head_rows,num_head_columns):
 #            
 #        plt.savefig(figures_output_folder+'Pc\\'+Pc_folder_name+'Pc值分布.png')
 #        plt.close()
+            
+    new_workbook.save(output_folder+'数据输出.xls')
         
