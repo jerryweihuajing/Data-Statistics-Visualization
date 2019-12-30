@@ -238,15 +238,15 @@ def WorkbookResilience(xls_path,num_head_rows,num_head_columns):
             that_data.index_compression=list_index_compression[i]
             that_data.index_resilience=list_index_resilience[i]
             
-            that_data.pressure_compression=pressure_compression
-            that_data.settlement_compression=data_settlement_compression[i]
-                  
             print('')
             print('...')
             print('......')
             print('Hole ID:',that_data.hole_id)
             
             '''calculate a and e of compression'''
+            that_data.pressure_compression=pressure_compression
+            that_data.settlement_compression=data_settlement_compression[i]
+            
             #difference of s and p
             diff_p=np.array(that_data.pressure_compression[1:])\
                   -np.array(that_data.pressure_compression[:-1])
@@ -257,8 +257,9 @@ def WorkbookResilience(xls_path,num_head_rows,num_head_columns):
             #first value
             s_0=that_data.settlement_compression[0]
             p_0=that_data.pressure_compression[0]
+            
+            '''unit of compression coeffient is 1/MPa'''
             a_0=(s_0/p_0)*1000/20*(1+that_data.porosity_original)
-
             list_a=[a_0]+list((diff_s/diff_p)*1000/20*(1+that_data.porosity_original))
             list_diff_p=[p_0]+list(diff_p.ravel())
 
@@ -290,6 +291,7 @@ def WorkbookResilience(xls_path,num_head_rows,num_head_columns):
             print('Cc: %.3f'%(that_data.index_compression))
             print('Cs: %.3f'%(that_data.index_resilience))
             print('Es1-2: %.2fMpa'%(that_data.modulus_compression))
+            
 #            print(that_data.coefficient_compression)
 #            print(that_data.porosity_compression)
             
@@ -341,12 +343,12 @@ def WorkbookResilience(xls_path,num_head_rows,num_head_columns):
                 
                 new_sheet.write(i*7+6,j+2,'%.3f'%(that_data.coefficient_compression[j]),style)
                 
-            that_data.pressure_resilience=pressure_resilience
             that_data.pressure_recompression=pressure_recompression
-            that_data.settlement_resilience=data_settlement_resilience[i]
             that_data.settlement_recompression=data_settlement_recompression[i]
-            
-            '''unit of coeffient is 1/MPa'''
+
+            '''calculate a and e of resilience'''
+            that_data.pressure_resilience=pressure_resilience
+            that_data.settlement_resilience=data_settlement_resilience[i]
             
 #        #high pressure
 #        for i in range(np.shape(index_valid)[0]):
