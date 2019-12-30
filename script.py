@@ -14,10 +14,10 @@ from __init__ import *
 import os
 
 #merge xls
-list_merged_xls_name=['颗分1.xls','颗分2.xls','颗分3.xls','地质调查HAB-1.xls']
+#list_merged_xls_name=['颗分1.xls','颗分2.xls','颗分3.xls','地质调查HAB-1.xls']
 
 #construct list xls path
-list_merged_xls_path=['.\Data\\input\\'+this_xls_name for this_xls_name in list_merged_xls_name]
+#list_merged_xls_path=['.\Data\\input\\'+this_xls_name for this_xls_name in list_merged_xls_name]
 
 #ES.MergedWorkbookStatistics(list_merged_xls_path,3,2)
 #SC.MergedWorkbookClassification(list_merged_xls_path,3,2)      
@@ -25,7 +25,7 @@ list_merged_xls_path=['.\Data\\input\\'+this_xls_name for this_xls_name in list_
 #batch processing
 #BP.Go('.\Data\\input\\',3,2)
 
-xls_path=os.getcwd()+'\\Data\input\土工试验54个.xls'
+#xls_path=os.getcwd()+'\\Data\input\土工试验54个.xls'
 
 #CS.WorkbookCondolidation(xls_path,3,2)
 
