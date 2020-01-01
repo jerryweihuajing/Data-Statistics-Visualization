@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 from matplotlib.pyplot import MultipleLocator
 from matplotlib.font_manager import FontProperties
 
-import PcCalculation as PC
+import calculation_pressure_consolidation as C_P_C
 
 #==============================================================================
 #object to store and operate data
@@ -112,8 +112,9 @@ class data:
         '''canvas'''
         fig,ax=plt.subplots(figsize=(8,8))
         
-        final_Pc=PC.CalculatePcAndCc(valid_logP_compression,valid_e_compression,show=1)  
-
+        #calculation of consolidation pressure
+        final_Pc=C_P_C.CalculatePcAndCc(valid_logP_compression,valid_e_compression,show=1)  
+        
         #set ticks
         plt.tick_params(labelsize=12)
         labels = ax.get_xticklabels() + ax.get_yticklabels()
@@ -124,7 +125,7 @@ class data:
         #annotation font
         title_font=FontProperties(fname="C:\Windows\Fonts\GIL_____.ttf",size=20)
         
-        plt.title('ID:'+str(self.hole_id),FontProperties=title_font)  
+        plt.title('ID: '+str(self.hole_id),FontProperties=title_font)  
                 
         plt.xlabel('lgP',FontProperties=annotation_font)
         plt.ylabel('e',FontProperties=annotation_font)
@@ -146,9 +147,14 @@ class data:
         ax.yaxis.set_major_locator(MultipleLocator(y_major_step))
         ax.yaxis.set_minor_locator(MultipleLocator(y_minor_step))
         
+        #visualization of curve
+        C_P_C.DataVisualization(valid_logP_compression,valid_e_compression,x_major_step,y_major_step)
+        C_P_C.DataVisualization(valid_logP_resilience,valid_e_resilience,x_major_step,y_major_step)
+        C_P_C.DataVisualization(valid_logP_recompression,valid_e_recompression,x_major_step,y_major_step)
+        
         #add depth
-        plt.text(np.average(valid_logP),max(valid_e),
-                 'Start Depth:'+str(self.start_depth)+'m End Depth:'+str(self.end_depth)+'m',
+        plt.text(0.95*np.average(valid_logP),max(valid_e),
+                 'Start Depth: '+str(self.start_depth)+'m End Depth: '+str(self.end_depth)+'m',
                  FontProperties=annotation_font)
         
         #show the grid
@@ -162,3 +168,4 @@ class data:
         plt.close()
         
         return final_Pc
+             

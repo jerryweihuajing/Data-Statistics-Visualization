@@ -11,8 +11,6 @@ Created on Mon Sep 30 20:43:10 2019
 
 from __init__ import *
 
-import os
-
 #merge xls
 #list_merged_xls_name=['颗分1.xls','颗分2.xls','颗分3.xls','地质调查HAB-1.xls']
 
@@ -29,7 +27,7 @@ import os
 
 #CS.WorkbookCondolidation(xls_path,3,2)
 
-'''resiliance: a new func'''
 xls_path=os.getcwd()+'\\Data\input\城市地质调查高压数据.xls'
 
-RS.WorkbookResilience(xls_path,2,2)
+'''better annotation position'''
+S_R_C.WorkbookResilience(xls_path,2,2)

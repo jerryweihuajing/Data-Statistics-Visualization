@@ -600,34 +600,49 @@ def MinCurvateRadius(which_x_y):
     
     return curvate_radius.index(R_min)+base
 
-def DataVisualisation(which_x_y):
-    
-    X=[item[0] for item in which_x_y]
-    Y=[item[1] for item in which_x_y]
-    
-    if max(X)-np.log10(800)<=0.01:
-        
-        return X,Y
-    
-    former_x=[X[k] for k in range(len(X)) if X[k]<=np.log10(800)]
-    former_y=[Y[k] for k in range(len(X)) if X[k]<=np.log10(800)]
-    
-    #latter part
-    X_for_linear=[X[k] for k in range(len(X)) if X[k]>=np.log10(800)]
-    Y_for_linear=[Y[k] for k in range(len(X)) if X[k]>=np.log10(800)]
-    
-#    print(X_for_linear,Y_for_linear)
-    
-    params= np.polyfit(X_for_linear,Y_for_linear,1)
-    
-    latter_x=np.linspace(np.log10(800),max(X),20)
-    latter_y=np.polyval(params,latter_x)
-    
-    #combine them
-    new_x=list(former_x)+list(latter_x)
-    new_y=list(former_y)+list(latter_y)
+#------------------------------------------------------------------------------
+"""
+Make resilience curve
 
-    return new_x,new_y
+Args:
+    x: x coordinates
+    y: y coordinates
+    x_step: step length of x
+    y_step: step length of y
+    annotation: (bool) whether to add annotation (default: False)
+
+Returns:
+    None
+"""
+def DataVisualization(x,y,x_step,y_step,annotation=False):
+    
+    #sample data font
+    sammple_font=fm.FontProperties(fname="C:\Windows\Fonts\GIL_____.ttf",size=9)
+
+    #combine x y
+    which_x_y=[[x[k],y[k]] for k in range(len(x))]
+    
+    #result of interpolation
+    new_x_y=LargrangeInterpolation(x,y)
+    
+    new_x=[this_x_y[0] for this_x_y in new_x_y]
+    new_y=[this_x_y[1] for this_x_y in new_x_y]
+    
+    #plot curve
+    plt.plot(new_x,new_y,'grey')
+    
+    #plot sample data
+    for kk in range(len(which_x_y)):
+        
+         plt.scatter(x[kk],y[kk],color='k')
+         
+         if annotation:
+             
+             plt.annotate('(%d,%.3f)'%(np.round(10**x[kk]),y[kk]),
+                          xy=(x[kk],y[kk]),
+                          xytext=(x[kk]-0.5*x_step,y[kk]-0.3*y_step),
+                          color='k',
+                          fontproperties=sammple_font)
 
 #------------------------------------------------------------------------------
 """
@@ -770,45 +785,23 @@ def CalculatePcAndCc(x,y,show=False):
     #annotation font
     annotation_font=fm.FontProperties(fname="C:\Windows\Fonts\GIL_____.ttf",size=16)
      
-    #sample data
-    sammple_font=fm.FontProperties(fname="C:\Windows\Fonts\GIL_____.ttf",size=9)
-    
     #step stands for grid length
     x_step=(max(x)-min(x))/10
     y_step=(max(y)-min(y))/10
     
     #show or not
     if show:
-        
-#        x_visual=DataVisualisation(which_x_y)[0]
-#        y_visual=DataVisualisation(which_x_y)[1]
-#        
-#        #plot interpolation result
-#        plt.plot(x_visual,y_visual,'c')
-        
-        plt.plot(new_x,new_y,'c')
-        
-        #plot sample data
-        for kk in range(len(which_x_y)):
-            
-             plt.scatter(x[kk],y[kk],color='k')
-             
-             plt.annotate('(%d,%.3f)'%(np.round(10**x[kk]),y[kk]),
-                         xy=(x[kk],y[kk]),
-                         xytext=(x[kk]-0.5*x_step,y[kk]-0.5*y_step),
-                         color='k',
-                         fontproperties=sammple_font)
-                     
+               
         #dicide text position
-        pos_text=(pos_Q[0]-2*x_step,pos_Q[1]-3*y_step)
+        pos_text=(pos_Q[0]+2*x_step,pos_Q[1]-0*y_step)
             
         plt.annotate('Pc=%dkPa'%int(Pc),
                      xy=(pos_Q[0],pos_Q[1]),
                      xytext=pos_text,
                      weight='bold',color='k',
                      arrowprops=dict(arrowstyle='-|>',
-                     connectionstyle='arc3',color='r'),
-                     bbox=dict(boxstyle='round,pad=0.6', fc='gray', ec='k',lw=1 ,alpha=0.4),
+                     connectionstyle='arc3',color='k'),
+                     bbox=dict(boxstyle='round,pad=0.6', fc='grey', ec='k',lw=1 ,alpha=0.4),
                      fontproperties=annotation_font)
                      
         '''point O error!'''
@@ -818,10 +811,10 @@ def CalculatePcAndCc(x,y,show=False):
 #        LinePlot(pos_P,k_OP,0.2,'k','center') #OP        
         LinePlot(pos_P,k_PS,len_PQ*1.5,'k','start') #PS
         LinePlot(pos_P,k_PD,len_PQ*1.5,'k','start') #PD
-        LinePlot(pos_P,k_PQ,len_PQ*1.5,'r','start') #PQ
-        LinePlot(pos_N,k_MN,len_NQ*1.2,'b','end') #MN
+        LinePlot(pos_P,k_PQ,len_PQ*1.5,'k','start') #PQ
+        LinePlot(pos_N,k_MN,len_NQ*1.2,'k','end') #MN
         
-        plt.scatter(pos_Q[0],pos_Q[1],color='aqua')
+        plt.scatter(pos_Q[0],pos_Q[1],color='grey')
         
     return Pc
      

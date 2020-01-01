@@ -10,30 +10,18 @@ Created on Sun Dec 22 20:47:26 2019
 """
 
 import xlrd,xlwt
-import pandas as pd
-
-import HeadColumns as HC
-import ListOperation as LO
-import PathProcessing as PP
-
-from o_data import data
-
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 
 from matplotlib.pyplot import MultipleLocator
 from matplotlib.font_manager import FontProperties
 
-def ResilienceVisualization(valid_logP_resilience,valid_e_resilience):
-    
-    #combine x y
-    which_x_y=[[valid_logP_resilience[k],valid_e_resilience[k]] for k in range(len(x))]
-    
-    #result of interpolation
-    new_x_y=LargrangeInterpolation(x,y)
-    
-    new_x=[this_x_y[0] for this_x_y in new_x_y]
-    new_y=[this_x_y[1] for this_x_y in new_x_y]
+import operation_head_column as O_H_C
+import operation_list as O_L
+import operation_path as O_P
+
+from o_data import data
     
 #------------------------------------------------------------------------------
 """
@@ -58,7 +46,7 @@ def WorkbookResilience(xls_path,num_head_rows,num_head_columns):
     output_folder=xls_path.replace('.xls','').replace('input','output')+'\\先期固结压力\\回弹\\'
     
     #generate output folder
-    PP.GenerateFolder(output_folder)
+    O_P.GenerateFolder(output_folder)
     
     #open the excel sheet to be operated on
     #formatting_info: keep the header format
@@ -96,7 +84,7 @@ def WorkbookResilience(xls_path,num_head_rows,num_head_columns):
         #Data Frame object
         channel=pd.read_excel(xls_path,sheet_name=this_sheet_name)
         
-        final_head_columns,unit_list=HC.HeadColumnsGeneration(channel,num_head_rows)
+        final_head_columns,unit_list=O_H_C.HeadColumnsGeneration(channel,num_head_rows)
         
 #        print(final_head_columns)
         
@@ -107,7 +95,7 @@ def WorkbookResilience(xls_path,num_head_rows,num_head_columns):
         num_head_rows-=1
         
         #delete the repetition
-        index_valid=LO.ValidIndexList(value_matrix[num_head_rows:,1])  
+        index_valid=O_L.ValidIndexList(value_matrix[num_head_rows:,1])  
 
         #fetch the id of P and e
         index_settlement_compression=[]
@@ -174,29 +162,25 @@ def WorkbookResilience(xls_path,num_head_rows,num_head_columns):
                 index_settlement_recompression.append(k)
                 pressure_recompression.append(float(title.strip().split(' ')[1]))
             
-        #indoor id
-        list_indoor_id=LO.CustomIndexList(list(value_matrix[num_head_rows:,0]),index_valid)
+        index_list=[0,
+                    1,
+                    2,
+                    3,
+                    index_index_compression,
+                    index_index_resilience,
+                    index_porosity_original,
+                    index_pressure_consolidation]
         
-        #hole id
-        list_hole_id=LO.CustomIndexList(list(value_matrix[num_head_rows:,1]),index_valid)
-        
-        #start depth
-        list_start_depth=LO.CustomIndexList(list(value_matrix[num_head_rows:,2]),index_valid)
-        
-        #end depth
-        list_end_depth=LO.CustomIndexList(list(value_matrix[num_head_rows:,3]),index_valid)
-        
-        #pore aperture
-        list_porosity_original=LO.CustomIndexList(list(value_matrix[num_head_rows:,index_porosity_original]),index_valid)
-        
-        #consolidation pressure
-        list_pressure_consolidation=LO.CustomIndexList(list(value_matrix[num_head_rows:,index_pressure_consolidation]),index_valid)
-        
-        #compression index
-        list_index_compression=LO.CustomIndexList(list(value_matrix[num_head_rows:,index_index_compression]),index_valid)
-        
-        #compression index
-        list_index_resilience=LO.CustomIndexList(list(value_matrix[num_head_rows:,index_index_resilience]),index_valid)
+        #indoor id, hole id, start depth, end depth, 
+        #pore aperture, consolidation pressure, compression index, resilience index
+        list_indoor_id,\
+        list_hole_id,\
+        list_start_depth,\
+        list_end_depth,\
+        list_index_compression,\
+        list_index_resilience,\
+        list_porosity_original,\
+        list_pressure_consolidation=[O_L.CustomIndexList(list(value_matrix[num_head_rows:,this_index]),index_valid) for this_index in index_list]
         
         #settlement volume
         list_index=[index_settlement_compression,
@@ -214,7 +198,7 @@ def WorkbookResilience(xls_path,num_head_rows,num_head_columns):
                 
             for this_index in this_index_list:
                 
-                this_data[:,column]=LO.CustomIndexList(list(value_matrix[num_head_rows:,this_index]),index_valid)
+                this_data[:,column]=O_L.CustomIndexList(list(value_matrix[num_head_rows:,this_index]),index_valid)
             
                 column+=1
                 
@@ -294,12 +278,16 @@ def WorkbookResilience(xls_path,num_head_rows,num_head_columns):
             """e=e0-(1+e0)ΔH/20"""
             
             '''calculate a and e of resilience'''
-            that_data.pressure_resilience=pressure_resilience
+            that_data.pressure_resilience=[800]+pressure_resilience
             that_data.settlement_resilience=data_settlement_resilience[i]
             
             that_data.porosity_resilience=list(e_0-(1+e_0)*np.array(that_data.settlement_resilience)/20)
             
-            '''line'''
+            #tail: add an element whose pressure is 800
+            e_800=that_data.porosity_compression[that_data.pressure_compression.index(800)+1]
+
+            that_data.porosity_resilience.insert(0,e_800)
+            
 #            print(that_data.pressure_resilience)
 #            print(that_data.porosity_resilience)
             
@@ -310,17 +298,21 @@ def WorkbookResilience(xls_path,num_head_rows,num_head_columns):
             that_data.modulus_resilience=(200-100)/(s_200-s_100)/1000*20
             
             '''calculate a and e of recompression'''
-            that_data.pressure_recompression=pressure_recompression+[1600]
+            that_data.pressure_recompression=[50]+pressure_recompression+[1600]
             that_data.settlement_recompression=data_settlement_recompression[i]
         
             that_data.porosity_recompression=list(e_0-(1+e_0)*np.array(that_data.settlement_recompression)/20)
+        
+            #head: add an element whose pressure is 50
+            e_50=that_data.porosity_resilience[-1]
+#            
+            that_data.porosity_recompression.insert(0,e_50)
             
-            #add an element whose pressure is 1600
-            e_1600=that_data.porosity_compression[that_data.pressure_compression.index(1600)]
+            #tail: add an element whose pressure is 1600
+            e_1600=that_data.porosity_compression[that_data.pressure_compression.index(1600)+1]
 
             that_data.porosity_recompression.append(e_1600)
-  
-            '''curve'''
+
 #            print(that_data.pressure_recompression)
 #            print(that_data.porosity_recompression)
                   

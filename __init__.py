@@ -16,13 +16,4 @@ sys.path.append(os.getcwd()+'\\Module')
 sys.path.append(os.getcwd()+'\\Object')
 sys.path=list(set(sys.path))
 
-import HeadColumns as HC
-import DataFiltering as DF
-import ListOperation as LO
-import PathProcessing as PP
-import GrainPartition as GP
-import BatchProcessing as BP
-import ExcelStatistics as ES
-import SiltClassification as SC
-import ResilienceStatistics as RS
-import ConsolidationStatistics as CS
+import statistics_resilience_curve as S_R_C
