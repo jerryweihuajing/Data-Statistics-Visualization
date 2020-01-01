@@ -278,7 +278,10 @@ def SheetsStatistics(xls_path,num_head_rows,num_head_columns,list_num_head_colum
                 
                 title=title.replace('>','大于')    
             
-            plt.savefig(figures_output_folder+title+'.png')
+            fig_path=figures_output_folder+title+'.png'
+            
+            #save the fig
+            plt.savefig(fig_path,dpi=300,bbox_inches='tight')
             plt.close()
             
         #statistics decoration
@@ -616,7 +619,10 @@ def WorkbookStatistics(xls_path,num_head_rows,num_head_columns):
             
             title=title.replace('>','大于')    
         
-        plt.savefig(figures_output_folder+title+'.png')
+        fig_path=figures_output_folder+title+'.png'
+        
+        #save the fig
+        plt.savefig(fig_path,dpi=300,bbox_inches='tight')
         plt.close()
             
 #    print(statistic)
@@ -956,7 +962,10 @@ def MergedWorkbookStatistics(list_xls_path,num_head_rows,num_head_columns):
             
             title=title.replace('>','大于')    
         
-        plt.savefig(figures_output_folder+title+'.png')
+        fig_path=figures_output_folder+title+'.png'
+        
+        #save the fig
+        plt.savefig(fig_path,dpi=300,bbox_inches='tight')
         plt.close()
             
     #construct new workbook   

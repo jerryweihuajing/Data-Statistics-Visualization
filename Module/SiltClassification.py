@@ -304,7 +304,10 @@ def ClassificationStatistics(map_title_classification,figures_output_folder):
         plt.title(title+' 频数分布直方图\n样本总量:'+str(int(len(valid_str))),
                   FontProperties=title_font)
         
-        plt.savefig(figures_output_folder+title+'.png')
+        fig_path=figures_output_folder+title+'.png'
+        
+        #save the fig
+        plt.savefig(fig_path,dpi=300,bbox_inches='tight')
         plt.close()
         
 #------------------------------------------------------------------------------

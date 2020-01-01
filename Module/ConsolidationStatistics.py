@@ -125,8 +125,10 @@ def CalculatePc(P,e,hole_id,start_depth,end_depth,output_folder,show=False):
         
         output_folder+='1600-3200\\'
         
+    fig_path=output_folder+str(hole_id)+'.png'
+    
     #save the fig    
-    plt.savefig(output_folder+str(hole_id)+'.png')   
+    plt.savefig(fig_path,dpi=300,bbox_inches='tight')   
     plt.close()
     
     return final_Pc
@@ -376,7 +378,9 @@ def WorkbookCondolidation(xls_path,num_head_rows,num_head_columns):
             
             this_label.set_fontname('Times New Roman')
             
-        plt.savefig(figures_output_folder+'先期固结压力\\'+Pc_folder_name+'先期固结压力值分布.png')
+        fig_path=figures_output_folder+'先期固结压力\\'+Pc_folder_name+'先期固结压力值分布.png'
+        
+        plt.savefig(fig_path,dpi=300,bbox_inches='tight')
         plt.close()
     
 #path=r'C:\Users\whj\Desktop\fig\\'

@@ -246,55 +246,90 @@ def WorkbookResilience(xls_path,num_head_rows,num_head_columns):
             '''calculate a and e of compression'''
             that_data.pressure_compression=pressure_compression
             that_data.settlement_compression=data_settlement_compression[i]
-            
+                   
             #difference of s and p
             diff_p=np.array(that_data.pressure_compression[1:])\
                   -np.array(that_data.pressure_compression[:-1])
-
+        
             diff_s=np.array(that_data.settlement_compression[1:])\
                   -np.array(that_data.settlement_compression[:-1])
-            
+                          
             #first value
             s_0=that_data.settlement_compression[0]
             p_0=that_data.pressure_compression[0]
+            e_0=that_data.porosity_original
             
             '''unit of compression coeffient is 1/MPa'''
-            a_0=(s_0/p_0)*1000/20*(1+that_data.porosity_original)
-            list_a=[a_0]+list((diff_s/diff_p)*1000/20*(1+that_data.porosity_original))
+            a_0=(s_0/p_0)*1000/20*(1+e_0)
+            
+            list_a=[a_0]+list((diff_s/diff_p)*1000/20*(1+e_0))
             list_diff_p=[p_0]+list(diff_p.ravel())
-
+        
             #porosity list
-            list_e=[that_data.porosity_original]
+            list_e=[e_0]
             
             for j in range(len(list_a)):
                 
                 e_next=list_e[j]-list_a[j]*list_diff_p[j]/1000
                 
-#                print('...')
-#                print('last e:',list_e[j])
-#                print('a:',list_a[j])
-#                print('diff p:',list_diff_p[j])
-#                print('next e:',e_next)
-                
+#                        print('...')
+#                        print('last e:',list_e[j])
+#                        print('a:',list_a[j])
+#                        print('diff p:',list_diff_p[j])
+#                        print('next e:',e_next)
+#                
                 list_e.append(e_next)
-
+        
             that_data.coefficient_compression=list_a
             that_data.porosity_compression=list_e
+
+#            print(that_data.pressure_compression)
+#            print(that_data.porosity_compression)
             
             #compression modulus calculation
-            e=that_data.porosity_original
             a=that_data.coefficient_compression[that_data.pressure_compression.index(200)]
             
-            that_data.modulus_compression=(1+e)/a
+            that_data.modulus_compression=(1+e_0)/a
+            
+            """e=e0-(1+e0)ΔH/20"""
+            
+            '''calculate a and e of resilience'''
+            that_data.pressure_resilience=pressure_resilience
+            that_data.settlement_resilience=data_settlement_resilience[i]
+            
+            that_data.porosity_resilience=list(e_0-(1+e_0)*np.array(that_data.settlement_resilience)/20)
+            
+            '''line'''
+#            print(that_data.pressure_resilience)
+#            print(that_data.porosity_resilience)
+            
+            #resilience modulus calculation
+            s_100=that_data.settlement_resilience[that_data.pressure_resilience.index(100)]
+            s_200=that_data.settlement_resilience[that_data.pressure_resilience.index(200)]
+
+            that_data.modulus_resilience=(200-100)/(s_200-s_100)/1000*20
+            
+            '''calculate a and e of recompression'''
+            that_data.pressure_recompression=pressure_recompression+[1600]
+            that_data.settlement_recompression=data_settlement_recompression[i]
         
+            that_data.porosity_recompression=list(e_0-(1+e_0)*np.array(that_data.settlement_recompression)/20)
+            
+            #add an element whose pressure is 1600
+            e_1600=that_data.porosity_compression[that_data.pressure_compression.index(1600)]
+
+            that_data.porosity_recompression.append(e_1600)
+  
+            '''curve'''
+#            print(that_data.pressure_recompression)
+#            print(that_data.porosity_recompression)
+                  
             print('Pc: %dkPa'%(that_data.pressure_consolidation))
             print('Cc: %.3f'%(that_data.index_compression))
             print('Cs: %.3f'%(that_data.index_resilience))
-            print('Es1-2: %.2fMpa'%(that_data.modulus_compression))
-            
-#            print(that_data.coefficient_compression)
-#            print(that_data.porosity_compression)
-            
+            print('Es1-2: %.2fMPa'%(that_data.modulus_compression))
+            print('Eo2-1: %.2fMPa'%(that_data.modulus_resilience))
+
             '''print all data in sample paper'''
             new_sheet.write(i*7+1,0,'室内编号',style)
             new_sheet.write(i*7+1,1,that_data.indoor_id,style)
@@ -312,9 +347,9 @@ def WorkbookResilience(xls_path,num_head_rows,num_head_columns):
             new_sheet.write(i*7+2,4,'回弹指数',style)
             new_sheet.write(i*7+2,5,'Cs=%.3f'%(that_data.index_resilience),style)
             new_sheet.write(i*7+2,6,'压缩模量',style)
-            new_sheet.write(i*7+2,7,'Es1-2=%.2fMpa'%(that_data.modulus_compression),style)
+            new_sheet.write(i*7+2,7,'Es1-2=%.2fMPa'%(that_data.modulus_compression),style)
             new_sheet.write(i*7+2,8,'回弹模量',style)
-            new_sheet.write(i*7+2,9,'Eo2-1=',style)
+            new_sheet.write(i*7+2,9,'Eo2-1=%.2fMPa'%(that_data.modulus_resilience),style)
             
             new_sheet.write(i*7+3,0,'P (kPa)',style)
             new_sheet.write(i*7+3,1,'0',style)
@@ -342,13 +377,11 @@ def WorkbookResilience(xls_path,num_head_rows,num_head_columns):
             for j in range(len(that_data.coefficient_compression)):
                 
                 new_sheet.write(i*7+6,j+2,'%.3f'%(that_data.coefficient_compression[j]),style)
-                
-            that_data.pressure_recompression=pressure_recompression
-            that_data.settlement_recompression=data_settlement_recompression[i]
 
-            '''calculate a and e of resilience'''
-            that_data.pressure_resilience=pressure_resilience
-            that_data.settlement_resilience=data_settlement_resilience[i]
+            that_data.Canvas(output_folder)
+            
+#            print(that_data.coefficient_compression)
+#            print(that_data.porosity_compression)
             
 #        #high pressure
 #        for i in range(np.shape(index_valid)[0]):

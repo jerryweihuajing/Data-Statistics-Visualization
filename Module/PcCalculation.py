@@ -550,9 +550,10 @@ Returns:
 """
 def MinCurvateRadius(which_x_y):
 
+    '''default: (1/3, 3/4)'''
     #Calculate the radius of curvature
-    base=int(len(which_x_y)/3)
-    threshold=int(3*len(which_x_y)/4)
+    base=int(len(which_x_y)/4)
+    threshold=int(2*len(which_x_y)/4)
     
     #A list of radius of curvature
     curvate_radius=[]

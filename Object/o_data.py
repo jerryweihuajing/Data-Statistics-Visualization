@@ -59,7 +59,7 @@ class data:
         
         #modulus
         self.modulus_compression=modulus_compression
-        self.modulus_resiliance=modulus_resilience
+        self.modulus_resilience=modulus_resilience
                  
         #coefficient
         self.coefficient_compression=coefficient_compression
@@ -84,17 +84,17 @@ class data:
     def Canvas(self,output_folder):
         
         #delete the first element
-        valid_P_compression=self.pressure_compression[1:]
+        valid_P_compression=self.pressure_compression
         valid_e_compression=self.porosity_compression[1:]
-        valid_P_resiliance=self.pressure_resiliance[1:]
-        valid_e_resiliance=self.porosity_resiliance[1:]
-        valid_P_recompression=self.pressure_recompression[1:]
-        valid_e_recompression=self.porosity_recompression[1:]
+        valid_P_resilience=self.pressure_resilience
+        valid_e_resilience=self.porosity_resilience
+        valid_P_recompression=self.pressure_recompression
+        valid_e_recompression=self.porosity_recompression
         
         if valid_P_compression==[]\
         or valid_e_compression==[]\
-        or valid_P_resiliance==[]\
-        or valid_e_resiliance==[]\
+        or valid_P_resilience==[]\
+        or valid_e_resilience==[]\
         or valid_P_recompression==[]\
         or valid_e_recompression==[]:
             
@@ -102,12 +102,12 @@ class data:
         
         #Logarithm of P
         valid_logP_compression=[np.log10(item) for item in valid_P_compression]
-        valid_logP_resiliance=[np.log10(item) for item in valid_P_resiliance]
+        valid_logP_resilience=[np.log10(item) for item in valid_P_resilience]
         valid_logP_recompression=[np.log10(item) for item in valid_P_recompression]
         
         #combine all variabls
         valid_logP=valid_logP_compression
-        valid_e=list(valid_e_compression)+list(valid_e_resiliance)+list(valid_e_recompression)
+        valid_e=list(valid_e_compression)+list(valid_e_resilience)+list(valid_e_recompression)
         
         '''canvas'''
         fig,ax=plt.subplots(figsize=(8,8))
@@ -155,8 +155,10 @@ class data:
         plt.grid()
         plt.show()
     
-        #save the fig    
-        plt.savefig(output_folder+str(self.hole_id)+'.png')   
+        fig_path=output_folder+str(self.hole_id)+'.png'
+        
+        #save the fig
+        plt.savefig(fig_path,dpi=300,bbox_inches='tight')
         plt.close()
         
         return final_Pc
