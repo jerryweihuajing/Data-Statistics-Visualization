@@ -47,6 +47,7 @@ def ValidIndexList(which_list):
     #count invalid index
     repetition=0
     R=0
+    NaN=0
     
     for ix in range(len(which_list)):
         
@@ -58,6 +59,14 @@ def ValidIndexList(which_list):
             
             continue
         
+        if isinstance(this_index,float):
+            
+            if np.isnan(this_index):
+                
+                NaN+=1
+                
+                continue
+            
         if 'R' in this_index:
             
             R+=1

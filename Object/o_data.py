@@ -81,7 +81,7 @@ class data:
         self.settlement_resilience=settlement_resilience
         self.settlement_recompression=settlement_recompression
         
-    def Canvas(self,output_folder):
+    def ResilienceCurve(self,output_folder):
         
         #delete the first element
         valid_P_compression=self.pressure_compression
@@ -148,9 +148,20 @@ class data:
         ax.yaxis.set_minor_locator(MultipleLocator(y_minor_step))
         
         #visualization of curve
-        C_P_C.DataVisualization(valid_logP_compression,valid_e_compression,x_major_step,y_major_step)
-        C_P_C.DataVisualization(valid_logP_resilience,valid_e_resilience,x_major_step,y_major_step)
-        C_P_C.DataVisualization(valid_logP_recompression,valid_e_recompression,x_major_step,y_major_step)
+        C_P_C.DataVisualization(valid_logP_compression,
+                                valid_e_compression,
+                                x_major_step,
+                                y_major_step)
+        
+        C_P_C.DataVisualization(valid_logP_resilience,
+                                valid_e_resilience,
+                                x_major_step,
+                                y_major_step)
+        
+        C_P_C.DataVisualization(valid_logP_recompression,
+                                valid_e_recompression,
+                                x_major_step,
+                                y_major_step)
         
         #add depth
         plt.text(0.95*np.average(valid_logP),max(valid_e),
@@ -168,4 +179,107 @@ class data:
         plt.close()
         
         return final_Pc
-             
+    
+    def ConsolidationCurve(self,output_folder):
+        
+        #delete the first element
+        valid_P_compression=self.pressure_compression[1:]
+        valid_e_compression=self.porosity_compression[1:]
+        
+        if valid_P_compression==[]\
+        or valid_e_compression==[]:
+            
+            return None
+        
+        #Logarithm of P
+        valid_logP_compression=[np.log10(item) for item in valid_P_compression]
+        
+        #combine all variabls
+        valid_logP=valid_logP_compression
+        valid_e=list(valid_e_compression)
+        
+        '''canvas'''
+        fig,ax=plt.subplots(figsize=(8,8))
+        
+        #calculation of consolidation pressure
+        final_Pc=C_P_C.CalculatePcAndCc(valid_logP_compression,valid_e_compression,show=1)  
+        
+        #set ticks
+        plt.tick_params(labelsize=12)
+        labels = ax.get_xticklabels() + ax.get_yticklabels()
+        
+        #title font
+        annotation_font=FontProperties(fname=r"C:\Windows\Fonts\GILI____.ttf",size=16)
+        
+        #annotation font
+        title_font=FontProperties(fname="C:\Windows\Fonts\GIL_____.ttf",size=20)
+        
+        plt.title('ID: '+str(self.hole_id),FontProperties=title_font)  
+                
+        plt.xlabel('lgP',FontProperties=annotation_font)
+        plt.ylabel('e',FontProperties=annotation_font)
+        
+        #label fonts
+        for this_label in labels:
+            
+            this_label.set_fontname('Times New Roman')
+            
+        #tick step
+        x_major_step=(max(valid_logP)-min(valid_logP))/10
+        x_minor_step=(max(valid_logP)-min(valid_logP))/20
+        y_major_step=(max(valid_e)-min(valid_e))/10
+        y_minor_step=(max(valid_e)-min(valid_e))/20
+        
+        #set locator
+        ax.xaxis.set_major_locator(MultipleLocator(x_major_step))
+        ax.xaxis.set_minor_locator(MultipleLocator(x_minor_step))
+        ax.yaxis.set_major_locator(MultipleLocator(y_major_step))
+        ax.yaxis.set_minor_locator(MultipleLocator(y_minor_step))
+        
+        #visualization of curve
+        C_P_C.DataVisualization(valid_logP_compression,
+                                valid_e_compression,
+                                x_major_step,
+                                y_major_step,
+                                True)
+        
+        #add depth
+        plt.text(0.95*np.average(valid_logP),max(valid_e),
+                 'Start Depth: '+str(self.start_depth)+'m End Depth: '+str(self.end_depth)+'m',
+                 FontProperties=annotation_font)
+        
+        #show the grid
+        plt.grid()
+        plt.show()
+
+        if final_Pc<100:
+        
+            output_folder+='0-100\\'
+        
+        elif final_Pc<200:
+            
+            output_folder+='100-200\\'
+        
+        elif final_Pc<400:
+            
+            output_folder+='200-400\\'
+            
+        elif final_Pc<800:
+            
+            output_folder+='400-800\\'
+            
+        elif final_Pc<1600:
+            
+            output_folder+='800-1600\\'
+            
+        else:
+            
+            output_folder+='1600-3200\\'
+            
+        fig_path=output_folder+str(self.hole_id)+'.png'
+        
+        #save the fig
+        plt.savefig(fig_path,dpi=300,bbox_inches='tight')
+        plt.close()
+    
+        return final_Pc

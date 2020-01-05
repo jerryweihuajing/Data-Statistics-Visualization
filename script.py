@@ -20,14 +20,17 @@ from __init__ import *
 #ES.MergedWorkbookStatistics(list_merged_xls_path,3,2)
 #SC.MergedWorkbookClassification(list_merged_xls_path,3,2)      
 
-#batch processing
-#BP.Go('.\Data\\input\\',3,2)
+#xls_path=os.getcwd()+'\\Data\input\城市地质调查高压数据.xls'
+#
+#'''better annotation position'''
+#S_R_C.WorkbookResilience(xls_path,2,2)
 
-#xls_path=os.getcwd()+'\\Data\input\土工试验54个.xls'
+xls_path=os.getcwd()+'\\Data\input\淮安城市地质土工试验54个.xls'
 
-#CS.WorkbookCondolidation(xls_path,3,2)
+S_G_V.WorkbookStatistics(xls_path,3,2)
+S_S_C.WorkbookClassification(xls_path,3,2)
 
-xls_path=os.getcwd()+'\\Data\input\城市地质调查高压数据.xls'
+#xls_path=os.getcwd()+'\\Data\input\淮安城市地质有高压数据部分.xls'
+#
+#S_P_C.WorkbookCondolidation(xls_path,3,2)
 
-'''better annotation position'''
-S_R_C.WorkbookResilience(xls_path,2,2)

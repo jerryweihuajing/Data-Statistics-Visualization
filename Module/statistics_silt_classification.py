@@ -21,10 +21,10 @@ from xlutils.copy import copy
 from matplotlib.pyplot import MultipleLocator
 from matplotlib.font_manager import FontProperties
 
-import HeadColumns as HC
-import ListOperation as LO
-import PathProcessing as PP
-import GrainPartition as GP
+import operation_list as O_L
+import operation_path as O_P
+import operation_head_column as O_H_C
+import calculation_feature_value as C_F_V
 
 #------------------------------------------------------------------------------
 """
@@ -341,7 +341,7 @@ def SheetsClassification(xls_path,num_head_rows,num_head_columns,list_num_head_c
     tables_output_folder=xls_path.replace('.xls','').replace('input','output')+'\\分类\\'
     
     #generate output folder
-    PP.GenerateFolder(tables_output_folder)
+    O_P.GenerateFolder(tables_output_folder)
     
     #save as
     new_workbook.save(tables_output_folder+'分类结果.xls')
@@ -377,19 +377,19 @@ def SheetsClassification(xls_path,num_head_rows,num_head_columns,list_num_head_c
         figures_output_folder=xls_path.replace('.xls','').replace('input','output')+'\\分类\\图\\表 '+this_sheet_name+'\\'
         
         #generate output folder
-        PP.GenerateFolder(figures_output_folder)
-        PP.GenerateFolder(tables_output_folder)
+        O_P.GenerateFolder(figures_output_folder)
+        O_P.GenerateFolder(tables_output_folder)
         
         #Data Frame object
         channel=pd.read_excel(xls_path,sheet_name=this_sheet_name)
         
-        final_head_columns,unit_list=HC.HeadColumnsGeneration(channel,num_head_rows)
+        final_head_columns,unit_list=O_H_C.HeadColumnsGeneration(channel,num_head_rows)
         
         #all info of dataframe
         value_matrix=channel.values
         
         #delete the repetition
-        index_valid=LO.ValidIndexList(value_matrix[num_head_rows:,1])
+        index_valid=O_L.ValidIndexList(value_matrix[num_head_rows:,1])
         
         #index of line where info starts
         start_info_row=num_head_rows+1   
@@ -401,7 +401,7 @@ def SheetsClassification(xls_path,num_head_rows,num_head_columns,list_num_head_c
             #search for note and make statistics
             if '备' in this_head or '注' in this_head:
                 
-                list_note=LO.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
+                list_note=O_L.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
                 head_note=this_head
                 
                 print('-->head:'+head_note)
@@ -409,7 +409,7 @@ def SheetsClassification(xls_path,num_head_rows,num_head_columns,list_num_head_c
             #search for type of silt
             if '分类' in this_head:
                 
-                list_GB=LO.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
+                list_GB=O_L.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
                 head_GB=this_head
                 
                 print('-->head:'+head_GB)
@@ -417,7 +417,7 @@ def SheetsClassification(xls_path,num_head_rows,num_head_columns,list_num_head_c
             #search for pore ratio
             if 'e0' in this_head:
      
-                list_e0=LO.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
+                list_e0=O_L.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
                 head_e0=this_head
                 
                 print('-->head:'+head_e0)
@@ -425,7 +425,7 @@ def SheetsClassification(xls_path,num_head_rows,num_head_columns,list_num_head_c
             #search for moisture content
             if 'ω0' in this_head:
                 
-                list_ω0=LO.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
+                list_ω0=O_L.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
                 head_ω0=this_head 
                 
                 print('-->head:'+head_ω0)
@@ -433,7 +433,7 @@ def SheetsClassification(xls_path,num_head_rows,num_head_columns,list_num_head_c
             #search for liquidity index
             if 'IL' in this_head:
                 
-                list_IL=LO.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
+                list_IL=O_L.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
                 head_IL=this_head
                 
                 print('-->head:'+head_IL)
@@ -538,8 +538,8 @@ def SheetsClassification(xls_path,num_head_rows,num_head_columns,list_num_head_c
         new_workbook.save(tables_output_folder+'分类结果.xls')
         
         #delete blank list
-        real_title_list=LO.CustomIndexList(title_list,LO.DeleteBlankList(classification_list))
-        real_classification_list=LO.CustomIndexList(classification_list,LO.DeleteBlankList(classification_list))
+        real_title_list=O_L.CustomIndexList(title_list,O_L.DeleteBlankList(classification_list))
+        real_classification_list=O_L.CustomIndexList(classification_list,O_L.DeleteBlankList(classification_list))
         
         #delete nan in classification list
         new_classification_list=[]
@@ -599,7 +599,7 @@ def WorkbookClassification(xls_path,num_head_rows,num_head_columns):
     figures_output_folder=xls_path.replace('.xls','').replace('input','output')+'\\分类\\图\\总图\\'
     
     #generate output folder
-    PP.GenerateFolder(figures_output_folder)
+    O_P.GenerateFolder(figures_output_folder)
   
     #construct map between sheet names and head rows
     list_sheet_names=list(workbook.sheet_names())
@@ -621,7 +621,7 @@ def WorkbookClassification(xls_path,num_head_rows,num_head_columns):
     classification_ω0,classification_e0,classification_IL=[],[],[]
     
     #traverse all sheets
-    for this_sheet_name in list_sheet_names:
+    for this_sheet_name in list_sheet_names[-1:]:
             
         print('')
         print('...')
@@ -631,13 +631,13 @@ def WorkbookClassification(xls_path,num_head_rows,num_head_columns):
         #Data Frame object
         channel=pd.read_excel(xls_path,sheet_name=this_sheet_name)
         
-        final_head_columns,unit_list=HC.HeadColumnsGeneration(channel,num_head_rows)
+        final_head_columns,unit_list=O_H_C.HeadColumnsGeneration(channel,num_head_rows)
         
         #all info of dataframe
         value_matrix=channel.values
         
         #delete the repetition
-        index_valid=LO.ValidIndexList(value_matrix[num_head_rows:,1])
+        index_valid=O_L.ValidIndexList(value_matrix[num_head_rows:,1])
         
         print('-->Valid Samples:',len(index_valid))
         
@@ -648,7 +648,7 @@ def WorkbookClassification(xls_path,num_head_rows,num_head_columns):
             #search for note and make statistics
             if '备' in this_head or '注' in this_head:
                 
-                list_note=LO.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
+                list_note=O_L.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
                 head_note=this_head
                 
                 print('-->head:'+head_note)
@@ -656,7 +656,7 @@ def WorkbookClassification(xls_path,num_head_rows,num_head_columns):
             #search for type of silt
             if '分类' in this_head:
                 
-                list_GB=LO.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
+                list_GB=O_L.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
                 head_GB=this_head
                 
                 print('-->head:'+head_GB)
@@ -664,7 +664,7 @@ def WorkbookClassification(xls_path,num_head_rows,num_head_columns):
             #search for pore ratio
             if 'e0' in this_head:
      
-                list_e0=LO.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
+                list_e0=O_L.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
                 head_e0=this_head
                 
                 print('-->head:'+head_e0)
@@ -672,7 +672,7 @@ def WorkbookClassification(xls_path,num_head_rows,num_head_columns):
             #search for moisture content
             if 'ω0' in this_head:
                 
-                list_ω0=LO.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
+                list_ω0=O_L.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
                 head_ω0=this_head 
                 
                 print('-->head:'+head_ω0)
@@ -680,21 +680,21 @@ def WorkbookClassification(xls_path,num_head_rows,num_head_columns):
             #search for liquidity index
             if 'IL' in this_head:
                 
-                list_IL=LO.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
+                list_IL=O_L.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
                 head_IL=this_head
                 
                 print('-->head:'+head_IL)
 
         #filter floury soil
-        index_floury_soil=LO.GBIndexFlourySoil(list_GB)
+        index_floury_soil=O_L.GBIndexFlourySoil(list_GB)
         
-        ω0_valid=LO.CustomIndexList(list_ω0,index_floury_soil)
-        e0_valid=LO.CustomIndexList(list_e0,index_floury_soil)
+        ω0_valid=O_L.CustomIndexList(list_ω0,index_floury_soil)
+        e0_valid=O_L.CustomIndexList(list_e0,index_floury_soil)
 
         #filter cohesive silt
-        index_cohesive_silt=LO.GBIndexCohesiveSilt(list_GB)
+        index_cohesive_silt=O_L.GBIndexCohesiveSilt(list_GB)
         
-        IL_valid=LO.CustomIndexList(list_IL,index_cohesive_silt)
+        IL_valid=O_L.CustomIndexList(list_IL,index_cohesive_silt)
      
         #list of classification result
         #floury soil
@@ -772,8 +772,8 @@ def WorkbookClassification(xls_path,num_head_rows,num_head_columns):
     new_workbook.save(tables_output_folder+'统计总表.xls')
     
     #delete blank list
-    real_title_list=LO.CustomIndexList(title_list,LO.DeleteBlankList(classification_list))
-    real_classification_list=LO.CustomIndexList(classification_list,LO.DeleteBlankList(classification_list))
+    real_title_list=O_L.CustomIndexList(title_list,O_L.DeleteBlankList(classification_list))
+    real_classification_list=O_L.CustomIndexList(classification_list,O_L.DeleteBlankList(classification_list))
     
     #delete nan in classification list
     new_classification_list=[]
@@ -829,8 +829,8 @@ def MergedWorkbookClassification(list_xls_path,num_head_rows,num_head_columns):
     figures_output_folder=list_xls_path[0].split('input')[0]+'output\\颗分汇总\\分类\\图\\总图\\'
         
     #generate output folder
-    PP.GenerateFolder(tables_output_folder)
-    PP.GenerateFolder(figures_output_folder)
+    O_P.GenerateFolder(tables_output_folder)
+    O_P.GenerateFolder(figures_output_folder)
     
     #DF channels
     total_channels=[]
@@ -882,13 +882,13 @@ def MergedWorkbookClassification(list_xls_path,num_head_rows,num_head_columns):
         print('......')
         print('')
 
-        final_head_columns,unit_list=HC.HeadColumnsGeneration(channel,num_head_rows)
+        final_head_columns,unit_list=O_H_C.HeadColumnsGeneration(channel,num_head_rows)
         
         #all info of dataframe
         value_matrix=channel.values
         
         #delete the repetition
-        index_valid=LO.ValidIndexList(value_matrix[num_head_rows:,1])
+        index_valid=O_L.ValidIndexList(value_matrix[num_head_rows:,1])
         
         print('-->Valid Samples:',len(index_valid))
         
@@ -899,7 +899,7 @@ def MergedWorkbookClassification(list_xls_path,num_head_rows,num_head_columns):
             #search for note and make statistics
             if '备' in this_head or '注' in this_head:
                 
-                list_note=LO.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
+                list_note=O_L.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
                 head_note=this_head
                 
                 print('-->head:'+head_note)
@@ -907,7 +907,7 @@ def MergedWorkbookClassification(list_xls_path,num_head_rows,num_head_columns):
             #search for type of silt
             if '分类' in this_head:
                 
-                list_GB=LO.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
+                list_GB=O_L.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
                 head_GB=this_head
                 
                 print('-->head:'+head_GB)
@@ -915,7 +915,7 @@ def MergedWorkbookClassification(list_xls_path,num_head_rows,num_head_columns):
             #search for pore ratio
             if 'e0' in this_head:
      
-                list_e0=LO.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
+                list_e0=O_L.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
                 head_e0=this_head
                 
                 print('-->head:'+head_e0)
@@ -923,7 +923,7 @@ def MergedWorkbookClassification(list_xls_path,num_head_rows,num_head_columns):
             #search for moisture content
             if 'ω0' in this_head:
                 
-                list_ω0=LO.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
+                list_ω0=O_L.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
                 head_ω0=this_head 
                 
                 print('-->head:'+head_ω0)
@@ -931,13 +931,13 @@ def MergedWorkbookClassification(list_xls_path,num_head_rows,num_head_columns):
             #search for liquidity index
             if 'IL' in this_head:
                 
-                list_IL=LO.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
+                list_IL=O_L.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
                 head_IL=this_head
                 
                 print('-->head:'+head_IL)
         
         #delete the repetition and remove label R
-        index_valid=LO.ListWithR(value_matrix[num_head_rows:,1])
+        index_valid=O_L.ListWithR(value_matrix[num_head_rows:,1])
      
         print('-->Total Samples:',len(value_matrix[num_head_rows:,1]))
         print('-->Valid Samples:',len(index_valid))
@@ -962,24 +962,24 @@ def MergedWorkbookClassification(list_xls_path,num_head_rows,num_head_columns):
                 
                 print('-->',title)
                 
-                data_Cu=LO.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
+                data_Cu=O_L.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
                 
             if '曲' and '率' in title:
                 
                 print('-->',title)
                 
-                data_Ce=LO.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
+                data_Ce=O_L.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
                 
             if '分' and '类' in title:
                 
                 print('-->',title)
                 
-                data_GB=LO.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
+                data_GB=O_L.CustomIndexList(list(value_matrix[num_head_rows:,k]),index_valid)
             
     #    print(list_partition_index)
         
         #for partition
-        index_partition=LO.GBIndexPartition(data_GB)
+        index_partition=O_L.GBIndexPartition(data_GB)
          
         #matrix to contain grain partition proportion
         data_partition=np.zeros((len(index_partition),len(list_partition_index)))
@@ -988,14 +988,14 @@ def MergedWorkbookClassification(list_xls_path,num_head_rows,num_head_columns):
         
         for this_index in list_partition_index:
             
-            data_partition[:,column]=LO.CustomIndexList(list(value_matrix[num_head_rows:,this_index]),index_partition)
+            data_partition[:,column]=O_L.CustomIndexList(list(value_matrix[num_head_rows:,this_index]),index_partition)
         
             column+=1
         
         #valid part
-        GB_partition=LO.CustomIndexList(data_GB,index_partition)
-        Cu_partition=LO.CustomIndexList(data_Cu,index_partition)
-        Ce_partition=LO.CustomIndexList(data_Ce,index_partition)
+        GB_partition=O_L.CustomIndexList(data_GB,index_partition)
+        Cu_partition=O_L.CustomIndexList(data_Cu,index_partition)
+        Ce_partition=O_L.CustomIndexList(data_Ce,index_partition)
         
     #        len(index_valid)
         
@@ -1008,7 +1008,7 @@ def MergedWorkbookClassification(list_xls_path,num_head_rows,num_head_columns):
         for kk in range(len(index_partition)):
                   
             #construct new object
-            this_grain=GP.grain()
+            this_grain=C_F_V.grain()
             
             this_grain.silt_type=GB_partition[kk]
             this_grain.InitMap(list(data_partition[kk,:]))   
@@ -1027,15 +1027,15 @@ def MergedWorkbookClassification(list_xls_path,num_head_rows,num_head_columns):
                 G_classification_code.append(this_grain.classification_code)
             
         #filter floury soil
-        index_floury_soil=LO.GBIndexFlourySoil(list_GB)
+        index_floury_soil=O_L.GBIndexFlourySoil(list_GB)
 
-        ω0_valid=LO.CustomIndexList(list_ω0,index_floury_soil)
-        e0_valid=LO.CustomIndexList(list_e0,index_floury_soil)
+        ω0_valid=O_L.CustomIndexList(list_ω0,index_floury_soil)
+        e0_valid=O_L.CustomIndexList(list_e0,index_floury_soil)
 
         #filter cohesive silt
-        index_cohesive_silt=LO.GBIndexCohesiveSilt(list_GB)
+        index_cohesive_silt=O_L.GBIndexCohesiveSilt(list_GB)
 
-        IL_valid=LO.CustomIndexList(list_IL,index_cohesive_silt)
+        IL_valid=O_L.CustomIndexList(list_IL,index_cohesive_silt)
      
         #list of classification result
         #floury soil
@@ -1071,8 +1071,8 @@ def MergedWorkbookClassification(list_xls_path,num_head_rows,num_head_columns):
                          classification_G_code]
         
     #delete blank list
-    real_title_list=LO.CustomIndexList(title_list,LO.DeleteBlankList(classification_list))
-    real_classification_list=LO.CustomIndexList(classification_list,LO.DeleteBlankList(classification_list))
+    real_title_list=O_L.CustomIndexList(title_list,O_L.DeleteBlankList(classification_list))
+    real_classification_list=O_L.CustomIndexList(classification_list,O_L.DeleteBlankList(classification_list))
     
     #delete nan in classification list
     new_classification_list=[]

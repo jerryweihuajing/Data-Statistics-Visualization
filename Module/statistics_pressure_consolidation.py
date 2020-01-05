@@ -12,17 +12,19 @@ Created on Sun Nov 24 16:22:25 2019
 import xlrd
 import pandas as pd
 
-import HeadColumns as HC
-import PcCalculation as PC
-import ListOperation as LO
-import PathProcessing as PP
-
 import numpy as np
 import matplotlib.pyplot as plt
 
 from matplotlib.pyplot import MultipleLocator
 from matplotlib.font_manager import FontProperties
-        
+
+import operation_list as O_L
+import operation_path as O_P
+import operation_head_column as O_H_C
+import calculation_pressure_consolidation as C_P_C
+
+from o_data import data
+
 #------------------------------------------------------------------------------        
 """
 Calculate Pc external interface
@@ -52,13 +54,13 @@ def CalculatePc(P,e,hole_id,start_depth,end_depth,output_folder,show=False):
     valid_logP=[np.log10(item) for item in valid_P]
 #    valid_logP=[np.log2(item) for item in valid_P]
     
-    if PC.CalculatePcAndCc(valid_logP,valid_e)>max(P):
+    if C_P_C.CalculatePcAndCc(valid_logP,valid_e)>max(P):
         
         return None
     
     fig,ax=plt.subplots(figsize=(8,8))
     
-    final_Pc=PC.CalculatePcAndCc(valid_logP,valid_e,show=show)  
+    final_Pc=C_P_C.CalculatePcAndCc(valid_logP,valid_e,show=show)  
     
     #set ticks
     plt.tick_params(labelsize=12)
@@ -158,12 +160,9 @@ def WorkbookCondolidation(xls_path,num_head_rows,num_head_columns):
     #generate output folder
     list_threshold=['0-100','100-200','200-400','400-800','800-1600','1600-3200']
     
-    for this_folder in [figures_output_folder+'先期固结压力\\正常\\',
-                        figures_output_folder+'先期固结压力\\高压\\']:
+    for this_threshold in list_threshold:
         
-        for this_threshold in list_threshold:
-            
-            PP.GenerateFolder(this_folder+this_threshold+'\\')
+        O_P.GenerateFolder(figures_output_folder+'先期固结压力\\'+this_threshold+'\\')
     
     #open the excel sheet to be operated on
     #formatting_info: keep the header format
@@ -173,7 +172,6 @@ def WorkbookCondolidation(xls_path,num_head_rows,num_head_columns):
     list_sheet_names=list(workbook.sheet_names())
     
     #data throughout workbook 
-    Pc_normal_workbook=[]
     Pc_high_pressure_workbook=[]
     
     #traverse all sheets
@@ -188,7 +186,7 @@ def WorkbookCondolidation(xls_path,num_head_rows,num_head_columns):
         #Data Frame object
         channel=pd.read_excel(xls_path,sheet_name=this_sheet_name)
         
-        final_head_columns,unit_list=HC.HeadColumnsGeneration(channel,num_head_rows)
+        final_head_columns,unit_list=O_H_C.HeadColumnsGeneration(channel,num_head_rows)
         
         #print(final_head_columns)
         
@@ -196,38 +194,25 @@ def WorkbookCondolidation(xls_path,num_head_rows,num_head_columns):
         value_matrix=channel.values
         
         #delete the repetition
-        index_valid=LO.ValidIndexList(value_matrix[num_head_rows:,1])  
+        index_valid=O_L.ValidIndexList(value_matrix[num_head_rows:,1])  
         
         #fetch the id of P and e
-        index_e=[]
         index_e_high=[]
         
         #pressure
-        P=[]
         P_high=[]
         
-        #hole id
-        list_hole_id=LO.CustomIndexList(list(value_matrix[num_head_rows:,1]),index_valid)
+        index_list=[1,2,3]
         
-        #start depth
-        list_start_depth=LO.CustomIndexList(list(value_matrix[num_head_rows:,2]),index_valid)
-        
-        #end depth
-        list_end_depth=LO.CustomIndexList(list(value_matrix[num_head_rows:,3]),index_valid)
+        #hole id, start depth, end depth
+        list_hole_id,\
+        list_start_depth,\
+        list_end_depth=[O_L.CustomIndexList(list(value_matrix[num_head_rows:,this_index]),index_valid) for this_index in index_list]
     
         for k in range(num_head_columns,np.shape(value_matrix)[1]):
             
             #title str
             title=final_head_columns[k] 
-    
-            if '各级压力下的孔隙比' in title and '高压固结' not in title:
-                
-                continue
-            
-                print(k,title)
-                
-                index_e.append(k)
-                P.append(float(title.strip().split(' ')[1]))
                 
             if '各级压力下的孔隙比' in title and '高压固结' in title:
                 
@@ -237,104 +222,58 @@ def WorkbookCondolidation(xls_path,num_head_rows,num_head_columns):
                 P_high.append(float(title.strip().split(' ')[1]))
                 
         #matrix to contain grain partition proportion
-        data_e=np.zeros((len(index_valid),len(index_e)))
         data_e_high=np.zeros((len(index_valid),len(index_e_high)))
-               
-        column=0
-            
-        for this_index in index_e:
-            
-            data_e[:,column]=LO.CustomIndexList(list(value_matrix[num_head_rows:,this_index]),index_valid)
-        
-            column+=1
-       
+                    
         column=0
         
         for this_index in index_e_high:
             
-            data_e_high[:,column]=LO.CustomIndexList(list(value_matrix[num_head_rows:,this_index]),index_valid)
+            data_e_high[:,column]=O_L.CustomIndexList(list(value_matrix[num_head_rows:,this_index]),index_valid)
         
             column+=1
-            
-        Pc_normal=[]
-        
-        #normal
-        for i in range(np.shape(data_e)[0]):
-            
-            expire_nan_index_list=LO.ExpireNanIndexList(data_e[i])
-        
-            this_e=LO.CustomIndexList(list(data_e[i]),expire_nan_index_list)
-            this_P=LO.CustomIndexList(P,expire_nan_index_list)
-    
-            this_hole_id=list_hole_id[i]
-            this_start_depth=list_start_depth[i]
-            this_end_depth=list_end_depth[i]
-            
-            Pc_normal.append(CalculatePc(this_P,
-                                         this_e,
-                                         this_hole_id,
-                                         this_start_depth,
-                                         this_end_depth,
-                                         figures_output_folder+'先期固结压力\\正常\\',
-                                         show=True))
         
         Pc_high_pressure=[]
         
         #high pressure
         for i in range(np.shape(data_e_high)[0]):
             
-            expire_nan_index_list=LO.ExpireNanIndexList(data_e_high[i])
-        
-            this_e=LO.CustomIndexList(list(data_e_high[i]),expire_nan_index_list)
-            this_P=LO.CustomIndexList(P_high,expire_nan_index_list)
+            expire_nan_index_list=O_L.ExpireNanIndexList(data_e_high[i])
+
+            this_e=O_L.CustomIndexList(list(data_e_high[i]),expire_nan_index_list)
+            this_P=O_L.CustomIndexList(P_high,expire_nan_index_list)
             
-            this_hole_id=list_hole_id[i]
-            this_start_depth=list_start_depth[i]
-            this_end_depth=list_end_depth[i]
+            #construct new data object
+            that_data=data()
             
-            Pc_high_pressure.append(CalculatePc(this_P,
-                                                this_e,
-                                                this_hole_id,
-                                                this_start_depth,
-                                                this_end_depth,
-                                                figures_output_folder+'先期固结压力\\高压\\',
-                                                show=True))
-#        print(Pc_high_pressure)
-        Pc_normal_sheet=[]
+            that_data.hole_id=list_hole_id[i]
+            that_data.end_depth=list_end_depth[i]
+            that_data.start_depth=list_start_depth[i]
+            that_data.porosity_compression=this_e
+            that_data.pressure_compression=this_P
+            
+            Pc_high_pressure.append(that_data.ConsolidationCurve(figures_output_folder+'先期固结压力\\'))
+            
         Pc_high_pressure_sheet=[]
         
         for j in range(len(index_valid)):
-            
-    #        print(Pc_normal[j],Pc_high_pressure[j])
-            
-            if Pc_normal[j] is None and Pc_high_pressure[j] is None:
-                
-                continue
-            
-            if Pc_normal[j] is not None:
-                
-                 Pc_normal_sheet.append(Pc_normal[j])
-                
+                         
             if Pc_high_pressure[j] is not None:
                 
                 Pc_high_pressure_sheet.append(Pc_high_pressure[j])
          
-        Pc_normal_workbook+=Pc_normal_sheet
         Pc_high_pressure_workbook+=Pc_high_pressure_sheet
             
     fig,ax=plt.subplots(figsize=(8,8))
     
     #for iteration
-    list_Pc_worbook=[Pc_normal_workbook,Pc_high_pressure_workbook]
-    list_title=['','高压固结']
-    list_folder_name=['正常\\','高压\\']
+    list_Pc_worbook=[Pc_high_pressure_workbook]
+    list_title=['高压固结']
     
     for k in range(len(list_title)):
         
         #Pc, list title, folder name
         Pc_workbook=list_Pc_worbook[k]
         Pc_title=list_title[k]
-        Pc_folder_name=list_folder_name[k]
         
         if Pc_title=='':
             
@@ -378,7 +317,7 @@ def WorkbookCondolidation(xls_path,num_head_rows,num_head_columns):
             
             this_label.set_fontname('Times New Roman')
             
-        fig_path=figures_output_folder+'先期固结压力\\'+Pc_folder_name+'先期固结压力值分布.png'
+        fig_path=figures_output_folder+'先期固结压力\\先期固结压力值分布.png'
         
         plt.savefig(fig_path,dpi=300,bbox_inches='tight')
         plt.close()
