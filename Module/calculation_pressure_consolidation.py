@@ -614,7 +614,7 @@ Args:
 Returns:
     None
 """
-def DataVisualization(x,y,x_step,y_step,annotation=False):
+def DataVisualization(x,y,x_step,y_step,annotation=True):
     
     #sample data font
     sammple_font=fm.FontProperties(fname="C:\Windows\Fonts\GIL_____.ttf",size=9)

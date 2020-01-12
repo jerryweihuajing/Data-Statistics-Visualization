@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 from matplotlib.pyplot import MultipleLocator
 from matplotlib.font_manager import FontProperties
 
+
 import calculation_pressure_consolidation as C_P_C
 
 #==============================================================================
@@ -43,7 +44,13 @@ class data:
                  pressure_recompression=None,
                  settlement_compression=None,
                  settlement_resilience=None,
-                 settlement_recompression=None):
+                 settlement_recompression=None,
+                 valid_logP_compression=None,
+                 valid_logP_resilience=None,
+                 valid_logP_recompression=None,
+                 valid_e_compression=None,
+                 valid_e_resilience=None,
+                 valid_e_recompression=None):
         
         #basic information
         self.indoor_id=indoor_id
@@ -81,6 +88,63 @@ class data:
         self.settlement_resilience=settlement_resilience
         self.settlement_recompression=settlement_recompression
         
+        #data for visualization
+        #log10 of pressure
+        self.valid_logP_compression=valid_logP_compression
+        self.valid_logP_resilience=valid_logP_resilience
+        self.valid_logP_recompression=valid_logP_recompression
+        
+        #porosity
+        self.valid_e_compression=valid_e_compression
+        self.valid_e_resilience=valid_e_resilience
+        self.valid_e_recompression=valid_e_recompression
+    
+    def PerfectDataVisualization(self,x_step,y_step):
+    
+        #sample data font
+        sammple_font=FontProperties(fname="C:\Windows\Fonts\GIL_____.ttf",size=9)
+    
+        #scatter data
+        x_compression=self.valid_logP_compression
+        y_compression=self.valid_e_compression
+        
+        x_resilience=self.valid_logP_resilience
+        y_resilience=self.valid_e_resilience
+        
+        x_recompression=self.valid_logP_recompression
+        y_recompression=self.valid_e_recompression
+        
+        #result of interpolation
+        new_x_y_compression=C_P_C.LargrangeInterpolation(x_compression,y_compression)
+        new_x_y_resilience=C_P_C.LargrangeInterpolation(x_resilience,y_resilience)
+        new_x_y_recompression=C_P_C.LargrangeInterpolation(x_recompression,y_recompression)
+        
+        new_x_compression=[this_x_y[0] for this_x_y in new_x_y_compression]
+        new_y_compression=[this_x_y[1] for this_x_y in new_x_y_compression]
+        
+        new_x_resilience=[this_x_y[0] for this_x_y in new_x_y_resilience]
+        new_y_resilience=[this_x_y[1] for this_x_y in new_x_y_resilience]
+        
+        new_x_recompression=[this_x_y[0] for this_x_y in new_x_y_recompression]
+        new_y_recompression=[this_x_y[1] for this_x_y in new_x_y_recompression]
+        
+        #plot curve
+        plt.plot(new_x_compression,new_y_compression,'grey')
+        plt.plot(new_x_resilience,new_y_resilience,'grey')
+        plt.plot(new_x_recompression,new_y_recompression,'grey')
+        
+        #plot sample data
+        for kk in range(len(x_compression)):
+            
+             plt.scatter(x_compression[kk],y_compression[kk],color='k')
+
+             plt.annotate('(%d,%.3f)'%(np.round(10**x_compression[kk]),y_compression[kk]),
+                          xy=(x_compression[kk],y_compression[kk]),
+                          xytext=(x_compression[kk]-0.5*x_step,
+                                  y_compression[kk]-0.3*y_step),
+                          color='k',
+                          fontproperties=sammple_font)
+     
     def ResilienceCurve(self,output_folder):
         
         #delete the first element
