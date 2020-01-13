@@ -102,7 +102,7 @@ class data:
     def PerfectDataVisualization(self,x_step,y_step):
     
         #sample data font
-        sammple_font=FontProperties(fname="C:\Windows\Fonts\GIL_____.ttf",size=9)
+        sample_font=FontProperties(fname="C:\Windows\Fonts\GIL_____.ttf",size=9)
     
         #scatter data
         x_compression=self.valid_logP_compression
@@ -143,7 +143,7 @@ class data:
                           xytext=(x_compression[kk]-0.5*x_step,
                                   y_compression[kk]-0.3*y_step),
                           color='k',
-                          fontproperties=sammple_font)
+                          fontproperties=sample_font)
      
     def ResilienceCurve(self,output_folder):
         
