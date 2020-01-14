@@ -11,6 +11,8 @@ Created on Thu Nov  7 20:20:50 2019
 
 import numpy as np
 
+from o_sample import sample
+
 #------------------------------------------------------------------------------        
 """
 Gets the new list based on the index list  
@@ -294,3 +296,29 @@ def ExpireNanIndexList(which_array):
         this_index+=1
         
     return valid_index
+
+#------------------------------------------------------------------------------
+"""
+Construct list of sample object
+
+Args:
+    list_pos_x: x coordinate list of samples to be constructed
+    list_pos_y: y coordinate list of samples to be constructed
+    
+Returns:
+    list of sample objects
+"""    
+def SampleList(list_pos_x,list_pos_y):
+    
+    samples=[]
+    
+    for k in range(len(list_pos_x)):
+        
+        that_sample=sample()
+        
+        that_sample.pos_x=list_pos_x[k]
+        that_sample.pos_y=list_pos_y[k]
+        
+        samples.append(that_sample)
+        
+    return samples

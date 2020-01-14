@@ -6,7 +6,7 @@ Created on Sun Dec 22 20:41:47 2019
 @company: Nanjing University
 @e-mail: jerryweihuajing@126.com
 
-@title：Consolidation Calculation
+@title：Object-data
 """
 
 import numpy as np
@@ -15,8 +15,10 @@ import matplotlib.pyplot as plt
 from matplotlib.pyplot import MultipleLocator
 from matplotlib.font_manager import FontProperties
 
-
+import operation_list as O_L
 import calculation_pressure_consolidation as C_P_C
+
+from o_sample import sample
 
 #==============================================================================
 #object to store and operate data
@@ -133,17 +135,64 @@ class data:
         plt.plot(new_x_resilience,new_y_resilience,'grey')
         plt.plot(new_x_recompression,new_y_recompression,'grey')
         
-        #plot sample data
-        for kk in range(len(x_compression)):
-            
-             plt.scatter(x_compression[kk],y_compression[kk],color='k')
+        #construct sample list
+        samples_compression=O_L.SampleList(x_compression,y_compression)
+        samples_resilience=O_L.SampleList(x_resilience,y_resilience)
+        samples_recompression=O_L.SampleList(x_recompression,y_recompression)
 
-             plt.annotate('(%d,%.3f)'%(np.round(10**x_compression[kk]),y_compression[kk]),
-                          xy=(x_compression[kk],y_compression[kk]),
-                          xytext=(x_compression[kk]-0.5*x_step,
-                                  y_compression[kk]-0.3*y_step),
-                          color='k',
-                          fontproperties=sample_font)
+        '''init'''
+        for this_sample in samples_compression+samples_resilience+samples_recompression:
+            
+            this_sample.pos_annotation='lower'
+            
+        '''resilience and recompression comparison'''
+        for this_sample in samples_resilience:
+            
+            for that_sample in samples_recompression:
+                
+                #compare y coordinates
+                if this_sample.pos_x==that_sample.pos_x:
+                    
+                    if '%.3f'%this_sample.pos_y<'%.3f'%that_sample.pos_y:
+        
+                        that_sample.pos_annotation='upper'
+                        
+                    if '%.3f'%this_sample.pos_y>'%.3f'%that_sample.pos_y:
+        
+                        this_sample.pos_annotation='upper'
+                        
+        '''delete samples of being stacked'''
+        for this_sample in samples_resilience+samples_recompression:
+            
+            for that_sample in samples_compression:              
+                
+                if '%d'%(100**this_sample.pos_x)=='%d'%(100**that_sample.pos_x):
+                    
+                    if '%.3f'%this_sample.pos_y=='%.3f'%that_sample.pos_y:
+
+                        this_sample.pos_annotation='None'
+                    
+        #plot sample data
+        for this_sample in samples_compression+samples_resilience+samples_recompression:
+
+            if this_sample.pos_annotation!='None':
+    
+                if this_sample.pos_annotation=='upper':
+                    
+                    factor=0.2
+                    
+                if this_sample.pos_annotation=='lower':
+                    
+                    factor=-0.3   
+                    
+                plt.scatter(this_sample.pos_x,this_sample.pos_y,color='k')
+    
+                plt.annotate('(%d,%.3f)'%(np.round(10**this_sample.pos_x),this_sample.pos_y),
+                             xy=(this_sample.pos_x,this_sample.pos_y),
+                             xytext=(this_sample.pos_x-0.5*x_step,
+                                     this_sample.pos_y+factor*y_step),
+                             color='k',
+                             fontproperties=sample_font)
      
     def ResilienceCurve(self,output_folder):
         
@@ -211,22 +260,33 @@ class data:
         ax.yaxis.set_major_locator(MultipleLocator(y_major_step))
         ax.yaxis.set_minor_locator(MultipleLocator(y_minor_step))
         
+        #init data for visualization
+        self.valid_logP_compression=valid_logP_compression
+        self.valid_e_compression=valid_e_compression
+        self.valid_logP_resilience=valid_logP_resilience
+        self.valid_e_resilience=valid_e_resilience
+        self.valid_logP_recompression=valid_logP_recompression
+        self.valid_e_recompression=valid_e_recompression
+        
+        '''visualization of curve'''
+        self.PerfectDataVisualization(x_major_step,y_major_step)
+        
         #visualization of curve
-        C_P_C.DataVisualization(valid_logP_compression,
-                                valid_e_compression,
-                                x_major_step,
-                                y_major_step)
-        
-        C_P_C.DataVisualization(valid_logP_resilience,
-                                valid_e_resilience,
-                                x_major_step,
-                                y_major_step)
-        
-        C_P_C.DataVisualization(valid_logP_recompression,
-                                valid_e_recompression,
-                                x_major_step,
-                                y_major_step)
-        
+#        C_P_C.DataVisualization(valid_logP_compression,
+#                                valid_e_compression,
+#                                x_major_step,
+#                                y_major_step)
+#        
+#        C_P_C.DataVisualization(valid_logP_resilience,
+#                                valid_e_resilience,
+#                                x_major_step,
+#                                y_major_step)
+#        
+#        C_P_C.DataVisualization(valid_logP_recompression,
+#                                valid_e_recompression,
+#                                x_major_step,
+#                                y_major_step)
+#        
         #add depth
         plt.text(0.95*np.average(valid_logP),max(valid_e),
                  'Start Depth: '+str(self.start_depth)+'m End Depth: '+str(self.end_depth)+'m',
