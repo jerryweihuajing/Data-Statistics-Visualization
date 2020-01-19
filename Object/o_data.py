@@ -6,7 +6,7 @@ Created on Sun Dec 22 20:41:47 2019
 @company: Nanjing University
 @e-mail: jerryweihuajing@126.com
 
-@title：Object-data
+@title: Object-data
 """
 
 import numpy as np
@@ -16,9 +16,8 @@ from matplotlib.pyplot import MultipleLocator
 from matplotlib.font_manager import FontProperties
 
 import operation_list as O_L
+import calculation_numerical_analysis as C_N_A
 import calculation_pressure_consolidation as C_P_C
-
-from o_sample import sample
 
 #==============================================================================
 #object to store and operate data
@@ -117,9 +116,9 @@ class data:
         y_recompression=self.valid_e_recompression
         
         #result of interpolation
-        new_x_y_compression=C_P_C.LargrangeInterpolation(x_compression,y_compression)
-        new_x_y_resilience=C_P_C.LargrangeInterpolation(x_resilience,y_resilience)
-        new_x_y_recompression=C_P_C.LargrangeInterpolation(x_recompression,y_recompression)
+        new_x_y_compression=C_N_A.LargrangeInterpolation(x_compression,y_compression)
+        new_x_y_resilience=C_N_A.LargrangeInterpolation(x_resilience,y_resilience)
+        new_x_y_recompression=C_N_A.LargrangeInterpolation(x_recompression,y_recompression)
         
         new_x_compression=[this_x_y[0] for this_x_y in new_x_y_compression]
         new_y_compression=[this_x_y[1] for this_x_y in new_x_y_compression]

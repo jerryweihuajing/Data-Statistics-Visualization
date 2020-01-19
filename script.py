@@ -22,7 +22,6 @@ from __init__ import *
 
 xls_path=os.getcwd()+'\\Data\input\城市地质调查高压数据.xls'
 
-'''better annotation position'''
 S_R_C.WorkbookResilience(xls_path,2,2)
 
 #xls_path=os.getcwd()+'\\Data\input\淮安城市地质土工试验54个.xls'

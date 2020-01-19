@@ -6,7 +6,7 @@ Created on Thu Oct 17 20:42:32 2019
 @company: Nanjing University
 @e-mail: jerryweihuajing@126.com
 
-@title：Path Processing
+@title: Module-Path Processing
 """
 
 import os

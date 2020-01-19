@@ -6,7 +6,7 @@ Created on Fri Oct 18 19:18:54 2019
 @company: Nanjing University
 @e-mail: jerryweihuajing@126.com
 
-@title：Module-Vital Parameters in Geotchnics
+@title: Module-Vital Parameters in Geotchnics
 """
 
 import numpy as np

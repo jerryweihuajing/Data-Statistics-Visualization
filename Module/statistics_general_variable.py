@@ -6,7 +6,7 @@ Created on Thu Oct 17 21:03:11 2019
 @company: Nanjing University
 @e-mail: jerryweihuajing@126.com
 
-@title：Statistics
+@title: Module-Statistics of General Variables
 """
 
 import xlrd

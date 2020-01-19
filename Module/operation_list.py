@@ -6,7 +6,7 @@ Created on Thu Nov  7 20:20:50 2019
 @company: Nanjing University
 @e-mail: jerryweihuajing@126.com
 
-@title：List Operation
+@title: Module-List Operation
 """
 
 import numpy as np
@@ -22,7 +22,7 @@ Args:
     index_list: list of index which is valid
 
 Returns:
-    None
+    list based on the index list
 """          
 def CustomIndexList(which_list,index_list):
     
@@ -36,7 +36,7 @@ Args:
     which_list: list to be processed
 
 Returns:
-    None
+    list based on the set of index list
 """          
 def ValidIndexList(which_list):
     
@@ -88,7 +88,7 @@ Args:
     which_list: list to be processed
 
 Returns:
-    None
+    index list
 """          
 def ListWithoutRepetition(which_list):
     
@@ -124,7 +124,7 @@ Args:
     which_list: list to be processed
 
 Returns:
-    None
+    list with 'R'
 """          
 def ListWithR(which_list):
 
@@ -138,7 +138,7 @@ Args:
     which_list: GB list to be processed
 
 Returns:
-    None
+    new index list
 """          
 def GBIndexCohesiveSilt(which_list):
     
@@ -164,7 +164,7 @@ Args:
     which_list: GB list to be processed
 
 Returns:
-    None
+    new index list
 """          
 def GBIndexFlourySoil(which_list):
     
@@ -190,7 +190,7 @@ Args:
     which_list: GB list to be processed
 
 Returns:
-    None
+    new index list
 """          
 def GBIndexPartition(which_list):
     

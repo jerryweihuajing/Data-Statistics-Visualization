@@ -6,13 +6,14 @@ Created on Wed Oct  2 16:15:51 2019
 @company: Nanjing University
 @e-mail: jerryweihuajing@126.com
 
-@title：Head Columns from Data Frame object
+@title: Module-Head Columns from Data Frame object
 """
 
 '''
 demand:
 1 Nan in the head columns also needs to be processed
 '''
+
 import copy as cp
 
 #------------------------------------------------------------------------------

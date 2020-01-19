@@ -6,7 +6,7 @@ Created on Tue Jan 14 16:53:54 2020
 @company: Nanjing University
 @e-mail: jerryweihuajing@126.com
 
-@title：Object-sample
+@title: Object-sample
 """
 
 #==============================================================================

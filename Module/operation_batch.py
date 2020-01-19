@@ -6,7 +6,7 @@ Created on Mon Nov  4 14:38:52 2019
 @company: Nanjing University
 @e-mail: jerryweihuajing@126.com
 
-@title：Batch Processing
+@title: Module-Batch Processing
 """
 
 import os

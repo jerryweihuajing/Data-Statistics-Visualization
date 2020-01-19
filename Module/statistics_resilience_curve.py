@@ -6,16 +6,12 @@ Created on Sun Dec 22 20:47:26 2019
 @company: Nanjing University
 @e-mail: jerryweihuajing@126.com
 
-@title：Consolidation Calculation
+@title: Module-Stastics of Resilience Curve
 """
 
 import xlrd,xlwt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-
-from matplotlib.pyplot import MultipleLocator
-from matplotlib.font_manager import FontProperties
 
 import operation_head_column as O_H_C
 import operation_list as O_L
@@ -25,7 +21,7 @@ from o_data import data
     
 #------------------------------------------------------------------------------
 """
-Make resilience calculation from one excel
+Make resilience curve from one excel
 
 Args:
     xls_path: path of excel to be processed
@@ -38,7 +34,7 @@ Returns:
 def WorkbookResilience(xls_path,num_head_rows,num_head_columns):
     
     print('')
-    print('--Resilience Calculation')
+    print('--Workbook Resilience')
     
     #plt.style.use('ggplot')
     

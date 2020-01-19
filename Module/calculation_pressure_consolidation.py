@@ -2,20 +2,23 @@
 """
 Created on Wed Apr 24 22:13:09 2019
 
-@author:Wei Huajing
-@company:Nanjing University
-@e-mail:jerryweihuajing@126.com
+@author: Wei Huajing
+@company: Nanjing University
+@e-mail: jerryweihuajing@126.com
 
-@title：The utility model relates to an electronic calculation method for determining early consolidation pressure Pc
+@title: Module-Pc calculation
+"""
+'''
+description: The utility model relates to an electronic calculation method for determining early consolidation pressure Pc
 
-@ steps:
+steps:
 1 discrete points with unequal spacing, interpolating appropriate nearby values (Lagrange)
 2 Calculate radius of curvature according to Angle bisector
 3 calculate Pc and Cc according to appropriate curvature radius
 
-@INPUT：e,P,M
-@OUTPUT：Pc,Cc
-"""
+INPUT：e,P,M
+OUTPUT：Pc,Cc
+'''
 
 import copy as cp
 import numpy as np
@@ -24,295 +27,8 @@ import matplotlib.font_manager as fm
 
 from scipy.linalg import solve
 
-#------------------------------------------------------------------------------
-"""
-Solve multiple primary equations using Jacobi methods
-
-Args:
-    which_A: coefficient matrix
-    which_b: coefficient array
-    
-Returns:
-    solution of system of equation
-"""
-def JacobiRoot(which_A,which_b):
-    
-    #Vectorizarion
-    np.array(which_A)
-    np.array(which_b)
-    
-    #The calculation results
-    x=[]
-    
-    #Jacobi0
-    J_0=np.linalg.det(which_A)
-    
-    for k in range(len(which_A)):
-        
-        A_temp=cp.deepcopy(which_A)
-    
-        #The first column is replaced by b
-        A_temp[:,k]=which_b
-        
-        #calculation results
-        x.append(np.linalg.det(A_temp)/J_0)
-        
-    return np.array(x)
-
-#------------------------------------------------------------------------------
-"""
-Interpolation Lagrange base function
-
-Args:
-    x_y_sample: sample data
-    x_i: x coordinates
-    x: x coordiante to calculate
-    
-Returns:
-    Lagrange Interpolation base function
-"""
-def LargrangeBase(x_y_sample,x_i,x):
-    
-    #Lists of x and y respectively
-    x_sample=[this_x_y[0] for this_x_y in x_y_sample]
-    
-    up_product=1
-    down_product=1
-    
-    #x_i in x_sample
-    for this_x in x_sample:
-        
-        if this_x==x_i:
-            
-            continue
-        
-        up_product*=(this_x-x)
-        down_product*=(this_x-x_i)
-        
-    return up_product/down_product
-
-#------------------------------------------------------------------------------
-"""
-Interpolation Lagrange value
-
-Args:
-    x_y_sample: sample data
-    x: x coordiante to calculate
-    
-Returns:
-    Lagrange Interpolation value
-"""
-def LargrangeValue(x_y_sample,x):
-        
-    #final result
-    interpolation_result=0
-    
-    #A linear combination
-    for this_x_y in x_y_sample:
-        
-        interpolation_result+=this_x_y[1]*LargrangeBase(x_y_sample,this_x_y[0],x)
-    
-    return interpolation_result
-
-#------------------------------------------------------------------------------
-"""
-Distance between A and B
-
-Args:
-    pos_A: coordinate ot point A
-    pos_B: coordinate ot point B
-    
-Returns:
-    Lagrange Interpolation value
-"""
-def Distance(pos_A,pos_B):
-    
-    #Determine the data type of pos_A,pos_B, whatever, and convert it to np.array
-    if type(pos_A) is not np.array:
-       
-        pos_A=np.array(pos_A)
-    
-    if type(pos_B) is not np.array:
-       
-        pos_B=np.array(pos_B)
-  
-    return np.sqrt(np.sum((pos_A-pos_B)**2))
-
-#------------------------------------------------------------------------------
-"""
-Interpolation Lagrange
-
-Args:
-    X: X array
-    Y: Y array
-    n_step: amount of step
-    show: (bool) whether to show
-    
-Returns:
-    Lagrange Interpolation value x y list
-"""
-def LargrangeInterpolation(X,Y,n_step=1000,show=False):
-    
-    x_y_sample=[[X[k],Y[k]] for k in range(len(X))]
-    
-    new_x=np.linspace(min(X),max(X),n_step)
-    new_y=np.array([LargrangeValue(x_y_sample,this_x) for this_x in new_x])
-    
-    if show:
-        
-        plt.plot(new_x,new_y,'c')
-        
-    return [[new_x[k],new_y[k]] for k in range(n_step)]
-
-#------------------------------------------------------------------------------
-"""
-Interpolation former being curvate and latter being linear
-
-Args:
-    X: X array
-    Y: Y array
-    n_step: amount of step
-    show: (bool) whether to show
-    
-Returns:
-    Lagrange Interpolation value x y list
-"""
-def CurvateAndLinearInterpolation(X,Y,n_step=100,show=False):
-    
-    x_y_sample=[[X[k],Y[k]] for k in range(len(X))]
-    
-    total_x=np.linspace(min(X),max(X),n_step)
-    total_y=np.array([LargrangeValue(x_y_sample,this_x) for this_x in total_x])
-    
-    #former part
-    former_x=np.linspace(min(X),np.log10(800),n_step)
-    former_y=np.array([LargrangeValue(x_y_sample,this_x) for this_x in former_x])
-    
-    if max(X)-np.log10(800)<=0.01:
-        
-        return [[former_x[k],former_y[k]] for k in range(len(former_x))]
-    
-    #latter part
-    X_for_linear=[total_x[k] for k in range(len(total_x)) if total_x[k]>=np.log10(800)]
-    Y_for_linear=[total_y[k] for k in range(len(total_x)) if total_x[k]>=np.log10(800)]
-    
-#    print(X_for_linear,Y_for_linear)
-    
-    params= np.polyfit(X_for_linear,Y_for_linear,1)
-    
-    latter_x=np.linspace(np.log10(800),max(X),n_step)
-    latter_y=np.polyval(params,latter_x)
-    
-    #combine them
-    new_x=list(former_x)+list(latter_x)
-    new_y=list(former_y)+list(latter_y)
-
-    if show:
-        
-        plt.plot(new_x,new_y,'c')
-        
-    return [[new_x[k],new_y[k]] for k in range(len(new_x))]
-
-#------------------------------------------------------------------------------
-"""
-Data preprocessing
-
-Args:
-    which_e: porosity array
-    which_P: pressure array
-    
-Returns:
-    Lagrange Interpolation value
-"""
-def PreProcess(which_P,which_e,show=False):
-    
-    #plt.figure()
-    #plt.plot(which_P,which_e)
-    
-#    x=np.log10(which_P)
-    
-    x=which_P
-    
-    #print(x)
-    
-    y=which_e
-    
-#    print(x,y)
-#    print(len(x),len(y))
-    
-    #length is dimension
-    length=len(x)
-    
-    if length>=len(y):
-        
-        length=len(y)
-        
-    #combined as coordinates
-    x_y=[[x[k],y[k]] for k in range(length)]
-    
-#    plt.figure()
-#    plt.plot(x[:length],y[:length],'b')
-    
-    new_x=np.linspace(min(x),max(x),20)
-    
-    #result of interpolation
-    new_y=np.array([LargrangeValue(x_y,this_new_x) for this_new_x in new_x])
-    
-    if show:
-        
-        #plt.figure()
-        
-        plt.plot(new_x,new_y,'c')
-    
-    #new points after interpolation
-    new_x_y=[[new_x[k],new_y[k]] for k in range(len(new_x))]    
-    
-    #new_x_y=[[0,1],[1,2],[2,1]]
-    
-    #plt.figure()
-    #plt.plot([0,1,2],[1,2,1],'r')
-
-    return new_x_y
-
-#------------------------------------------------------------------------------
-"""
-Quadratic fitting
-
-Args:
-    X: X array
-    Y: Y array
-    n_step: amount of step
-    show: (bool) whether to show
-    
-Returns:
-    Parabola Fitting value
-"""
-def ParabolaFitting(X,Y,n_step=100,show=False):
-    
-#    print(X,Y)
-    
-    X.reverse()
-    Y.reverse()
-    
-    params= np.polyfit(X,Y,2)
-    
-    x=np.linspace(min(X),max(X),n_step)
-    
-    y=np.polyval(params,x)
-    
-    new_x=list(x)
-    new_y=list(y)
-    
-#    print(new_x,new_y)
-    
-#    new_x.reverse()
-#    new_y.reverse()
-    
-    if show:
-                
-        plt.plot(new_x,new_y,'c')
-
-    return [[new_x[k],new_y[k]] for k in range(len(new_x))] 
+import operation_visualization as O_V
+import calculation_numerical_analysis as C_N_A
 
 #------------------------------------------------------------------------------
 """
@@ -386,7 +102,7 @@ def Curvature(which_3_points,show=False):
     B=np.array([k_OD*pos_D[0]-pos_D[1],k_OE*pos_E[0]-pos_E[1]])
       
     #Center coordinates
-    pos_O=JacobiRoot(A,B)
+    pos_O=C_N_A.JacobiRoot(A,B)
     
 #    print(pos_O)
     
@@ -407,8 +123,8 @@ def Curvature(which_3_points,show=False):
 #    distance_D=abs(A_D*pos_O[0]+B_D*pos_O[1]+C_D)/np.sqrt(A_D**2+B_D**2)
 #    distance_E=abs(A_E*pos_O[0]+B_E*pos_O[1]+C_E)/np.sqrt(A_E**2+B_E**2)
     
-    distance_D=Distance(pos_O,pos_D)
-    distance_E=Distance(pos_O,pos_E)
+    distance_D=C_N_A.Distance(pos_O,pos_D)
+    distance_E=C_N_A.Distance(pos_O,pos_E)
     
 #    print(distance_D,distance_E)
     
@@ -423,120 +139,20 @@ def Curvature(which_3_points,show=False):
         plt.scatter(pos_D[0],pos_D[1],color='y') #D
         plt.scatter(pos_E[0],pos_E[1],color='y') #E
         
-        LinePlot(pos_D,k_AB,1,'k','center') #AB
-        LinePlot(pos_E,k_BC,1,'k','center') #BC   
+        O_V.LinePlot(pos_D,k_AB,1,'k','center') #AB
+        O_V.LinePlot(pos_E,k_BC,1,'k','center') #BC   
         
-        LinePlot(pos_D,k_OD,distance_D+1,'k','end') #OD        
-        LinePlot(pos_E,k_OE,distance_E+1,'k','end') #OE
+        O_V.LinePlot(pos_D,k_OD,distance_D+1,'k','end') #OD        
+        O_V.LinePlot(pos_E,k_OE,distance_E+1,'k','end') #OE
         
     if np.round(distance_D)-np.round(distance_E)<0.1:
 
-        return Distance(pos_O,pos_D),pos_O
+        return C_N_A.Distance(pos_O,pos_D),pos_O
     
     else:
     
         print('ERROR:Incorrect distance')
         
-#------------------------------------------------------------------------------
-"""
-A sequence whose step length is step
-
-Args:
-    which_value: value list
-    amount: amount of points
-    step: step length between points
-    
-Returns:
-    sequence whose step length is step
-"""
-def ArrayOfCenterPoint(which_value,amount,step):
-    
-    return [which_value+(k-amount/2)*step for k in range(amount)]
-
-#------------------------------------------------------------------------------
-"""
-A sequence starting from a point with step length as step
-
-Args:
-    which_value: value list
-    amount: amount of points
-    step: step length between points
-    
-Returns:
-    sequence starting from a point with step length as step
-"""
-def ArrayOfStartPoint(which_value,amount,step):
-    
-    return [which_value+k*step for k in range(amount)]
-
-#------------------------------------------------------------------------------
-"""
-A sequence with a certain point as the end point and the step length is step
-
-Args:
-    which_value: value list
-    amount: amount of points
-    step: step length between points
-    
-Returns:
-    sequence with a certain point as the end point and the step length is step
-"""
-def ArrayOfEndPoint(which_value,amount,step):
-    
-    return [which_value-k*step for k in range(amount)]
-
-#------------------------------------------------------------------------------
-"""
-Point-slope line drawing
-
-Args:
-    which_pos: key point coordinate
-    which_k: slope
-    length: length between points
-    which_color: color of line
-    point_mode: ['center', 'start', 'end'] (defualt: 'center')
-    
-Returns:
-    None
-"""
-def LinePlot(which_pos,
-             which_k,
-             length,
-             which_color='k',
-             point_mode='center'):
-    
-    #Custom step size
-    step=0.01
-    
-    #Calculation steps
-    amount=int(np.ceil(length/(step*np.sqrt(which_k**2+1))))
-    
-#    print(amount)
-    
-    #to list
-    which_pos=list(which_pos)
-    
-    #Point coordinates
-    which_pos_x,which_pos_y=which_pos
-    
-    #Create a sequence based on the point type
-    if point_mode is 'start':
-   
-        x_array=ArrayOfStartPoint(which_pos_x,amount,step)
-        
-    if point_mode is 'center':
-   
-        x_array=ArrayOfCenterPoint(which_pos_x,amount,step)
-    
-    if point_mode is 'end':
-   
-        x_array=ArrayOfEndPoint(which_pos_x,amount,step)
-        
-    #The range of coordinates of a point
-    y_array=[which_k*(this_x-which_pos_x)+which_pos_y for this_x in x_array]
-    
-    plt.plot(x_array,y_array,color=which_color)
-    
 #------------------------------------------------------------------------------
 """
 Calculate the minimum radius of curvature
@@ -602,50 +218,6 @@ def MinCurvateRadius(which_x_y):
 
 #------------------------------------------------------------------------------
 """
-Make resilience curve
-
-Args:
-    x: x coordinates
-    y: y coordinates
-    x_step: step length of x
-    y_step: step length of y
-    annotation: (bool) whether to add annotation (default: False)
-
-Returns:
-    None
-"""
-def DataVisualization(x,y,x_step,y_step,annotation=True):
-    
-    #sample data font
-    sammple_font=fm.FontProperties(fname="C:\Windows\Fonts\GIL_____.ttf",size=9)
-
-    #combine x y
-    which_x_y=[[x[k],y[k]] for k in range(len(x))]
-    
-    #result of interpolation
-    new_x_y=LargrangeInterpolation(x,y)
-    
-    new_x=[this_x_y[0] for this_x_y in new_x_y]
-    new_y=[this_x_y[1] for this_x_y in new_x_y]
-    
-    #plot curve
-    plt.plot(new_x,new_y,'grey')
-    
-    #plot sample data
-    for kk in range(len(which_x_y)):
-        
-         plt.scatter(x[kk],y[kk],color='k')
-         
-         if annotation:
-             
-             plt.annotate('(%d,%.3f)'%(np.round(10**x[kk]),y[kk]),
-                          xy=(x[kk],y[kk]),
-                          xytext=(x[kk]-0.5*x_step,y[kk]-0.3*y_step),
-                          color='k',
-                          fontproperties=sammple_font)
-
-#------------------------------------------------------------------------------
-"""
 Calculate the final result
 
 Args:
@@ -658,11 +230,8 @@ Returns:
 """
 def CalculatePcAndCc(x,y,show=False):
     
-    #combine x y
-    which_x_y=[[x[k],y[k]] for k in range(len(x))]
-    
     #result of interpolation
-    new_x_y=LargrangeInterpolation(x,y)
+    new_x_y=C_N_A.LargrangeInterpolation(x,y)
     
     new_x=[this_x_y[0] for this_x_y in new_x_y]
     new_y=[this_x_y[1] for this_x_y in new_x_y]
@@ -774,10 +343,10 @@ def CalculatePcAndCc(x,y,show=False):
     pos_Q=[solve(A,B)[1],solve(A,B)[0]]
     
     '''len_PQ'''
-    len_PQ=Distance(pos_P,pos_Q)
+    len_PQ=C_N_A.Distance(pos_P,pos_Q)
     
     '''len_MN'''
-    len_NQ=Distance(pos_N,pos_Q)
+    len_NQ=C_N_A.Distance(pos_N,pos_Q)
     
 #    print('Cc=%.3f'%Cc)
 #    print('Pc=%.3f'%Pc)
@@ -809,10 +378,10 @@ def CalculatePcAndCc(x,y,show=False):
 #        plt.scatter(pos_P[0],pos_P[1],color='r')
            
 #        LinePlot(pos_P,k_OP,0.2,'k','center') #OP        
-        LinePlot(pos_P,k_PS,len_PQ*1.5,'k','start') #PS
-        LinePlot(pos_P,k_PD,len_PQ*1.5,'k','start') #PD
-        LinePlot(pos_P,k_PQ,len_PQ*1.5,'k','start') #PQ
-        LinePlot(pos_N,k_MN,len_NQ*1.2,'k','end') #MN
+        O_V.LinePlot(pos_P,k_PS,len_PQ*1.5,'k','start') #PS
+        O_V.LinePlot(pos_P,k_PD,len_PQ*1.5,'k','start') #PD
+        O_V.LinePlot(pos_P,k_PQ,len_PQ*1.5,'k','start') #PQ
+        O_V.LinePlot(pos_N,k_MN,len_NQ*1.2,'k','end') #MN
         
         plt.scatter(pos_Q[0],pos_Q[1],color='grey')
         

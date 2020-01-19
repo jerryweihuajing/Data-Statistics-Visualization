@@ -6,7 +6,7 @@ Created on Thu Nov  7 21:49:46 2019
 @company: Nanjing University
 @e-mail: jerryweihuajing@126.com
 
-@title：List Operation
+@title: Module-Data Filering and Stastics
 """
 
 import xlrd

@@ -6,7 +6,7 @@ Created on Sat Oct 19 13:57:48 2019
 @company: Nanjing University
 @e-mail: jerryweihuajing@126.com
 
-@title：Silt Classification
+@title: Module-Silt Classification
 """
 
 import xlrd

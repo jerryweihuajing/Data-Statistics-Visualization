@@ -6,7 +6,7 @@ Created on Sun Nov 24 16:22:25 2019
 @company: Nanjing University
 @e-mail: jerryweihuajing@126.com
 
-@title：Consolidation Calculation
+@title: Module-Consolidation Pressure Calculation
 """
 
 import xlrd
@@ -150,7 +150,7 @@ Returns:
 def WorkbookCondolidation(xls_path,num_head_rows,num_head_columns):
     
     print('')
-    print('--Consolidation Calculation')
+    print('--Workbook Condolidation')
     
     #plt.style.use('ggplot')
     
