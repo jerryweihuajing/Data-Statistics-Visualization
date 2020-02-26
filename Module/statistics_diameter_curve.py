@@ -37,7 +37,7 @@ def WorkbookDiameter(xls_path,num_head_rows,num_head_columns):
     #plt.style.use('ggplot')
     
     #construct output folder path
-    output_folder=xls_path.replace('.xls','').replace('input','output')+'\\先期固结压力\\回弹\\'
+    output_folder=xls_path.replace('.xls','').replace('input','output')+'\\粒径曲线\\'
     
     #generate output folder
     O_P.GenerateFolder(output_folder)
@@ -130,7 +130,7 @@ def WorkbookDiameter(xls_path,num_head_rows,num_head_columns):
                 
                 index_porosity_original=k
                 
-            if '一定压力固结沉降量' in title:
+            if '颗' in title:
                 
                 print(k,title)
                 
