@@ -182,7 +182,18 @@ def List2FrequencyMap(which_list):
         map_frequency[this_key]=which_list.count(this_key)    
     
     return map_frequency
-    
+
+#------------------------------------------------------------------------------
+"""
+Save title and class result  as table
+
+Args:
+    map_title_classification: map between title and classification result
+    tables_output_folder: tables save folder
+        
+Returns:
+    None
+""" 
 def TitleAndClassification2Table(map_title_classification,tables_output_folder):
     
     #delete blank list
@@ -224,7 +235,6 @@ def TitleAndClassification2Table(map_title_classification,tables_output_folder):
         
         row+=1
         
-    #        print(list_frequency_map[k])
         
         for kk in range(len(list_frequency_map[k])):
             
@@ -243,7 +253,6 @@ def TitleAndClassification2Table(map_title_classification,tables_output_folder):
         row+=1
             
     new_workbook.save(tables_output_folder+'统计总表.xls')
-    
 
 #------------------------------------------------------------------------------
 """

@@ -51,7 +51,9 @@ class data:
                  valid_logP_recompression=None,
                  valid_e_compression=None,
                  valid_e_resilience=None,
-                 valid_e_recompression=None):
+                 valid_e_recompression=None,
+                 list_diameter=None,
+                 list_diameter_percentage=None):
         
         #basic information
         self.indoor_id=indoor_id
@@ -100,6 +102,10 @@ class data:
         self.valid_e_resilience=valid_e_resilience
         self.valid_e_recompression=valid_e_recompression
     
+        #for diameter curve
+        self.list_diameter=list_diameter
+        self.list_diameter_percentage=list_diameter_percentage
+        
     def PerfectDataVisualization(self,x_step,y_step):
     
         #sample data font

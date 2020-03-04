@@ -10,12 +10,16 @@ Created on Sun Jan 19 18:41:14 2020
 """
 
 import xlrd,xlwt
+import copy as cp
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 import operation_head_column as O_H_C
 import operation_list as O_L
 import operation_path as O_P
+
+from o_data import data
 
 #------------------------------------------------------------------------------
 """
@@ -67,7 +71,7 @@ def WorkbookDiameter(xls_path,num_head_rows,num_head_columns):
     style.borders = borders
     
     #traverse all sheets
-    for this_sheet_name in list_sheet_names:
+    for this_sheet_name in list_sheet_names[:-1]:
     
         print('')
         print('...')
@@ -85,73 +89,69 @@ def WorkbookDiameter(xls_path,num_head_rows,num_head_columns):
         #all info of dataframe
         value_matrix=channel.values
         
-        '''special condition'''
-        num_head_rows-=1
+#        '''special condition'''
+#        num_head_rows-=1
         
         #delete the repetition
         index_valid=O_L.ValidIndexList(value_matrix[num_head_rows:,1])  
-
-        #fetch the id of P and e
-        index_settlement_compression=[]
-        index_settlement_resilience=[]
-        index_settlement_recompression=[]
-        
-        #pressure
-        pressure_compression=[]
-        pressure_resilience=[]
-        pressure_recompression=[]
+    
+        index_diameter=[]
+        diameter_range=[200,20,2,0.5,0.25,0.075,0.05,0.005,0]
     
         for k in range(num_head_columns,np.shape(value_matrix)[1]):
             
             #title str
             title=final_head_columns[k] 
                
-            if 'PC' in title:
+            if '颗' in title\
+            and '粒' in title\
+            and '分' in title\
+            and '析' in title\
+            and 'mm' in title:
                 
                 print(k,title)
                 
-                index_pressure_consolidation=k
+                index_diameter.append(k)
+ 
+        #matrix to contain grain partition proportion
+        data_diameter=np.zeros((len(index_valid),len(index_diameter)))
+        
+        column=0
+        
+        for this_index in index_diameter:
+            
+            data_diameter[:,column]=O_L.CustomIndexList(list(value_matrix[num_head_rows:,this_index]),index_valid)
+        
+            column+=1
+              
+        #construct data objects
+        list_data=[]
+        
+        for i in range(np.shape(data_diameter)[0]):
+            
+            new_data=data()
+            
+            new_data.list_diameter=cp.deepcopy(diameter_range)
+            new_data.list_diameter_percentage=list(data_diameter[i,:])
+            
+            list_bool=[np.isnan(this_percentage) for this_percentage in new_data.list_diameter_percentage]
+            
+            #expire list with all nan
+            if list_bool==len(list_bool)*[True]:
                 
-            if '压缩指数' in title:
+                continue
                 
-                print(k,title)
-                
-                index_index_compression=k
-                
-            if '回弹指数' in title:
-                
-                print(k,title)
-                
-                index_index_resilience=k    
-                
-            if '孔隙比' in title:
-                
-                print(k,title)
-                
-                index_porosity_original=k
-                
-            if '颗' in title:
-                
-                print(k,title)
-                
-                index_settlement_compression.append(k)
+            list_data.append(new_data)
+            
+        the_data=list_data[-1]
+        
+        plt.figure()
+        
+        x_alias=[k for k in range(len(diameter_range))]
+        
+        plt.plot(x_alias,the_data.list_diameter_percentage)
 
-                pressure_compression.append(float(title.strip().split(' ')[1].replace('kPa','')))
-                
-            if '回弹固结沉降量' in title:
-                
-                print(k,title)
-                
-                index_settlement_resilience.append(k)
-                pressure_resilience.append(float(title.strip().split(' ')[1]))
-                
-            if '再压缩固结沉降量' in title:
-                
-                if 'PC' in title or '指数' in title:
-                    
-                    continue
-                
-                print(k,title)
-                
-                index_settlement_recompression.append(k)
-                pressure_recompression.append(float(title.strip().split(' ')[1]))
+        #set the interval manually
+        plt.xticks(x_alias, diameter_range)
+        
+        plt.xlim([min(x_alias)-0.5,max(x_alias)+0.5])
