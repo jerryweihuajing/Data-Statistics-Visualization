@@ -129,13 +129,22 @@ def WorkbookDiameter(xls_path,num_head_rows,num_head_columns):
             
             new_data.list_diameter=cp.deepcopy(diameter_range)
             new_data.list_diameter_percentage=list(data_diameter[i,:])
-            
+
             list_bool=[np.isnan(this_percentage) for this_percentage in new_data.list_diameter_percentage]
             
             #expire list with all nan
             if list_bool==len(list_bool)*[True]:
                 
                 continue
+            
+            #calculate the cumulative percentage
+            new_data.list_diameter_percentage_cumulative=[]
+            
+            for s in range(len(new_data.list_diameter_percentage)):
+                
+                this_cumulative_percentage=np.sum([this_percentage for this_percentage in new_data.list_diameter_percentage[s:] if not np.isnan(this_percentage)])
+                
+                new_data.list_diameter_percentage_cumulative.append(this_cumulative_percentage)
                 
             list_data.append(new_data)
             

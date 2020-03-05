@@ -259,10 +259,13 @@ Returns:
 """
 def ParabolaFitting(X,Y,n_step=100,show=False):
   
+    X=list(X)
+    Y=list(Y)
+    
     X.reverse()
     Y.reverse()
     
-    params= np.polyfit(X,Y,2)
+    params= np.polyfit(X,Y,7)
     
     x=np.linspace(min(X),max(X),n_step)
     

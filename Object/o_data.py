@@ -64,7 +64,8 @@ class data:
                  valid_e_resilience=None,
                  valid_e_recompression=None,
                  list_diameter=None,
-                 list_diameter_percentage=None):
+                 list_diameter_percentage=None,
+                 list_diameter_percentage_cumulative=None):
         
         #basic information
         self.indoor_id=indoor_id
@@ -116,6 +117,7 @@ class data:
         #for diameter curve
         self.list_diameter=list_diameter
         self.list_diameter_percentage=list_diameter_percentage
+        self.list_diameter_percentage_cumulative=list_diameter_percentage_cumulative
         
     def PerfectDataVisualization(self,x_step,y_step):
     
@@ -434,14 +436,13 @@ class data:
             
             this_label.set_fontname('Times New Roman')
                 
-        x_alias=[k for k in range(len(self.list_diameter))]
-        y_alias=np.copy(self.list_diameter_percentage)
+        x_alias=[k for k in range(len(self.list_diameter_percentage_cumulative))]
+        y_alias=np.copy(self.list_diameter_percentage_cumulative)
         
         valid_x=x_alias
         valid_y=[item for item in y_alias if not np.isnan(item)]
         
         #tick step
-        
         x_major_step=1
         x_minor_step=0.5
         y_major_step=np.round((max(valid_y)-min(valid_y))/10)
@@ -453,7 +454,13 @@ class data:
         ax.yaxis.set_major_locator(MultipleLocator(y_major_step))
         ax.yaxis.set_minor_locator(MultipleLocator(y_minor_step))
             
-        plt.plot(x_alias,y_alias,'grey')
+        #smoothing the curve
+        smoothed_x_y=C_N_A.ParabolaFitting(x_alias,y_alias,n_step=50)
+        
+        x_smoothed=[this_x_y[0] for this_x_y in smoothed_x_y]
+        y_smoothed=[this_x_y[1] for this_x_y in smoothed_x_y]
+        
+        plt.plot(x_smoothed,y_smoothed,'grey')
     
         #set the interval manually
         plt.xticks([item+0.5 for item in x_alias],self.list_diameter)
