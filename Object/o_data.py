@@ -9,6 +9,8 @@ Created on Sun Dec 22 20:41:47 2019
 @title: Object-data
 """
 
+from o_sample import sample
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -19,6 +21,15 @@ import operation_list as O_L
 import calculation_numerical_analysis as C_N_A
 import calculation_pressure_consolidation as C_P_C
 
+#sample data font
+sample_font=FontProperties(fname="C:\Windows\Fonts\GIL_____.ttf",size=9)
+    
+#title font
+annotation_font=FontProperties(fname=r"C:\Windows\Fonts\GILI____.ttf",size=16)
+
+#annotation font
+title_font=FontProperties(fname="C:\Windows\Fonts\GIL_____.ttf",size=20)
+    
 #==============================================================================
 #object to store and operate data
 #==============================================================================    
@@ -107,9 +118,6 @@ class data:
         self.list_diameter_percentage=list_diameter_percentage
         
     def PerfectDataVisualization(self,x_step,y_step):
-    
-        #sample data font
-        sample_font=FontProperties(fname="C:\Windows\Fonts\GIL_____.ttf",size=9)
     
         #scatter data
         x_compression=self.valid_logP_compression
@@ -237,12 +245,6 @@ class data:
         plt.tick_params(labelsize=12)
         labels = ax.get_xticklabels() + ax.get_yticklabels()
         
-        #title font
-        annotation_font=FontProperties(fname=r"C:\Windows\Fonts\GILI____.ttf",size=16)
-        
-        #annotation font
-        title_font=FontProperties(fname="C:\Windows\Fonts\GIL_____.ttf",size=20)
-        
         plt.title('ID: '+str(self.hole_id),FontProperties=title_font)  
                 
         plt.xlabel('lgP',FontProperties=annotation_font)
@@ -355,9 +357,9 @@ class data:
             
         #tick step
         x_major_step=(max(valid_logP)-min(valid_logP))/10
-        x_minor_step=(max(valid_logP)-min(valid_logP))/20
+        x_minor_step=x_major_step/2
         y_major_step=(max(valid_e)-min(valid_e))/10
-        y_minor_step=(max(valid_e)-min(valid_e))/20
+        y_minor_step=y_major_step/2
         
         #set locator
         ax.xaxis.set_major_locator(MultipleLocator(x_major_step))
@@ -412,3 +414,85 @@ class data:
         plt.close()
     
         return final_Pc
+    
+    def DiameterCurve(self):
+        
+        '''canvas'''
+        fig,ax=plt.subplots(figsize=(8,6))
+        
+        #set ticks
+        plt.tick_params(labelsize=12)
+        labels = ax.get_xticklabels() + ax.get_yticklabels()
+        
+        plt.title('ID: '+str(self.hole_id),FontProperties=title_font)  
+                
+        plt.xlabel('Daimeter(mm)',FontProperties=annotation_font)
+        plt.ylabel('Percentage(%)',FontProperties=annotation_font)
+        
+        #label fonts
+        for this_label in labels:
+            
+            this_label.set_fontname('Times New Roman')
+                
+        x_alias=[k for k in range(len(self.list_diameter))]
+        y_alias=np.copy(self.list_diameter_percentage)
+        
+        valid_x=x_alias
+        valid_y=[item for item in y_alias if not np.isnan(item)]
+        
+        #tick step
+        
+        x_major_step=1
+        x_minor_step=0.5
+        y_major_step=np.round((max(valid_y)-min(valid_y))/10)
+        y_minor_step=y_major_step/2
+    
+        #set locator
+        ax.xaxis.set_major_locator(MultipleLocator(x_major_step))
+        ax.xaxis.set_minor_locator(MultipleLocator(x_minor_step))
+        ax.yaxis.set_major_locator(MultipleLocator(y_major_step))
+        ax.yaxis.set_minor_locator(MultipleLocator(y_minor_step))
+            
+        plt.plot(x_alias,y_alias,'grey')
+    
+        #set the interval manually
+        plt.xticks([item+0.5 for item in x_alias],self.list_diameter)
+        
+        plt.xlim([min(x_alias)-0.5,max(x_alias)+0.5])
+        
+        samples=[]
+        
+        for t in range(len(x_alias)):
+            
+            new_sample=sample()
+            
+            new_sample.pos_x=x_alias[t]
+            new_sample.pos_y=y_alias[t]
+            
+            samples.append(new_sample)
+                  
+        #plot sample data
+        for this_sample in samples:
+    
+            if np.isnan(this_sample.pos_y):
+                
+                continue
+    
+            plt.scatter(this_sample.pos_x,this_sample.pos_y,color='k')
+    
+            plt.annotate('%.1f%%'%this_sample.pos_y,
+                         xy=(this_sample.pos_x+0.1,
+                             this_sample.pos_y),
+                         xytext=(this_sample.pos_x+0.1*x_major_step,
+                                 this_sample.pos_y+0.1*y_major_step),
+                         color='k',
+                         fontproperties=sample_font)
+       
+        #add depth
+        plt.text(0.9*np.average(valid_x),np.max(valid_y),
+                 'Start Depth: '+str(self.start_depth)+'m End Depth: '+str(self.end_depth)+'m',
+                 FontProperties=annotation_font)
+        
+        #show the grid
+        plt.grid()
+        plt.show()

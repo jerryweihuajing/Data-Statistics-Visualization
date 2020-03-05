@@ -9,11 +9,10 @@ Created on Sun Jan 19 18:41:14 2020
 @title: Module-Stastics of Diameter Curve
 """
 
-import xlrd,xlwt
+import xlrd
 import copy as cp
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 
 import operation_head_column as O_H_C
 import operation_list as O_L
@@ -52,23 +51,6 @@ def WorkbookDiameter(xls_path,num_head_rows,num_head_columns):
     
     #construct map between sheet names and head rows
     list_sheet_names=list(workbook.sheet_names())
-    
-    #construct new workbook   
-    new_workbook=xlwt.Workbook(encoding='utf-8')  
-    
-    #construct new sheet
-    new_sheet=new_workbook.add_sheet("总表")          
-          
-    #define the border style
-    borders = xlwt.Borders()
-    borders.left = 1
-    borders.right = 1
-    borders.top = 1
-    borders.bottom = 1
-    borders.bottom_colour=0x3A    
-     
-    style = xlwt.XFStyle()
-    style.borders = borders
     
     #traverse all sheets
     for this_sheet_name in list_sheet_names[:-1]:
@@ -113,6 +95,15 @@ def WorkbookDiameter(xls_path,num_head_rows,num_head_columns):
                 
                 index_diameter.append(k)
  
+        index_list=[0,1,2,3]
+        
+        #indoor id, hole id, start depth, end depth, 
+        #pore aperture, consolidation pressure, compression index, resilience index
+        list_indoor_id,\
+        list_hole_id,\
+        list_start_depth,\
+        list_end_depth=[O_L.CustomIndexList(list(value_matrix[num_head_rows:,this_index]),index_valid) for this_index in index_list]
+        
         #matrix to contain grain partition proportion
         data_diameter=np.zeros((len(index_valid),len(index_diameter)))
         
@@ -131,6 +122,11 @@ def WorkbookDiameter(xls_path,num_head_rows,num_head_columns):
             
             new_data=data()
             
+            new_data.hole_id=list_hole_id[i]
+            new_data.indoor_id=list_indoor_id[i]
+            new_data.end_depth=list_end_depth[i]
+            new_data.start_depth=list_start_depth[i]
+            
             new_data.list_diameter=cp.deepcopy(diameter_range)
             new_data.list_diameter_percentage=list(data_diameter[i,:])
             
@@ -143,15 +139,6 @@ def WorkbookDiameter(xls_path,num_head_rows,num_head_columns):
                 
             list_data.append(new_data)
             
-        the_data=list_data[-1]
-        
-        plt.figure()
-        
-        x_alias=[k for k in range(len(diameter_range))]
-        
-        plt.plot(x_alias,the_data.list_diameter_percentage)
-
-        #set the interval manually
-        plt.xticks(x_alias, diameter_range)
-        
-        plt.xlim([min(x_alias)-0.5,max(x_alias)+0.5])
+    the_data=list_data[-1]
+    
+    the_data.DiameterCurve()
