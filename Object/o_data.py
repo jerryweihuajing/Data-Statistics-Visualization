@@ -463,6 +463,7 @@ class data:
         plt.plot(x_smoothed,y_smoothed,'grey')
     
         #set the interval manually
+        '''represent A with B'''
         plt.xticks([item+0.5 for item in x_alias],self.list_diameter)
         
         plt.xlim([min(x_alias)-0.5,max(x_alias)+0.5])
