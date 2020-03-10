@@ -55,6 +55,8 @@ def WorkbookDiameter(xls_path,num_head_rows,num_head_columns):
     #traverse all sheets
     for this_sheet_name in list_sheet_names[:-1]:
     
+        O_P.GenerateFolder(output_folder+this_sheet_name)
+        
         print('')
         print('...')
         print('......')
@@ -148,6 +150,4 @@ def WorkbookDiameter(xls_path,num_head_rows,num_head_columns):
                 
             list_data.append(new_data)
             
-    the_data=list_data[-1]
-    
-    the_data.DiameterCurve()
+            new_data.DiameterCurve(output_folder+this_sheet_name+'\\')

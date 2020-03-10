@@ -417,7 +417,7 @@ class data:
     
         return final_Pc
     
-    def DiameterCurve(self):
+    def DiameterCurve(self,output_folder):
         
         '''canvas'''
         fig,ax=plt.subplots(figsize=(8,6))
@@ -440,42 +440,55 @@ class data:
         y_alias=np.copy(self.list_diameter_percentage_cumulative)
         
         valid_x=x_alias
-        valid_y=[item for item in y_alias if not np.isnan(item)]
+        valid_y=[int(np.round(item*10))/10 for item in y_alias]
         
         #tick step
         x_major_step=1
         x_minor_step=0.5
-        y_major_step=np.round((max(valid_y)-min(valid_y))/10)
-        y_minor_step=y_major_step/2
+        y_major_step=10
+        y_minor_step=5
     
         #set locator
         ax.xaxis.set_major_locator(MultipleLocator(x_major_step))
         ax.xaxis.set_minor_locator(MultipleLocator(x_minor_step))
         ax.yaxis.set_major_locator(MultipleLocator(y_major_step))
         ax.yaxis.set_minor_locator(MultipleLocator(y_minor_step))
-            
-        #smoothing the curve
-        smoothed_x_y=C_N_A.ParabolaFitting(x_alias,y_alias,n_step=50)
+
+        '''fitting respectively'''
+        index_separation=list(valid_y).index(np.max([item for item in list(valid_y) if item<100]))
+
+#        print('y alias:',y_alias)
         
+        #smoothing the curve
+        '''smoothed curve'''
+        smoothed_x_y=C_N_A.SmoothCurve(valid_x[index_separation-1:],valid_y[index_separation-1:])
+
         x_smoothed=[this_x_y[0] for this_x_y in smoothed_x_y]
         y_smoothed=[this_x_y[1] for this_x_y in smoothed_x_y]
         
         plt.plot(x_smoothed,y_smoothed,'grey')
-    
+
+#        '''line'''
+#        plt.plot(x_alias[:index_separation],y_alias[:index_separation],'grey')
+        
         #set the interval manually
         '''represent A with B'''
         plt.xticks([item+0.5 for item in x_alias],self.list_diameter)
         
-        plt.xlim([min(x_alias)-0.5,max(x_alias)+0.5])
+        plt.xlim([min(x_alias)-x_minor_step,max(x_alias)+x_minor_step])
+        plt.ylim([0-y_minor_step,100+y_minor_step])
         
         samples=[]
-        
-        for t in range(len(x_alias)):
+
+        for t in range(len(valid_x)):
             
+            if t<index_separation-1:
+                
+                continue
             new_sample=sample()
             
-            new_sample.pos_x=x_alias[t]
-            new_sample.pos_y=y_alias[t]
+            new_sample.pos_x=valid_x[t]
+            new_sample.pos_y=valid_y[t]
             
             samples.append(new_sample)
                   
@@ -497,10 +510,16 @@ class data:
                          fontproperties=sample_font)
        
         #add depth
-        plt.text(0.9*np.average(valid_x),np.max(valid_y),
+        plt.text(0,0,
                  'Start Depth: '+str(self.start_depth)+'m End Depth: '+str(self.end_depth)+'m',
                  FontProperties=annotation_font)
         
         #show the grid
         plt.grid()
         plt.show()
+        
+        fig_path=output_folder+str(self.hole_id)+'.png'
+        
+        #save the fig
+        plt.savefig(fig_path,dpi=300,bbox_inches='tight')
+        plt.close()

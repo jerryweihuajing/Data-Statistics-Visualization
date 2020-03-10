@@ -251,13 +251,14 @@ Quadratic fitting
 Args:
     X: X array
     Y: Y array
+    exp: exp index
     n_step: amount of step
     show: (bool) whether to show
     
 Returns:
     Parabola Fitting value
 """
-def ParabolaFitting(X,Y,n_step=100,show=False):
+def ParabolaFitting(X,Y,exp,n_step=100,show=False):
   
     X=list(X)
     Y=list(Y)
@@ -265,7 +266,7 @@ def ParabolaFitting(X,Y,n_step=100,show=False):
     X.reverse()
     Y.reverse()
     
-    params= np.polyfit(X,Y,7)
+    params= np.polyfit(X,Y,exp)
     
     x=np.linspace(min(X),max(X),n_step)
     
@@ -279,7 +280,57 @@ def ParabolaFitting(X,Y,n_step=100,show=False):
         plt.plot(new_x,new_y,'c')
 
     return [[new_x[k],new_y[k]] for k in range(len(new_x))] 
+
+#------------------------------------------------------------------------------
+"""
+Curve smoothing based on mid-point
+
+Args:
+    X: X array
+    Y: Y array
+    iteration: stands for extent of smoothing
+    fluctuation_proportion: stands for convexity and concavity
+    
+Returns:
+    Curve smoothing coordinates serial
+"""        
+def SmoothCurve(X,Y,iteration=2,fluctuation_proportion=0.1):
+
+    while iteration:
         
+        X_new=[]
+        Y_new=[]
+        
+        for k in range(len(X)):
+            
+            #previous
+            X_new.append(X[k])
+            Y_new.append(Y[k])
+            
+            if k>=len(X)-1:
+                
+                continue
+            
+            X_new.append(0.5*(X[k]+X[k+1]))
+            
+            inclination=(Y[k]-Y[k+1])/(X[k]-X[k+1])
+            
+            if inclination<-10:
+                
+#                print('+')
+                Y_new.append((0.5-fluctuation_proportion)*Y[k]+(0.5+fluctuation_proportion)*Y[k+1])
+            
+            else:
+                
+#                print('-')
+                Y_new.append((0.5+fluctuation_proportion)*Y[k]+(0.5-fluctuation_proportion)*Y[k+1])
+            
+        X,Y=X_new,Y_new
+        
+        iteration-=1
+            
+    return [[X_new[k],Y_new[k]] for k in range(len(X_new))] 
+
 #------------------------------------------------------------------------------
 """
 A sequence whose step length is step
