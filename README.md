@@ -1,4 +1,4 @@
-# Statistics and visualization of Geotechnical Data
+# Statistics and Visualization of Geotechnical Data
  ## 1 Curve
  ### 1.1 Compression and Resilience
 ![Image text](https://github.com/jerryweihuajing/Data-Statistics-Visualization/blob/master/Product/compression%20and%20resilience.png)
