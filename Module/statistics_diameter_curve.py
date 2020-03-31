@@ -44,6 +44,7 @@ def WorkbookDiameter(xls_path,num_head_rows,num_head_columns):
     
     #generate output folder
     O_P.GenerateFolder(output_folder)
+
     
     #open the excel sheet to be operated on
     #formatting_info: keep the header format
@@ -55,7 +56,8 @@ def WorkbookDiameter(xls_path,num_head_rows,num_head_columns):
     #traverse all sheets
     for this_sheet_name in list_sheet_names[:-1]:
     
-        O_P.GenerateFolder(output_folder+this_sheet_name)
+        O_P.GenerateFolder(output_folder+this_sheet_name+'\单点\\')
+        O_P.GenerateFolder(output_folder+this_sheet_name+'\单层\\')
         
         print('')
         print('...')
@@ -150,4 +152,105 @@ def WorkbookDiameter(xls_path,num_head_rows,num_head_columns):
                 
             list_data.append(new_data)
             
-            new_data.DiameterCurve(output_folder+this_sheet_name+'\\')
+        #construct hole objects
+        list_hole=[]
+        
+        map_id_data={}
+        
+        #combine layer data to hole data
+        for this_data in list_data:
+            
+            this_hole_id=this_data.hole_id.split('-')[0]
+            
+            if this_hole_id not in list(map_id_data.keys()):
+                
+                map_id_data[this_hole_id]=[]
+
+            map_id_data[this_hole_id].append(this_data)
+            
+        for item in list(map_id_data.items()):
+            
+            new_hole=data()
+            
+            new_hole.hole_id=item[0]
+            
+            #data in this hole
+            list_data_this_hole=item[1]
+            
+            list_depth_this_hole=[]
+            list_list_diameter_percentage=[]
+            
+            #thickness of layer
+            list_thickness=[]
+            
+            for this_data in list_data_this_hole:
+                
+                list_depth_this_hole.append(this_data.end_depth)
+                list_depth_this_hole.append(this_data.start_depth)
+                
+                list_list_diameter_percentage.append(this_data.list_diameter_percentage)
+               
+                list_thickness.append(this_data.end_depth-this_data.start_depth)
+                
+            #define the depth
+            new_hole.end_depth=np.max(list_depth_this_hole)
+            new_hole.start_depth=np.min(list_depth_this_hole)
+            
+            new_hole.list_diameter=cp.deepcopy(diameter_range)
+            
+            #accumulate the diameter percentage
+            new_hole.list_diameter_percentage=np.array([0.0]*len(new_hole.list_diameter))
+            
+            for this_list in list_list_diameter_percentage:
+                
+                for k in range(len(this_list)):
+                    
+                    if np.isnan(this_list[k]):
+                        
+                        this_list[k]=0
+                        
+            #weight of average
+            list_weight=np.array(list_thickness)/np.sum(list_thickness)
+            
+            for i in range(len(list_weight)):
+
+                new_hole.list_diameter_percentage+=list_weight[i]*np.array(list_list_diameter_percentage[i])
+            
+            new_hole.list_diameter_percentage=list(new_hole.list_diameter_percentage)
+            
+            for kk in range(len(new_hole.list_diameter_percentage)):
+                
+                if new_hole.list_diameter_percentage[kk]==0:
+                    
+                    new_hole.list_diameter_percentage[kk]=np.nan
+
+            list_bool=[np.isnan(this_percentage) for this_percentage in new_hole.list_diameter_percentage]
+   
+            #expire list with all nan
+            if list_bool==len(list_bool)*[True]:
+                
+                continue
+            
+            #calculate the cumulative percentage
+            new_hole.list_diameter_percentage_cumulative=[]
+            
+            for s in range(len(new_hole.list_diameter_percentage)):
+                
+                this_cumulative_percentage=np.sum([this_percentage for this_percentage in new_hole.list_diameter_percentage[s:] if not np.isnan(this_percentage)])
+                
+                new_hole.list_diameter_percentage_cumulative.append(this_cumulative_percentage)
+                
+            list_hole.append(new_hole)
+            
+        #output the visualization
+        for this_data in list_data:
+            
+            this_data.DiameterCurve(output_folder+this_sheet_name+'\单层\\')
+       
+        for this_hole in list_hole:
+            
+            this_hole.DiameterCurve(output_folder+this_sheet_name+'\单点\\')
+            
+#    list_data[0].DiameterCurve(output_folder+this_sheet_name+'\单层\\')
+#    list_hole[0].DiameterCurve(output_folder+this_sheet_name+'\单点\\')
+            

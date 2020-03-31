@@ -475,7 +475,7 @@ class data:
         '''represent A with B'''
         plt.xticks([item+0.5 for item in x_alias],self.list_diameter)
         
-        plt.xlim([min(x_alias)-x_minor_step,max(x_alias)+x_minor_step])
+        plt.xlim([x_alias[index_separation-1]-x_minor_step,x_alias[-1]+x_minor_step])
         plt.ylim([0-y_minor_step,100+y_minor_step])
         
         samples=[]
@@ -485,6 +485,7 @@ class data:
             if t<index_separation-1:
                 
                 continue
+            
             new_sample=sample()
             
             new_sample.pos_x=valid_x[t]
@@ -510,7 +511,7 @@ class data:
                          fontproperties=sample_font)
        
         #add depth
-        plt.text(0,0,
+        plt.text(x_alias[index_separation-1],0,
                  'Start Depth: '+str(self.start_depth)+'m End Depth: '+str(self.end_depth)+'m',
                  FontProperties=annotation_font)
         
