@@ -13,6 +13,8 @@ import copy as cp
 import numpy as np
 import matplotlib.pyplot as plt
 
+from scipy import interpolate 
+
 #------------------------------------------------------------------------------
 """
 Solve multiple primary equations using Jacobi methods
@@ -283,13 +285,33 @@ def ParabolaFitting(X,Y,exp,n_step=100,show=False):
 
 #------------------------------------------------------------------------------
 """
+B-Spline Interpolation on 1D
+
+Args:
+    X: X array
+    Y: Y array
+    n_step: amount of step
+    
+Returns:
+    Interpolatd coordinates serial
+""" 
+def BSplineInterpolation(X,Y,n_step=100):
+    
+    X_new = np.linspace(min(X),max(X),n_step)
+
+    Y_new = interpolate.splev(X_new,interpolate.splrep(X, Y))
+    
+    return [[X_new[k],Y_new[k]] for k in range(len(X_new))]
+
+#------------------------------------------------------------------------------
+"""
 Curve smoothing based on mid-point
 
 Args:
     X: X array
     Y: Y array
-    iteration: stands for extent of smoothing
-    fluctuation_proportion: stands for convexity and concavity
+    iteration: stands for extent of smoothing (default: 2)
+    fluctuation_proportion: stands for convexity and concavity (default: 0.1)
     
 Returns:
     Curve smoothing coordinates serial
