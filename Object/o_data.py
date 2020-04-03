@@ -460,10 +460,9 @@ class data:
 #        print('y alias:',y_alias)
         
         #smoothing the curve
-        '''smoothing'''
-        X=[item[0] for item in C_N_A.SmoothCurve(valid_x[index_separation-1:],valid_y[index_separation-1:])]
-        Y=[item[1] for item in C_N_A.SmoothCurve(valid_x[index_separation-1:],valid_y[index_separation-1:])]
-        
+        X=valid_x[index_separation-1:]
+        Y=valid_y[index_separation-1:]
+
         '''spline interpolation'''
         smoothed_x_y=C_N_A.BSplineInterpolation(X,Y)
 
