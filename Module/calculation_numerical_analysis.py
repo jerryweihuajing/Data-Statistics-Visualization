@@ -340,11 +340,13 @@ def SmoothCurve(X,Y,iteration=2,fluctuation_proportion=0.1):
             if inclination<-10:
                 
 #                print('+')
+                
                 Y_new.append((0.5-fluctuation_proportion)*Y[k]+(0.5+fluctuation_proportion)*Y[k+1])
             
             else:
                 
 #                print('-')
+                
                 Y_new.append((0.5+fluctuation_proportion)*Y[k]+(0.5-fluctuation_proportion)*Y[k+1])
             
         X,Y=X_new,Y_new
