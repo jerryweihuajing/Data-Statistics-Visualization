@@ -4,6 +4,7 @@
 ![Image text](https://github.com/jerryweihuajing/Data-Statistics-Visualization/blob/master/Product/compression%20and%20resilience.png)
  ### 1.2 Diameter Distribution
  ![Image text](https://github.com/jerryweihuajing/Data-Statistics-Visualization/blob/master/Product/diameter%20distribution.png)
+  ![Image text](https://github.com/jerryweihuajing/Data-Statistics-Visualization/blob/master/Product/diameter%20distribution%20batch.png)
  ## 2 Histogram
  ### 2.1 Classification
  ![Image text](https://github.com/jerryweihuajing/Data-Statistics-Visualization/blob/master/Product/classfication.png)

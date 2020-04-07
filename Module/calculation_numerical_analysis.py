@@ -305,6 +305,26 @@ def BSplineInterpolation(X,Y,n_step=100):
 
 #------------------------------------------------------------------------------
 """
+P-Chip Interpolation on 1D
+
+Args:
+    X: X array
+    Y: Y array
+    n_step: amount of step
+    
+Returns:
+    Interpolatd coordinates serial
+""" 
+def PChipInterpolation(X,Y,n_step=100):
+    
+    X_new = np.linspace(min(X),max(X),n_step)
+
+    Y_new = interpolate.PchipInterpolator(X, Y)(X_new)
+    
+    return [[X_new[k],Y_new[k]] for k in range(len(X_new))]
+
+#------------------------------------------------------------------------------
+"""
 Curve smoothing based on mid-point
 
 Args:

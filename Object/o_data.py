@@ -35,6 +35,7 @@ title_font=FontProperties(fname="C:\Windows\Fonts\GIL_____.ttf",size=20)
 #==============================================================================    
 class data:
     def __init__(self,
+                 list_data=None,
                  indoor_id=None,
                  hole_id=None,
                  start_depth=None,
@@ -64,8 +65,11 @@ class data:
                  valid_e_resilience=None,
                  valid_e_recompression=None,
                  list_diameter=None,
+                 list_diameter_lg=None,
                  list_diameter_percentage=None,
                  list_diameter_percentage_cumulative=None):
+        
+        self.list_data=list_data
         
         #basic information
         self.indoor_id=indoor_id
@@ -116,6 +120,7 @@ class data:
     
         #for diameter curve
         self.list_diameter=list_diameter
+        self.list_diameter_log2=list_diameter_lg
         self.list_diameter_percentage=list_diameter_percentage
         self.list_diameter_percentage_cumulative=list_diameter_percentage_cumulative
         
@@ -428,7 +433,7 @@ class data:
         
         plt.title('ID: '+str(self.hole_id),FontProperties=title_font)  
                 
-        plt.xlabel('Daimeter(mm)',FontProperties=annotation_font)
+        plt.xlabel('lg of Diameter(lg(mm))',FontProperties=annotation_font)
         plt.ylabel('Percentage(%)',FontProperties=annotation_font)
         
         #label fonts
@@ -438,6 +443,9 @@ class data:
                 
         x_alias=[k for k in range(len(self.list_diameter_percentage_cumulative))]
         y_alias=np.copy(self.list_diameter_percentage_cumulative)
+        
+        #diameter list in lg form
+        self.list_diameter_lg=[np.round(np.log10(item),3) for item in self.list_diameter[:-1]]+[0.00]
         
         valid_x=x_alias
         valid_y=[int(np.round(item*10))/10 for item in y_alias]
@@ -463,8 +471,8 @@ class data:
         X=valid_x[index_separation-1:]
         Y=valid_y[index_separation-1:]
 
-        '''spline interpolation'''
-        smoothed_x_y=C_N_A.BSplineInterpolation(X,Y)
+        '''p-chip interpolation'''
+        smoothed_x_y=C_N_A.PChipInterpolation(X,Y)
 
         x_smoothed=[this_x_y[0] for this_x_y in smoothed_x_y]
         y_smoothed=[this_x_y[1] for this_x_y in smoothed_x_y]
@@ -476,7 +484,7 @@ class data:
         
         #set the interval manually
         '''represent A with B'''
-        plt.xticks([item+0.5 for item in x_alias],self.list_diameter)
+        plt.xticks([item+0.5 for item in x_alias],self.list_diameter_lg)
         
         plt.xlim([x_alias[index_separation-1]-x_minor_step,x_alias[-1]+x_minor_step])
         plt.ylim([0-y_minor_step,100+y_minor_step])
@@ -513,6 +521,128 @@ class data:
                          color='k',
                          fontproperties=sample_font)
        
+        #add depth
+        plt.text(x_alias[index_separation-1],0,
+                 'Start Depth: '+str(self.start_depth)+'m End Depth: '+str(self.end_depth)+'m',
+                 FontProperties=annotation_font)
+        
+        #show the grid
+        plt.grid()
+        plt.show()
+        
+        fig_path=output_folder+str(self.hole_id)+'.png'
+        
+        #save the fig
+        plt.savefig(fig_path,dpi=300,bbox_inches='tight')
+        plt.close()
+        
+    def DiameterCurveBatch(self,output_folder):
+        
+        '''canvas'''
+        fig,ax=plt.subplots(figsize=(8,6))
+        
+        #set ticks
+        plt.tick_params(labelsize=12)
+        labels = ax.get_xticklabels() + ax.get_yticklabels()
+        
+        plt.title('ID: '+str(self.hole_id),FontProperties=title_font)  
+                
+        plt.xlabel('lg of Diameter(lg(mm))',FontProperties=annotation_font)
+        plt.ylabel('Percentage(%)',FontProperties=annotation_font)
+        
+        #label fonts
+        for this_label in labels:
+            
+            this_label.set_fontname('Times New Roman')
+            
+        #tick step
+        x_major_step=1
+        x_minor_step=0.5
+        y_major_step=10
+        y_minor_step=5
+    
+        #set locator
+        ax.xaxis.set_major_locator(MultipleLocator(x_major_step))
+        ax.xaxis.set_minor_locator(MultipleLocator(x_minor_step))
+        ax.yaxis.set_major_locator(MultipleLocator(y_major_step))
+        ax.yaxis.set_minor_locator(MultipleLocator(y_minor_step))    
+        
+        list_index_separation=[]
+        
+        #diameter list in lg form
+        self.list_diameter_lg=[np.round(np.log10(item),3) for item in self.list_diameter[:-1]]+[0.00]
+        
+        for this_data in self.list_data:
+            
+            x_alias=[k for k in range(len(this_data.list_diameter_percentage_cumulative))]
+            y_alias=np.copy(this_data.list_diameter_percentage_cumulative)
+            
+            valid_x=x_alias
+            valid_y=[int(np.round(item*10))/10 for item in y_alias]
+                
+            '''fitting respectively'''
+            index_separation=list(valid_y).index(np.max([item for item in list(valid_y) if item<100]))
+        
+            #collect it
+            list_index_separation.append(index_separation)
+            
+        #        print('y alias:',y_alias)
+            
+            #smoothing the curve
+            X=valid_x[index_separation-1:]
+            Y=valid_y[index_separation-1:]
+        
+            '''p-chip interpolation'''
+            smoothed_x_y=C_N_A.PChipInterpolation(X,Y)
+        
+            x_smoothed=[this_x_y[0] for this_x_y in smoothed_x_y]
+            y_smoothed=[this_x_y[1] for this_x_y in smoothed_x_y]
+            
+            plt.plot(x_smoothed,y_smoothed,'grey')
+        
+        #        '''line'''
+        #        plt.plot(x_alias[:index_separation],y_alias[:index_separation],'grey')
+        
+            samples=[]
+        
+            for t in range(len(valid_x)):
+                
+                if t<index_separation-1:
+                    
+                    continue
+                
+                new_sample=sample()
+                
+                new_sample.pos_x=valid_x[t]
+                new_sample.pos_y=valid_y[t]
+                
+                samples.append(new_sample)
+                      
+            #plot sample data
+            for this_sample in samples:
+        
+                if np.isnan(this_sample.pos_y):
+                    
+                    continue
+        
+                plt.scatter(this_sample.pos_x,this_sample.pos_y,color='k')
+        
+                '''it is in a mess for mass of data'''
+#                plt.annotate('%.1f%%'%this_sample.pos_y,
+#                             xy=(this_sample.pos_x+0.1,
+#                                 this_sample.pos_y),
+#                             xytext=(this_sample.pos_x+0.1*x_major_step,
+#                                     this_sample.pos_y+0.1*y_major_step),
+#                             color='k',
+#                             fontproperties=sample_font)
+                                       
+        #set the interval manually
+        '''represent A with B'''
+        plt.xticks([item+0.5 for item in x_alias],self.list_diameter_lg)
+        
+        plt.xlim([x_alias[np.min(list_index_separation)-1]-x_minor_step,x_alias[-1]+x_minor_step])
+        plt.ylim([0-y_minor_step,100+y_minor_step])
+            
         #add depth
         plt.text(x_alias[index_separation-1],0,
                  'Start Depth: '+str(self.start_depth)+'m End Depth: '+str(self.end_depth)+'m',
