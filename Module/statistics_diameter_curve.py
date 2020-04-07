@@ -355,6 +355,7 @@ def WorkbookDiameter(xls_path,num_head_rows,num_head_columns):
             this_range_hole.DiameterCurve(output_folder+this_sheet_name+'\孔划分\\')
             this_range_hole.DiameterCurveBatch(output_folder+this_sheet_name+'\孔划分集合\\')  
             
+#    #for testing
 #    list_layer[0].DiameterCurve(output_folder+this_sheet_name+'\层\\')
 #    list_hole[0].DiameterCurve(output_folder+this_sheet_name+'\孔\\')
 #        

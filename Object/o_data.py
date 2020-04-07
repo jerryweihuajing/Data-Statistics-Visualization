@@ -570,7 +570,7 @@ class data:
         list_index_separation=[]
         
         #diameter list in lg form
-        self.list_diameter_lg=[np.round(np.log10(item),3) for item in self.list_diameter[:-1]]+[0.00]
+        self.list_diameter_lg=[np.round(np.log10(item),3) for item in self.list_diameter]
         
         for this_data in self.list_data:
             
@@ -644,7 +644,7 @@ class data:
         plt.ylim([0-y_minor_step,100+y_minor_step])
             
         #add depth
-        plt.text(x_alias[index_separation-1],0,
+        plt.text(x_alias[np.min(list_index_separation)-1],0,
                  'Start Depth: '+str(self.start_depth)+'m End Depth: '+str(self.end_depth)+'m',
                  FontProperties=annotation_font)
         
