@@ -445,7 +445,7 @@ class data:
         y_alias=np.copy(self.list_diameter_percentage_cumulative)
         
         #diameter list in lg form
-        self.list_diameter_lg=[np.round(np.log10(item),3) for item in self.list_diameter[:-1]]+[0.00]
+        self.list_diameter_lg=[np.round(np.log10(item),3) for item in self.list_diameter]
         
         valid_x=x_alias
         valid_y=[int(np.round(item*10))/10 for item in y_alias]
