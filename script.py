@@ -18,14 +18,14 @@ from __init__ import *
 #list_merged_xls_path=['.\Data\\input\\'+this_xls_name for this_xls_name in list_merged_xls_name]
 
 #ES.MergedWorkbookStatistics(list_merged_xls_path,3,2)
-#SC.MergedWorkbookClassification(list_merged_xls_path,3,2)      
+#S_S_C.MergedWorkbookClassification(list_merged_xls_path,3,2)      
 
 #xls_path=os.getcwd()+'\\Data\input\城市地质调查高压数据.xls'
 #
 #S_R_C.WorkbookResilience(xls_path,2,2)
 
 xls_path=os.getcwd()+'\\Data\input\淮安城市地质土工试验54个.xls'
-
+#
 S_D_C.WorkbookDiameter(xls_path,3,2)
 #S_G_V.WorkbookStatistics(xls_path,3,2)
 #S_S_C.WorkbookClassification(xls_path,3,2)

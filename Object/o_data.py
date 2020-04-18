@@ -425,7 +425,7 @@ class data:
     def DiameterCurve(self,output_folder):
         
         '''canvas'''
-        fig,ax=plt.subplots(figsize=(8,6))
+        fig,ax=plt.subplots(figsize=(17,6))
         
         #set ticks
         plt.tick_params(labelsize=12)
@@ -440,27 +440,31 @@ class data:
         for this_label in labels:
             
             this_label.set_fontname('Times New Roman')
-                
-        x_alias=[k for k in range(len(self.list_diameter_percentage_cumulative))]
+            
+        #diameter list in lg form
+        self.list_diameter_lg=[np.round(np.log10(item),3) for item in self.list_diameter]    
+        
+        x_alias=self.list_diameter_lg[:-1]+[-5]
         y_alias=np.copy(self.list_diameter_percentage_cumulative)
         
-        #diameter list in lg form
-        self.list_diameter_lg=[np.round(np.log10(item),3) for item in self.list_diameter]
+        x_offset=[0.5*(x_alias[k]-x_alias[k-1]) for k in range(1,len(x_alias))]+[-0.25]
         
+        x_offset.reverse()
+ 
         valid_x=x_alias
         valid_y=[int(np.round(item*10))/10 for item in y_alias]
-        
+
         #tick step
         x_major_step=1
         x_minor_step=0.5
         y_major_step=10
         y_minor_step=5
     
-        #set locator
-        ax.xaxis.set_major_locator(MultipleLocator(x_major_step))
-        ax.xaxis.set_minor_locator(MultipleLocator(x_minor_step))
-        ax.yaxis.set_major_locator(MultipleLocator(y_major_step))
-        ax.yaxis.set_minor_locator(MultipleLocator(y_minor_step))
+#        #set locator
+#        ax.xaxis.set_major_locator(MultipleLocator(x_major_step))
+#        ax.xaxis.set_minor_locator(MultipleLocator(x_minor_step))
+#        ax.yaxis.set_major_locator(MultipleLocator(y_major_step))
+#        ax.yaxis.set_minor_locator(MultipleLocator(y_minor_step))
 
         '''fitting respectively'''
         index_separation=list(valid_y).index(np.max([item for item in list(valid_y) if item<100]))
@@ -470,37 +474,37 @@ class data:
         #smoothing the curve
         X=valid_x[index_separation-1:]
         Y=valid_y[index_separation-1:]
-
+        O=x_offset[index_separation-1:]
+        
+        X.reverse()
+        O.reverse()
+        
         '''p-chip interpolation'''
         smoothed_x_y=C_N_A.PChipInterpolation(X,Y)
 
         x_smoothed=[this_x_y[0] for this_x_y in smoothed_x_y]
         y_smoothed=[this_x_y[1] for this_x_y in smoothed_x_y]
-        
-        plt.plot(x_smoothed,y_smoothed,'grey')
 
+        plt.plot(x_smoothed,y_smoothed,'grey')
+        
 #        '''line'''
 #        plt.plot(x_alias[:index_separation],y_alias[:index_separation],'grey')
         
         #set the interval manually
         '''represent A with B'''
-        plt.xticks([item+0.5 for item in x_alias],self.list_diameter_lg)
+        plt.xticks(x_alias,self.list_diameter)
         
-        plt.xlim([x_alias[index_separation-1]-x_minor_step,x_alias[-1]+x_minor_step])
+        plt.xlim([np.min(X)-x_minor_step,np.max(X)+x_minor_step])
         plt.ylim([0-y_minor_step,100+y_minor_step])
         
         samples=[]
 
-        for t in range(len(valid_x)):
-            
-            if t<index_separation-1:
-                
-                continue
+        for t in range(len(X)):
             
             new_sample=sample()
-            
-            new_sample.pos_x=valid_x[t]
-            new_sample.pos_y=valid_y[t]
+            print(X[t],O[t])
+            new_sample.pos_x=X[t]+O[t]
+            new_sample.pos_y=Y[t]
             
             samples.append(new_sample)
                   
@@ -522,7 +526,7 @@ class data:
                          fontproperties=sample_font)
        
         #add depth
-        plt.text(x_alias[index_separation-1],0,
+        plt.text(np.min(x_alias),0,
                  'Start Depth: '+str(self.start_depth)+'m End Depth: '+str(self.end_depth)+'m',
                  FontProperties=annotation_font)
         
@@ -539,7 +543,7 @@ class data:
     def DiameterCurveBatch(self,output_folder):
         
         '''canvas'''
-        fig,ax=plt.subplots(figsize=(8,6))
+        fig,ax=plt.subplots(figsize=(17,6))
         
         #set ticks
         plt.tick_params(labelsize=12)
@@ -562,20 +566,24 @@ class data:
         y_minor_step=5
     
         #set locator
-        ax.xaxis.set_major_locator(MultipleLocator(x_major_step))
-        ax.xaxis.set_minor_locator(MultipleLocator(x_minor_step))
-        ax.yaxis.set_major_locator(MultipleLocator(y_major_step))
-        ax.yaxis.set_minor_locator(MultipleLocator(y_minor_step))    
+#        ax.xaxis.set_major_locator(MultipleLocator(x_major_step))
+#        ax.xaxis.set_minor_locator(MultipleLocator(x_minor_step))
+#        ax.yaxis.set_major_locator(MultipleLocator(y_major_step))
+#        ax.yaxis.set_minor_locator(MultipleLocator(y_minor_step))    
         
         list_index_separation=[]
         
         #diameter list in lg form
         self.list_diameter_lg=[np.round(np.log10(item),3) for item in self.list_diameter]
         
+        list_X=[]
+        
         for this_data in self.list_data:
             
-            x_alias=[k for k in range(len(this_data.list_diameter_percentage_cumulative))]
+            x_alias=self.list_diameter_lg[:-1]+[-5]
             y_alias=np.copy(this_data.list_diameter_percentage_cumulative)
+            
+            x_offset=[0.5]+[x_alias[k]-x_alias[k-1] for k in range(1,len(x_alias))]
             
             valid_x=x_alias
             valid_y=[int(np.round(item*10))/10 for item in y_alias]
@@ -592,6 +600,8 @@ class data:
             X=valid_x[index_separation-1:]
             Y=valid_y[index_separation-1:]
         
+            X.reverse()
+        
             '''p-chip interpolation'''
             smoothed_x_y=C_N_A.PChipInterpolation(X,Y)
         
@@ -605,16 +615,12 @@ class data:
         
             samples=[]
         
-            for t in range(len(valid_x)):
-                
-                if t<index_separation-1:
-                    
-                    continue
-                
+            for t in range(len(X)):
+            
                 new_sample=sample()
                 
-                new_sample.pos_x=valid_x[t]
-                new_sample.pos_y=valid_y[t]
+                new_sample.pos_x=X[t]
+                new_sample.pos_y=Y[t]
                 
                 samples.append(new_sample)
                       
@@ -636,15 +642,17 @@ class data:
 #                             color='k',
 #                             fontproperties=sample_font)
                                        
+            list_X+=X
+                
         #set the interval manually
         '''represent A with B'''
-        plt.xticks([item+0.5 for item in x_alias],self.list_diameter_lg)
+        plt.xticks(list(np.array(x_alias)+np.array(x_offset)),self.list_diameter)
         
-        plt.xlim([x_alias[np.min(list_index_separation)-1]-x_minor_step,x_alias[-1]+x_minor_step])
+        plt.xlim([np.min(list_X)-x_minor_step,np.max(list_X)+x_minor_step])
         plt.ylim([0-y_minor_step,100+y_minor_step])
-            
+        
         #add depth
-        plt.text(x_alias[np.min(list_index_separation)-1],0,
+        plt.text(np.min(list_X),0,
                  'Start Depth: '+str(self.start_depth)+'m End Depth: '+str(self.end_depth)+'m',
                  FontProperties=annotation_font)
         

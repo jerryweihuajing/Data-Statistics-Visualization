@@ -11,6 +11,8 @@ Created on Sun Jan 19 18:08:07 2020
 
 import numpy as np
 
+import operation_dictionary as O_D
+
 #==============================================================================
 #grain object
 #============================================================================== 
@@ -89,7 +91,7 @@ class grain:
 #        print(self.map_partition_proportion)
         
         #grain partition result
-        self.partition_type=DictKeyOfValue(self.map_partition_proportion,max(list(self.map_partition_proportion.values())))
+        self.partition_type=O_D.DictKeyOfValue(self.map_partition_proportion,max(list(self.map_partition_proportion.values())))
 
 #        print(self.partition_type)
       
@@ -99,10 +101,10 @@ class grain:
         self.fine_grained_proportion=self.map_partition_proportion['细粒-粉粒']+self.map_partition_proportion['细粒-粘土粒']
         
         #calculate type of fine grained
-        map_to_decide_type=DictSlice(self.map_partition_proportion,-2,len(self.map_partition_proportion))
+        map_to_decide_type=O_D.DictSlice(self.map_partition_proportion,-2,len(self.map_partition_proportion))
         
         #decide fine grained type
-        self.fine_grained_type=DictKeyOfValue(map_to_decide_type,max(list(map_to_decide_type.values())))
+        self.fine_grained_type=O_D.DictKeyOfValue(map_to_decide_type,max(list(map_to_decide_type.values())))
         
 #        print(self.fine_grained_type,self.fine_grained_proportion)
         

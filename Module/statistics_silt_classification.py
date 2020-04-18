@@ -24,7 +24,8 @@ from matplotlib.font_manager import FontProperties
 import operation_list as O_L
 import operation_path as O_P
 import operation_head_column as O_H_C
-import calculation_feature_value as C_F_V
+
+from o_grain import grain
 
 #------------------------------------------------------------------------------
 """
@@ -286,8 +287,8 @@ def ClassificationStatistics(map_title_classification,figures_output_folder):
         #group in x axis
         str_group=list(map_str_frequency.keys())
         
-        fig,ax=plt.subplots(figsize=(16,8))
-        
+        fig,ax=plt.subplots(figsize=(16,0.8*len(map_str_frequency)))
+
         #plot histogram
         plt.barh(range(len(str_frequency)),str_frequency,tick_label=str_group)
 
@@ -1017,7 +1018,7 @@ def MergedWorkbookClassification(list_xls_path,num_head_rows,num_head_columns):
         for kk in range(len(index_partition)):
                   
             #construct new object
-            this_grain=C_F_V.grain()
+            this_grain=grain()
             
             this_grain.silt_type=GB_partition[kk]
             this_grain.InitMap(list(data_partition[kk,:]))   

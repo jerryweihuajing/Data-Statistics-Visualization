@@ -336,34 +336,34 @@ def WorkbookDiameter(xls_path,num_head_rows,num_head_columns):
             list_range_hole=Data2RangeData(list_hole)
             
         #output the visualization
-        for this_layer in list_layer:
+#        for this_layer in list_layer:
+#            
+#            this_layer.DiameterCurve(output_folder+this_sheet_name+'\层\\')
+#            
+#        for this_hole in list_hole:
+#            
+#            this_hole.DiameterCurve(output_folder+this_sheet_name+'\孔\\')
+#            this_hole.DiameterCurveBatch(output_folder+this_sheet_name+'\孔集合\\')  
+#            
+#        for this_range_layer in list_range_layer:
+#            
+#            this_range_layer.DiameterCurve(output_folder+this_sheet_name+'\层划分\\')
+#            this_range_layer.DiameterCurveBatch(output_folder+this_sheet_name+'\层划分集合\\')  
+#            
+#        for this_range_hole in list_range_hole:
+#            
+#            this_range_hole.DiameterCurve(output_folder+this_sheet_name+'\孔划分\\')
+#            this_range_hole.DiameterCurveBatch(output_folder+this_sheet_name+'\孔划分集合\\')  
             
-            this_layer.DiameterCurve(output_folder+this_sheet_name+'\层\\')
-            
-        for this_hole in list_hole:
-            
-            this_hole.DiameterCurve(output_folder+this_sheet_name+'\孔\\')
-            this_hole.DiameterCurveBatch(output_folder+this_sheet_name+'\孔集合\\')  
-            
-        for this_range_layer in list_range_layer:
-            
-            this_range_layer.DiameterCurve(output_folder+this_sheet_name+'\层划分\\')
-            this_range_layer.DiameterCurveBatch(output_folder+this_sheet_name+'\层划分集合\\')  
-            
-        for this_range_hole in list_range_hole:
-            
-            this_range_hole.DiameterCurve(output_folder+this_sheet_name+'\孔划分\\')
-            this_range_hole.DiameterCurveBatch(output_folder+this_sheet_name+'\孔划分集合\\')  
-            
-#    #for testing
-#    list_layer[0].DiameterCurve(output_folder+this_sheet_name+'\层\\')
-#    list_hole[0].DiameterCurve(output_folder+this_sheet_name+'\孔\\')
-#        
-#    list_hole[0].DiameterCurveBatch(output_folder+this_sheet_name+'\孔集合\\') 
-#    
-#    list_range_hole[0].DiameterCurve(output_folder+this_sheet_name+'\孔划分\\')  
-#    list_range_layer[0].DiameterCurve(output_folder+this_sheet_name+'\层划分\\')
-#    
-#    list_range_hole[0].DiameterCurveBatch(output_folder+this_sheet_name+'\孔划分集合\\')  
-#    list_range_layer[0].DiameterCurveBatch(output_folder+this_sheet_name+'\层划分集合\\')
+    #for testing
+    list_layer[0].DiameterCurve(output_folder+this_sheet_name+'\层\\')
+    list_hole[0].DiameterCurve(output_folder+this_sheet_name+'\孔\\')
+        
+    list_hole[0].DiameterCurveBatch(output_folder+this_sheet_name+'\孔集合\\') 
+    
+    list_range_hole[0].DiameterCurve(output_folder+this_sheet_name+'\孔划分\\')  
+    list_range_layer[0].DiameterCurve(output_folder+this_sheet_name+'\层划分\\')
+    
+    list_range_hole[0].DiameterCurveBatch(output_folder+this_sheet_name+'\孔划分集合\\')  
+    list_range_layer[0].DiameterCurveBatch(output_folder+this_sheet_name+'\层划分集合\\')
     
