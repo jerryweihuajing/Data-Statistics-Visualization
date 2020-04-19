@@ -23,6 +23,7 @@ from matplotlib.font_manager import FontProperties
 
 import operation_list as O_L
 import operation_path as O_P
+import operation_dictionary as O_D
 import operation_head_column as O_H_C
 
 from o_grain import grain
@@ -279,8 +280,8 @@ def ClassificationStatistics(map_title_classification,figures_output_folder):
         valid_str=[this_data for this_data in data if isinstance(this_data,str) and this_data!='']
                    
         #construct a dictionary as vote machine
-        map_str_frequency=dict((this_valid_str,valid_str.count(this_valid_str)) for this_valid_str in valid_str)
-        
+        map_str_frequency=O_D.DictSortByValues(dict((this_valid_str,valid_str.count(this_valid_str)) for this_valid_str in valid_str))
+
         #frequency list
         str_frequency=list(map_str_frequency.values())
         
