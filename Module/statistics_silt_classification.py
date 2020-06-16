@@ -288,10 +288,33 @@ def ClassificationStatistics(map_title_classification,figures_output_folder):
         #group in x axis
         str_group=list(map_str_frequency.keys())
         
+        #init
+        list_str=cp.deepcopy(str_group)
+        
+        new_map_str_frequency={}
+        
+        if title=='粉土密实度分类':
+            
+            list_str=['稍密','中密','密实']
+            
+        if title=='粉土湿度分类':
+            
+            list_str=['湿','很湿']
+            
+        if title=='黏性土状态分类':
+            
+            list_str=['坚硬','硬塑','可塑','软塑','流塑']
+            
+        if title=='土的分类':
+            
+            list_str=['砾砂','粗砂','中砂','细砂','粉砂','粉土','粉质黏土','黏土','淤泥','淤泥质粉质黏土','淤泥质黏土']
+            
+        list_frequency=[map_str_frequency[this_str] for this_str in list_str]
+
         fig,ax=plt.subplots(figsize=(16,0.8*len(map_str_frequency)))
 
         #plot histogram
-        plt.barh(range(len(str_frequency)),str_frequency,tick_label=str_group)
+        plt.barh(range(len(list_str)),list_frequency,tick_label=list_str)
 
         if len(map_str_frequency)!=1:
             

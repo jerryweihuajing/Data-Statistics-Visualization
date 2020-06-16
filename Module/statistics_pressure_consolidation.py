@@ -88,9 +88,14 @@ def CalculatePc(P,e,hole_id,start_depth,end_depth,output_folder,show=False):
     y_major_step=(max(valid_e)-min(valid_e))/10
     y_minor_step=(max(valid_e)-min(valid_e))/20
     
+    print(P)
     #set locator
     ax.xaxis.set_major_locator(MultipleLocator(x_major_step))
     ax.xaxis.set_minor_locator(MultipleLocator(x_minor_step))
+    
+    '''represent A with B'''     
+    # plt.xticks(self.list_diameter_lg+[self.list_diameter_lg[-1]+1],self.list_diameter)
+        
     ax.yaxis.set_major_locator(MultipleLocator(y_major_step))
     ax.yaxis.set_minor_locator(MultipleLocator(y_minor_step))
     

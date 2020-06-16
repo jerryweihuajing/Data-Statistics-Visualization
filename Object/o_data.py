@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt
 from matplotlib.pyplot import MultipleLocator
 
 import operation_list as O_L
+import operation_visualization as O_V
 import calculation_numerical_analysis as C_N_A
 import calculation_pressure_consolidation as C_P_C
 
@@ -247,7 +248,7 @@ class data:
         
         plt.title('ID: '+str(self.hole_id),FontProperties=title_font)  
                 
-        plt.xlabel('lgP',FontProperties=annotation_font)
+        plt.xlabel('P(kPa)',FontProperties=annotation_font)
         plt.ylabel('e',FontProperties=annotation_font)
         
         #label fonts
@@ -262,10 +263,13 @@ class data:
         y_minor_step=(max(valid_e)-min(valid_e))/20
         
         #set locator
-        ax.xaxis.set_major_locator(MultipleLocator(x_major_step))
-        ax.xaxis.set_minor_locator(MultipleLocator(x_minor_step))
+        # ax.xaxis.set_major_locator(MultipleLocator(x_major_step))
+        # ax.xaxis.set_minor_locator(MultipleLocator(x_minor_step))
         ax.yaxis.set_major_locator(MultipleLocator(y_major_step))
         ax.yaxis.set_minor_locator(MultipleLocator(y_minor_step))
+        
+        '''represent A with B'''     
+        plt.xticks(valid_logP_compression,[int(item) for item in valid_P_compression])
         
         #init data for visualization
         self.valid_logP_compression=valid_logP_compression
@@ -341,7 +345,7 @@ class data:
         
         plt.title('ID: '+str(self.hole_id),FontProperties=title_font)  
                 
-        plt.xlabel('lgP',FontProperties=annotation_font)
+        plt.xlabel('P(kPa)',FontProperties=annotation_font)
         plt.ylabel('e',FontProperties=annotation_font)
         
         #label fonts
@@ -356,17 +360,20 @@ class data:
         y_minor_step=y_major_step/2
         
         #set locator
-        ax.xaxis.set_major_locator(MultipleLocator(x_major_step))
-        ax.xaxis.set_minor_locator(MultipleLocator(x_minor_step))
+        # ax.xaxis.set_major_locator(MultipleLocator(x_major_step))
+        # ax.xaxis.set_minor_locator(MultipleLocator(x_minor_step))
         ax.yaxis.set_major_locator(MultipleLocator(y_major_step))
         ax.yaxis.set_minor_locator(MultipleLocator(y_minor_step))
         
+        '''represent A with B'''     
+        plt.xticks(valid_logP_compression,[int(item) for item in valid_P_compression])
+        
         #visualization of curve
-        C_P_C.DataVisualization(valid_logP_compression,
-                                valid_e_compression,
-                                x_major_step,
-                                y_major_step,
-                                True)
+        O_V.DataVisualization(valid_logP_compression,
+                              valid_e_compression,
+                              x_major_step,
+                              y_major_step,
+                              True)
         
         #add depth
         plt.text(0.95*np.average(valid_logP),max(valid_e),
@@ -420,7 +427,7 @@ class data:
         
         plt.title('ID: '+str(self.hole_id),FontProperties=title_font)  
                 
-        plt.xlabel('lg of Diameter(lg(mm))',FontProperties=annotation_font)
+        plt.xlabel('Diameter(mm)',FontProperties=annotation_font)
         plt.ylabel('Percentage(%)',FontProperties=annotation_font)
         
         #label fonts
